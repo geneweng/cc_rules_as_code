@@ -1,0 +1,19 @@
+{
+  "ny.saww": [["2025-01-01", 1757.19], ["2026-01-01", 1839.34]],
+  "ny.pfl.weeks": [["2021-01-01", 12]],
+  "ny.pfl.wage_replacement_rate": [["2021-01-01", 0.67]],
+  "mn.saww": [["2026-01-01", 1423.0]],
+  "mn.wage_threshold_fraction_of_saaw": [["2026-01-01", 0.053]],
+  "mn.family.weeks": [["2026-01-01", 12]],
+  "mn.medical.weeks": [["2026-01-01", 12]],
+  "mn.combined.weeks": [["2026-01-01", 20]],
+  "ca.saww": [["2025-01-01", 1642.0], ["2026-01-01", 1704.0]],
+  "ca.pfl.weeks": [["2025-01-01", 8]],
+  "ca.pfl.max_weekly_benefit": [["2025-01-01", 1681.0]],
+  "ca.pfl.low_earner_rate": [["2025-01-01", 0.9]],
+  "ca.pfl.standard_rate": [["2025-01-01", 0.7]],
+  "ca.pfl.min_base_period_earnings": [["2025-01-01", 300.0]],
+  "fmla.weeks": [["1993-08-05", 12]],
+  "fmla.min_hours": [["1993-08-05", 1250]],
+  "fmla.min_worksite_headcount": [["1993-08-05", 50]]
+}

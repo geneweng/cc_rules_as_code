@@ -29,6 +29,25 @@ python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
 
 `GET /` serves a browser eligibility checker; `POST /determinations` takes `{facts, as_of?}` and returns per-regime eligibility, entitlement, benefit estimates, and interaction notes.
 
+### LLM amendment-watcher pipeline
+
+The maintenance moat from the brainstorm doc, working end-to-end: an LLM reads an amendment or agency notice, drafts a structured encoding diff, the regression suite validates it, and a human signs off before anything is applied.
+
+```sh
+export ANTHROPIC_API_KEY=...   # the analyze step calls Claude (claude-opus-4-8)
+.venv/bin/python -m openleave.watcher analyze samples/amendments/ny_saww_2027.txt --jurisdiction NY
+.venv/bin/python -m openleave.watcher list
+.venv/bin/python -m openleave.watcher review <prop-id> --approve --reviewer "Your Name"
+.venv/bin/python -m openleave.watcher apply <prop-id>
+```
+
+Pipeline guarantees, enforced in code and covered by tests:
+
+- **Parameter diffs vs. logic changes.** The LLM classifies every change: effective-dated parameter updates (a new SAWW, a new benefit cap) are machine-appliable; anything that changes rule *structure* (new eligibility conditions, changed formulas — see `samples/amendments/mn_sf_2199_2027.txt`) is flagged `requires_human_encoding` and never auto-applied.
+- **The regression suite is the gate.** Proposed diffs run against the 30-scenario suite via a parameter-override mechanism (`OPENLEAVE_PARAM_OVERRIDES`). Forward-dated changes pass; a diff that rewrites an in-force historical value breaks pinned determinations and is rejected — as is any hallucinated parameter key.
+- **Nothing applies without a human.** `apply` refuses unless the proposal is both validation-passing and explicitly approved, and records reviewer + timestamp.
+- **Provenance per proposal.** Each proposal (`proposals/*.json`) carries the source document's SHA-256, the model that drafted it, token usage, validation output, and the full review trail.
+
 > **Prototype disclaimer:** statutory parameter values are approximations for demonstration; verify against agency publications. Decision support, not legal advice.
 
 ## What's covered

@@ -1,8 +1,14 @@
 """Effective-dated statutory parameters.
 
-Each key maps to a list of (effective_date, value) pairs sorted ascending.
-`get(key, as_of)` returns the value in force on `as_of` — this is what lets a
-determination be evaluated "under the law as of" any date.
+Data lives in parameters.json: each key maps to a list of
+[effective_date, value] pairs. `get(key, as_of)` returns the value in force on
+`as_of` — this is what lets a determination be evaluated "under the law as of"
+any date.
+
+If the OPENLEAVE_PARAM_OVERRIDES environment variable points to a JSON file of
+the same shape, its entries are merged over the base data at import time. The
+amendment watcher uses this to run the regression suite against a *proposed*
+parameter change without touching the canonical data.
 
 PROTOTYPE NOTE: values are approximations gathered for demonstration. Verify
 against the responsible agency's current published figures before any real use.
@@ -10,31 +16,29 @@ against the responsible agency's current published figures before any real use.
 
 from __future__ import annotations
 
+import json
+import os
 from datetime import date
+from pathlib import Path
 
-_PARAMETERS: dict[str, list[tuple[date, float]]] = {
-    # New York — NYS DFL/PFL; SAWW set annually by NYSDOL
-    "ny.saww": [(date(2025, 1, 1), 1757.19), (date(2026, 1, 1), 1839.34)],
-    "ny.pfl.weeks": [(date(2021, 1, 1), 12)],
-    "ny.pfl.wage_replacement_rate": [(date(2021, 1, 1), 0.67)],
-    # Minnesota — Paid Leave (Minn. Stat. ch. 268B), benefits began 2026-01-01
-    "mn.saww": [(date(2026, 1, 1), 1423.00)],
-    "mn.wage_threshold_fraction_of_saaw": [(date(2026, 1, 1), 0.053)],  # of state average ANNUAL wage
-    "mn.family.weeks": [(date(2026, 1, 1), 12)],
-    "mn.medical.weeks": [(date(2026, 1, 1), 12)],
-    "mn.combined.weeks": [(date(2026, 1, 1), 20)],
-    # California — CFRA (Gov. Code § 12945.2) + PFL (Unemp. Ins. Code)
-    "ca.saww": [(date(2025, 1, 1), 1642.00), (date(2026, 1, 1), 1704.00)],
-    "ca.pfl.weeks": [(date(2025, 1, 1), 8)],
-    "ca.pfl.max_weekly_benefit": [(date(2025, 1, 1), 1681.00)],
-    "ca.pfl.low_earner_rate": [(date(2025, 1, 1), 0.90)],  # SB 951
-    "ca.pfl.standard_rate": [(date(2025, 1, 1), 0.70)],
-    "ca.pfl.min_base_period_earnings": [(date(2025, 1, 1), 300.00)],
-    # Federal FMLA
-    "fmla.weeks": [(date(1993, 8, 5), 12)],
-    "fmla.min_hours": [(date(1993, 8, 5), 1250)],
-    "fmla.min_worksite_headcount": [(date(1993, 8, 5), 50)],
-}
+DATA_FILE = Path(__file__).parent / "parameters.json"
+
+
+def _load() -> dict[str, list[tuple[date, float]]]:
+    raw = json.loads(DATA_FILE.read_text())
+    override_path = os.environ.get("OPENLEAVE_PARAM_OVERRIDES")
+    if override_path:
+        for key, entries in json.loads(Path(override_path).read_text()).items():
+            merged = dict(raw.get(key, []))
+            merged.update({d: v for d, v in entries})
+            raw[key] = sorted(merged.items())
+    return {
+        key: [(date.fromisoformat(d), v) for d, v in entries]
+        for key, entries in raw.items()
+    }
+
+
+_PARAMETERS = _load()
 
 
 def get(key: str, as_of: date) -> float:
@@ -54,3 +58,11 @@ def in_force(key: str, as_of: date) -> bool:
         return True
     except KeyError:
         return False
+
+
+def known_keys() -> list[str]:
+    return sorted(_PARAMETERS)
+
+
+def current_entries() -> dict[str, list[tuple[str, float]]]:
+    return {k: [(d.isoformat(), v) for d, v in entries] for k, entries in _PARAMETERS.items()}

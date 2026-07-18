@@ -1,0 +1,43 @@
+{
+  "id": "prop-20260718-072a7b",
+  "status": "approved",
+  "jurisdiction": "NY",
+  "source": {
+    "name": "ny_saww_2027.txt",
+    "sha256": "2b025920375a83ac757f1f90472081c68a30b4fc80747431cf4e217adf9f21fc"
+  },
+  "analysis": {
+    "summary": "NYSDOL notice sets the 2027 NYSAWW at $1,925.14 effective 2027-01-01; benefit rate (67%) and duration (12 weeks) unchanged.",
+    "parameter_changes": [
+      {
+        "key": "ny.saww",
+        "new_value": 1925.14,
+        "effective_date": "2027-01-01",
+        "citation": "NYSDOL 2027 NYSAWW notice, per WCL s. 2(16)",
+        "source_quote": "Effective January 1, 2027, the New York State Average Weekly Wage is $1,925.14."
+      }
+    ],
+    "logic_changes": [],
+    "requires_human_encoding": false,
+    "_provenance": {
+      "model": "offline-demo (hand-drafted, no LLM call \u2014 set ANTHROPIC_API_KEY to run the real analyzer)"
+    }
+  },
+  "validation": {
+    "ran_at": "2026-07-18T17:47:21.464002+00:00",
+    "overrides": {
+      "ny.saww": [
+        [
+          "2027-01-01",
+          1925.14
+        ]
+      ]
+    },
+    "passed": true,
+    "detail": "  /Users/gweng/cc_projects/cc_rules_as_code/.venv/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n30 passed, 1 warning in 0.38s"
+  },
+  "created_at": "2026-07-18T17:47:22.271424+00:00",
+  "reviewed_by": "Gene Weng",
+  "reviewed_at": "2026-07-18T17:47:36.293174+00:00",
+  "applied_at": null
+}
