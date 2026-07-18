@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OpenLeave — Series Seed</title>
+<style>
+  :root {
+    --ink: #1B1C24;
+    --page: #FAFAF6;
+    --oxblood: #6D2130;
+    --gold: #A78B4B;
+    --muted: #5C5F6C;
+    --green: #2E7D3B;
+    --hairline: #D8D4C8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #888; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { size: 1280px 720px; margin: 0; }
+
+  .slide {
+    width: 1280px; height: 720px;
+    background: var(--page); color: var(--ink);
+    font: 19px/1.5 "Charter", "Georgia", serif;
+    position: relative; overflow: hidden;
+    page-break-after: always;
+    display: flex; flex-direction: column;
+  }
+
+  /* ---------- running head & folio ---------- */
+  .runhead {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 34px 64px 12px;
+    font: 12px/1 "Charter", serif; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--gold);
+    margin: 0 0 0;
+  }
+  .runhead b { color: var(--oxblood); font-weight: normal; }
+  .folio {
+    position: absolute; bottom: 26px; left: 64px; right: 64px;
+    display: flex; justify-content: space-between;
+    font: 11px/1 "Menlo", monospace; color: var(--muted); letter-spacing: 0.06em;
+  }
+
+  /* ---------- statute-page body grid ---------- */
+  .body { flex: 1; display: flex; padding: 40px 64px 60px; gap: 44px; min-height: 0; }
+  .margin-col { width: 168px; flex: none; padding-top: 10px; }
+  .marker {
+    font: 54px/1 "Baskerville", "Times New Roman", serif; color: var(--oxblood);
+  }
+  .marker small { display: block; font: 12px/1.5 "Charter", serif; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--muted); margin-top: 10px; }
+  .marginalia {
+    margin-top: 30px; padding-top: 14px; border-top: 1px solid var(--hairline);
+    font: italic 13.5px/1.55 "Baskerville", serif; color: var(--muted);
+  }
+  .marginalia .cite { display: block; font: 10.5px/1.6 "Menlo", monospace;
+    font-style: normal; color: var(--gold); margin-top: 8px; }
+  .main { flex: 1; min-width: 0; }
+
+  h2 { font: 40px/1.15 "Baskerville", "Times New Roman", serif; font-weight: normal;
+       margin: 0 0 22px; }
+  h2 em { font-style: italic; color: var(--oxblood); }
+  .lede { font-size: 22px; line-height: 1.5; margin-bottom: 20px; max-width: 46rem; }
+  p + p { margin-top: 12px; }
+  .main p { max-width: 46rem; }
+
+  /* ---------- cover & back ---------- */
+  .dark { background: var(--ink); color: var(--page); }
+  .cover { justify-content: center; padding: 0 110px; }
+  .cover .rule { width: 76px; border: 0; border-top: 2px solid var(--gold); margin: 30px 0; }
+  .cover h1 { font: 96px/1 "Baskerville", serif; font-weight: normal; letter-spacing: 0.01em; }
+  .cover .longtitle {
+    font: italic 24px/1.55 "Baskerville", serif; color: #C9C5B8; max-width: 52rem;
+  }
+  .cover .longtitle b { font-style: normal; font-weight: normal; color: var(--gold);
+    letter-spacing: 0.18em; font-size: 17px; }
+  .cover .meta { margin-top: 46px; font: 13px/1.9 "Menlo", monospace; color: #8B8E9C;
+    letter-spacing: 0.05em; }
+  .cover .meta b { color: var(--gold); font-weight: normal; }
+
+  /* ---------- shared components ---------- */
+  .cols { display: flex; gap: 36px; }
+  .cols > div { flex: 1; min-width: 0; }
+
+  .heroline { display: flex; gap: 56px; margin: 26px 0 26px; }
+  .hero { }
+  .hero .n { font: 62px/1 "Baskerville", serif; color: var(--ink); }
+  .hero .n span { color: var(--oxblood); }
+  .hero .l { font: 12px/1.5 "Charter", serif; letter-spacing: 0.16em; text-transform: uppercase;
+             color: var(--muted); margin-top: 8px; max-width: 15rem; }
+
+  .mono {
+    font: 13px/1.65 "Menlo", monospace; background: #F1EFE7;
+    border-left: 3px solid var(--gold); padding: 18px 22px; border-radius: 0 4px 4px 0;
+    white-space: pre; overflow: hidden;
+  }
+  .mono .c  { color: var(--muted); }
+  .mono .k  { color: var(--oxblood); }
+  .mono .g  { color: var(--green); }
+  .mono .cite { color: var(--gold); }
+
+  .diffline { font: 16px/2.1 "Menlo", monospace; }
+  .diffline .del { color: var(--oxblood); text-decoration: line-through; }
+  .diffline .ins { color: var(--green); }
+  .diffline .meta { color: var(--muted); font-size: 12px; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 16.5px; }
+  th { font: 12px/1.4 "Charter", serif; letter-spacing: 0.14em; text-transform: uppercase;
+       color: var(--muted); text-align: left; padding: 0 18px 10px 0; font-weight: normal; }
+  td { padding: 11px 18px 11px 0; border-top: 1px solid var(--hairline); vertical-align: top; }
+  td.who { font-family: "Baskerville", serif; font-size: 18px; white-space: nowrap; }
+  tr.us td { border-top: 2px solid var(--oxblood); }
+  tr.us td.who { color: var(--oxblood); }
+
+  .steps { counter-reset: step; margin-top: 18px; }
+  .step { display: flex; gap: 18px; padding: 13px 0; border-top: 1px solid var(--hairline); }
+  .step:first-child { border-top: 0; }
+  .step .no { font: 26px/1.2 "Baskerville", serif; color: var(--gold); width: 30px; flex: none; }
+  .step b { font-family: "Baskerville", serif; font-weight: normal; font-size: 19px; display: block; }
+  .step p { font-size: 15.5px; color: var(--muted); max-width: none; }
+
+  ul.plain { list-style: none; }
+  ul.plain li { padding: 9px 0 9px 0; border-top: 1px solid var(--hairline); font-size: 17px; }
+  ul.plain li:first-child { border-top: 0; }
+  ul.plain b { font-family: "Baskerville", serif; font-weight: normal; font-size: 18.5px; }
+  .small { font-size: 14px; color: var(--muted); }
+  .gold { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- ══════════ COVER ══════════ -->
+<section class="slide dark cover">
+  <div class="longtitle"><b>AN&nbsp;API</b></div>
+  <h1>OpenLeave</h1>
+  <hr class="rule">
+  <div class="longtitle">To provide for the uniform determination of employee leave
+  entitlements under federal and state law; to cite the authority for every
+  conclusion; and for other purposes.</div>
+  <div class="meta">SERIES SEED &nbsp;·&nbsp; JULY 2026<br>
+  <b>leave law, as code</b> &nbsp;·&nbsp; github.com/geneweng/cc_rules_as_code</div>
+</section>
+
+<!-- ══════════ § 1 PROBLEM ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Series Seed</span><span>The Problem</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 1<small>The Problem</small></div>
+      <div class="marginalia">One remote employee in a state triggers that state's program.
+        <span class="cite">US DOL, FMLA/PFML interplay guidance, 2026</span></div>
+    </div>
+    <div class="main">
+      <h2>Leave law is fragmenting faster than<br>anyone can <em>re-code it</em>.</h2>
+      <div class="heroline">
+        <div class="hero"><div class="n">13<span>+DC</span></div><div class="l">states with mandatory paid-leave programs</div></div>
+        <div class="hero"><div class="n">2<span>/yr</span></div><div class="l">new state programs launching (MN &amp; DE, Jan 2026)</div></div>
+        <div class="hero"><div class="n">1<span>×/yr</span></div><div class="l">every state re-sets rates, caps &amp; wage bases</div></div>
+      </div>
+      <p class="lede">Every HR platform, payroll provider, and insurer employs analysts to read
+      the same statutes and hand-code the same rules — into black boxes that disagree
+      with each other and must all be re-coded every January.</p>
+      <p>The rules layer is the industry's largest <i>duplicated, non-differentiating</i> cost.</p>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — CONFIDENTIAL</span><span>2</span></div>
+</section>
+
+<!-- ══════════ § 2 PRODUCT ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Series Seed</span><span>The Product</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 2<small>The Product</small></div>
+      <div class="marginalia">Every conclusion carries the citation that produced it —
+        auditable line-by-line against the statute.</div>
+    </div>
+    <div class="main">
+      <h2>The rules layer, <em>sold as an API</em>.</h2>
+      <p class="lede">Send a fact pattern; get the determination for every applicable
+      law — with the legal authority attached.</p>
+      <div class="mono">
+<span class="c">POST /determinations</span>
+{ "employee": { "work_state": "MN", "hours_last_12mo": 1400, "aww": 1100 },
+  "employer": { "total_employees": 85 },  "event": { "type": "bonding" } }
+
+<span class="c">→ 200 OK</span>
+<span class="k">FMLA</span>       eligible · 12 weeks · job-protected · unpaid      <span class="cite">[29 U.S.C. § 2611]</span>
+<span class="k">MN Paid Leave</span>  eligible · 12 weeks · <span class="g">$896.76/week</span>            <span class="cite">[Minn. Stat. § 268B.06]</span>
+<span class="k">interaction</span> leaves run concurrently when designated       <span class="cite">[DOL guidance 2026]</span></div>
+      <p style="margin-top:18px">Justification trees, not verdicts. Effective-date time travel —
+      evaluate any determination under the law as of any date. Open-textured questions
+      return <span style="font-family:Menlo,monospace;font-size:15px">requires_human_judgment</span>,
+      never a fabricated answer.</p>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — CONFIDENTIAL</span><span>3</span></div>
+</section>
+
+<!-- ══════════ § 3 WHY NOW ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Series Seed</span><span>Why Now</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 3<small>Why Now</small></div>
+      <div class="marginalia">LLMs can draft policy-to-code translations reliably — with
+        retrieval and human review.
+        <span class="cite">Beeck Center, Policy2Code, 2025</span></div>
+    </div>
+    <div class="main">
+      <h2>AI changed <em>both sides</em> of the equation.</h2>
+      <div class="cols" style="margin-top:30px">
+        <div>
+          <p style="font-family:Baskerville,serif;font-size:24px">Encodings became cheap to&nbsp;maintain.</p>
+          <p style="margin-top:10px">Maintaining 60+ jurisdiction encodings was the reason this
+          business never existed. LLM-drafted amendment diffs — validated by regression tests,
+          approved by attorneys — collapse that cost. What was a headcount problem is now a
+          review workflow.</p>
+        </div>
+        <div>
+          <p style="font-family:Baskerville,serif;font-size:24px">And a new customer appeared.</p>
+          <p style="margin-top:10px">HR copilots are shipping everywhere, and they answer leave
+          questions confidently and wrong. Every one of them needs a deterministic,
+          citation-backed oracle behind the conversation. We are the API their
+          answers should come from.</p>
+        </div>
+      </div>
+      <p class="lede" style="margin-top:34px;border-top:1px solid var(--hairline);padding-top:22px">
+      The window: incumbents treat their rules encoding as sunk cost; none can open-source
+      it without unbundling themselves.</p>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — CONFIDENTIAL</span><span>4</span></div>
+</section>
+
+<!-- ══════════ § 4 MOAT ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Series Seed</span><span>The Moat</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 4<small>The Moat</small></div>
+      <div class="marginalia">A diff that rewrites an in-force value breaks pinned historic
+        determinations and is rejected automatically.</div>
+    </div>
+    <div class="main">
+      <h2>Amendments become <em>reviewed diffs</em>, not projects.</h2>
+      <div class="mono" style="margin-top:6px">
+<span class="c">// NYSDOL notice, 2027 NYSAWW — drafted by the pipeline, cited to source</span></div>
+      <div class="diffline" style="padding:16px 24px 6px">
+        <div><span class="meta">ny.saww&nbsp;&nbsp;</span><span class="del">2026-01-01&nbsp;&nbsp;$1,839.34</span></div>
+        <div><span class="meta">ny.saww&nbsp;&nbsp;</span><span class="ins">+ 2027-01-01&nbsp;&nbsp;$1,925.14&nbsp;&nbsp;“Effective January 1, 2027 …”</span></div>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="no">i</div><div><b>The LLM drafts.</b>
+          <p>Watches legislatures and agency feeds; separates machine-appliable parameter changes from
+          rule-structure changes, which always route to a human encoder.</p></div></div>
+        <div class="step"><div class="no">ii</div><div><b>The regression suite gates.</b>
+          <p>Every diff runs against pinned historic determinations. Hallucinated keys and rewritten
+          history fail closed.</p></div></div>
+        <div class="step"><div class="no">iii</div><div><b>An attorney signs.</b>
+          <p>Nothing ships without recorded human approval. Provenance — source hash, model, reviewer —
+          travels with every change. Customers get the webhook: “this affects 14 of your open leaves.”</p></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — CONFIDENTIAL</span><span>5</span></div>
+</section>
+
+<!-- ══════════ § 5 MARKET ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Series Seed</span><span>Market</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 5<small>Market</small></div>
+      <div class="marginalia">Regulatory complexity is the category's named growth driver.
+        <span class="cite">Verified Market Research; Mordor Intelligence, 2026</span></div>
+    </div>
+    <div class="main">
+      <h2>A billion-dollar category built <em>on top of</em> our layer.</h2>
+      <div class="heroline">
+        <div class="hero"><div class="n">$1.4<span>B</span></div><div class="l">absence &amp; leave software, 2026</div></div>
+        <div class="hero"><div class="n">9.5<span>%</span></div><div class="l">category CAGR through 2035</div></div>
+        <div class="hero"><div class="n">$18<span>B</span></div><div class="l">broader absence-management spend</div></div>
+      </div>
+      <p class="lede">Every dollar of it depends on a correct encoding of leave law —
+      today rebuilt privately by each vendor.</p>
+      <p><b style="font-family:Baskerville,serif;font-weight:normal">The wedge is leave; the market is employment law.</b>
+      The same engine, pipeline, and trust extend to wage &amp; hour, pay transparency,
+      and termination rules — the full multi-state compliance stack that platforms like
+      Mosey and SixFifty describe in documents, delivered as determinations.</p>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — CONFIDENTIAL</span><span>6</span></div>
+</section>
+
+<!-- ══════════ § 6 COMPETITION ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Series Seed</span><span>Competition</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 6<small>Competition</small></div>
+      <div class="marginalia">Incumbents advertise the encoding as internal capability —
+        “200+ statutory policies,” each maintained privately, none sold.</div>
+    </div>
+    <div class="main">
+      <h2>Everyone builds the rules layer.<br><em>Nobody sells it.</em></h2>
+      <table style="margin-top:26px">
+        <tr><th style="width:220px">Who</th><th>What they sell</th><th>The rules layer</th></tr>
+        <tr><td class="who">Cocoon · Sparrow · Tilt<br>AbsenceSoft</td>
+            <td>Leave administration workflow</td>
+            <td>Hand-coded internally; opaque; a cost center</td></tr>
+        <tr><td class="who">SixFifty · Mosey</td>
+            <td>Policy documents &amp; obligation tracking</td>
+            <td>Text generation — no executable determinations</td></tr>
+        <tr><td class="who">HRIS / payroll / EOR<br><span class="small">Rippling · Gusto · Deel</span></td>
+            <td>The systems of record</td>
+            <td>A checkbox they must offer and don't want to own</td></tr>
+        <tr class="us"><td class="who">OpenLeave</td>
+            <td>The rules layer itself, as an API</td>
+            <td>Open-source encodings · AI-maintained · citation-backed</td></tr>
+      </table>
+      <p style="margin-top:22px" class="small">Open source is the trust strategy: a determination you can
+      audit against the statute, versus a black box — and a moat incumbents can't copy without
+      giving away what they consider their IP.</p>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — CONFIDENTIAL</span><span>7</span></div>
+</section>
+
+<!-- ══════════ § 7 BUSINESS MODEL ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Series Seed</span><span>Business Model</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 7<small>Business Model</small></div>
+      <div class="marginalia">The encodings are free. The <i>currency</i> — maintenance, SLA,
+        history, alerts — is the subscription.</div>
+    </div>
+    <div class="main">
+      <h2>Open-core: the code is free,<br><em>being current</em> is the product.</h2>
+      <table style="margin-top:26px">
+        <tr><th style="width:250px">Buyer</th><th>Why they pay</th><th style="width:170px">Model</th></tr>
+        <tr><td class="who">Payroll / HRIS / EOR</td><td>Replace an internal rules team with an API line-item</td><td>Platform license</td></tr>
+        <tr><td class="who">Leave platforms</td><td>Shed their largest non-differentiating cost</td><td>Per covered employee</td></tr>
+        <tr><td class="who">Insurers &amp; TPAs</td><td>Determinations at claims scale, with audit trails</td><td>Per determination</td></tr>
+        <tr><td class="who">AI copilots</td><td>A citation-backed oracle behind the chat</td><td>Per call (MCP)</td></tr>
+      </table>
+      <p style="margin-top:24px">Compounding economics: each jurisdiction is encoded once and sold to
+      every customer, while the AI pipeline holds marginal maintenance cost near zero — the inverse
+      of every incumbent's cost structure.</p>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — CONFIDENTIAL</span><span>8</span></div>
+</section>
+
+<!-- ══════════ § 8 TRACTION ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Series Seed</span><span>Traction</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 8<small>Traction</small></div>
+      <div class="marginalia">Working code, public repo — every claim in this deck is
+        demonstrable in the prototype today.</div>
+    </div>
+    <div class="main">
+      <h2>The engine <em>runs today</em>.</h2>
+      <ul class="plain" style="margin-top:20px">
+        <li><b>Five regimes encoded, four jurisdictions</b> — FMLA + California (CFRA/PFL),
+          Minnesota Paid Leave, New York PFL — with per-clause citations and benefit formulas
+          computed to the cent.</li>
+        <li><b>37-scenario regression suite</b> pinning historic determinations — the contract an
+          amendment can't silently break.</li>
+        <li><b>AI amendment pipeline, end to end</b> — LLM-drafted diffs, automatic validation gate,
+          human sign-off with full provenance.</li>
+        <li><b>Live API + eligibility checker</b> — determinations with justification trees,
+          effective-date time travel demonstrated across the 2026→2027 NY rate change.</li>
+      </ul>
+      <p style="margin-top:20px"><span class="gold" style="font-family:Baskerville,serif;font-size:20px">Next:</span>
+      three paid design partners (payroll/EOR first) · 15 jurisdictions · SOC&nbsp;2 ·
+      the kill/scale metric: ≥80% of amendment diffs accepted with only minor human edits.</p>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — CONFIDENTIAL</span><span>9</span></div>
+</section>
+
+<!-- ══════════ § 9 ASK ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Series Seed</span><span>The Ask</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 9<small>The Ask</small></div>
+      <div class="marginalia">18 months to prove the two numbers that decide the company:
+        design-partner revenue and pipeline efficiency.</div>
+    </div>
+    <div class="main">
+      <h2>Raising a <em>$2.5M seed</em>.</h2>
+      <div class="heroline">
+        <div class="hero"><div class="n">50</div><div class="l">state encodings funded</div></div>
+        <div class="hero"><div class="n">3+</div><div class="l">paid design partners</div></div>
+        <div class="hero"><div class="n">18<span>mo</span></div><div class="l">runway to Series A metrics</div></div>
+      </div>
+      <p class="lede">Use of funds: two encoding engineers, one employment-law counsel
+      (the human in the loop is a hire, not a vendor), pipeline infrastructure, SOC&nbsp;2.</p>
+      <p><b style="font-family:Baskerville,serif;font-weight:normal">Team.</b> Gene Weng, founder.
+      Founding engineer and advisory counsel searches under way — this round funds both.</p>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — CONFIDENTIAL</span><span>10</span></div>
+</section>
+
+<!-- ══════════ BACK COVER ══════════ -->
+<section class="slide dark cover">
+  <div class="longtitle"><b>BE&nbsp;IT&nbsp;ENACTED,</b></div>
+  <hr class="rule">
+  <h1 style="font-size:64px;line-height:1.15">Stop re-coding the law.<br>Start calling it.</h1>
+  <div class="meta" style="margin-top:56px">
+    GENE WENG &nbsp;·&nbsp; gene.weng@gmail.com<br>
+    <b>github.com/geneweng/cc_rules_as_code</b><br><br>
+    <span style="color:#6B6E7C">Prototype figures are demonstrations; statutory parameters are
+    approximations pending counsel review. Decision support, not legal advice.</span>
+  </div>
+</section>
+
+</body>
+</html>
