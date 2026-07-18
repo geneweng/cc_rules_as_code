@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenLeave — Leave Eligibility Checker</title>
+<style>
+  :root { --ok:#15803d; --no:#b91c1c; --judge:#b45309; --line:#e2e8f0; --muted:#64748b; }
+  * { box-sizing:border-box; }
+  body { font:15px/1.5 -apple-system, "Segoe UI", sans-serif; margin:0; color:#0f172a; background:#f8fafc; }
+  header { background:#0f172a; color:#f8fafc; padding:1.2rem 1.5rem; }
+  header h1 { margin:0; font-size:1.2rem; } header p { margin:.2rem 0 0; color:#94a3b8; font-size:.85rem; }
+  main { max-width:60rem; margin:1.5rem auto; padding:0 1rem; display:grid; grid-template-columns:minmax(16rem,20rem) 1fr; gap:1.5rem; }
+  @media (max-width:44rem){ main{ grid-template-columns:1fr; } }
+  form { background:#fff; border:1px solid var(--line); border-radius:.6rem; padding:1rem; align-self:start; }
+  label { display:block; font-size:.8rem; font-weight:600; color:var(--muted); margin:.7rem 0 .15rem; }
+  input, select { width:100%; padding:.4rem .5rem; border:1px solid var(--line); border-radius:.4rem; font:inherit; }
+  button { margin-top:1rem; width:100%; padding:.55rem; border:0; border-radius:.4rem; background:#0f172a; color:#fff; font:inherit; font-weight:600; cursor:pointer; }
+  .regime { background:#fff; border:1px solid var(--line); border-radius:.6rem; padding:1rem 1.2rem; margin-bottom:1rem; }
+  .regime h2 { margin:0 0 .2rem; font-size:1rem; display:flex; justify-content:space-between; align-items:center; }
+  .badge { font-size:.75rem; padding:.15rem .55rem; border-radius:99px; color:#fff; }
+  .b-yes{background:var(--ok);} .b-no{background:var(--no);} .b-judge{background:var(--judge);}
+  ul { margin:.5rem 0; padding-left:1.1rem; } li { margin:.3rem 0; }
+  .cite { color:var(--muted); font-size:.8rem; } .detail { color:var(--muted); font-size:.85rem; }
+  .ent { background:#f1f5f9; border-radius:.4rem; padding:.6rem .8rem; font-size:.9rem; margin-top:.5rem; }
+  .interactions { background:#fffbeb; border:1px solid #fde68a; border-radius:.6rem; padding: .8rem 1.2rem; font-size:.9rem; }
+  .disclaimer { color:var(--muted); font-size:.78rem; margin:1rem 0 2rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>OpenLeave — Leave Eligibility Checker</h1>
+  <p>Prototype · FMLA + CA + MN + NY · every conclusion cites its source · not legal advice</p>
+</header>
+<main>
+  <form id="f">
+    <label>Work state</label>
+    <select name="work_state"><option>CA</option><option>MN</option><option>NY</option><option>TX</option></select>
+    <label>Hire date</label><input type="date" name="hire_date" value="2024-03-01" required>
+    <label>Hours worked, last 12 months</label><input type="number" name="hours_last_12mo" value="1600" required>
+    <label>Hours per week (optional)</label><input type="number" name="hours_per_week" value="40">
+    <label>Average weekly wage $ (optional)</label><input type="number" name="average_weekly_wage" value="1200">
+    <label>Employer total employees</label><input type="number" name="total_employees" value="120" required>
+    <label>Employees within 75 miles (optional)</label><input type="number" name="employees_within_75_miles">
+    <label>Leave reason</label>
+    <select name="type">
+      <option value="bonding">Bonding with a new child</option>
+      <option value="own_serious_health">Own serious health condition</option>
+      <option value="family_care">Care for a family member</option>
+      <option value="pregnancy">Pregnancy</option>
+      <option value="military_exigency">Military exigency</option>
+    </select>
+    <label>Leave start date</label><input type="date" name="start" value="2026-09-01" required>
+    <button>Check eligibility</button>
+  </form>
+  <section>
+    <div id="out"><p class="detail">Fill in the facts and press “Check eligibility”.</p></div>
+    <p class="disclaimer" id="disc"></p>
+  </section>
+</main>
+<script>
+const f = document.getElementById('f'), out = document.getElementById('out');
+const badge = e => e === true ? '<span class="badge b-yes">eligible</span>'
+  : e === false ? '<span class="badge b-no">not eligible</span>'
+  : '<span class="badge b-judge">needs human judgment</span>';
+const mark = m => m === true ? '✓' : m === false ? '✗' : '⚖';
+f.addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const d = Object.fromEntries(new FormData(f));
+  const num = v => v === '' ? null : Number(v);
+  const body = { facts: {
+    employee: { work_state: d.work_state, hire_date: d.hire_date, hours_last_12mo: Number(d.hours_last_12mo),
+      hours_per_week: num(d.hours_per_week), average_weekly_wage: num(d.average_weekly_wage) },
+    employer: { total_employees: Number(d.total_employees), employees_within_75_miles: num(d.employees_within_75_miles) },
+    event: { type: d.type, start: d.start } } };
+  const res = await fetch('/determinations', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  if (!res.ok) { out.innerHTML = '<p class="detail">Error: ' + (await res.text()) + '</p>'; return; }
+  const j = await res.json();
+  let html = '';
+  for (const r of j.regimes) {
+    html += `<div class="regime"><h2>${r.name} ${r.applies ? badge(r.eligible) : ''}</h2>`;
+    if (r.findings.length) html += '<ul>' + r.findings.map(x =>
+      `<li>${mark(x.met)} ${x.description} <span class="cite">[${x.citation.ref}]</span>` +
+      (x.detail ? `<br><span class="detail">${x.detail}</span>` : '') + '</li>').join('') + '</ul>';
+    if (r.entitlement) { const e = r.entitlement;
+      html += `<div class="ent"><strong>${e.weeks ?? '—'} weeks</strong> · job protected: ${e.job_protected ? 'yes' : 'no'} · ` +
+        `weekly benefit: ${e.weekly_benefit != null ? '$' + e.weekly_benefit.toLocaleString() : 'unpaid / n/a'}` +
+        (e.notes.length ? '<br><span class="detail">' + e.notes.join(' ') + '</span>' : '') + '</div>'; }
+    if (r.notes.length) html += `<p class="detail">${r.notes.join(' ')}</p>`;
+    html += '</div>';
+  }
+  if (j.interactions.length) html += '<div class="interactions"><strong>Interaction rules</strong><ul>' +
+    j.interactions.map(n => `<li>${n}</li>`).join('') + '</ul></div>';
+  out.innerHTML = html || '<p class="detail">No applicable regimes for these facts.</p>';
+  document.getElementById('disc').textContent = j.disclaimer + ' · evaluated as of ' + j.as_of;
+});
+</script>
+</body>
+</html>

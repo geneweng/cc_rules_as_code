@@ -8,6 +8,28 @@ A survey of **Rules as Code (RaC)** — the practice of publishing an official, 
 |---|---|
 | [`rules-as-code-survey.md`](rules-as-code-survey.md) | The survey in Markdown, with ~30 linked sources |
 | [`rules-as-code-survey.pdf`](rules-as-code-survey.pdf) | The same survey rendered as a PDF |
+| [`product-brainstorm-openleave.md`](product-brainstorm-openleave.md) | Product brainstorm + market validation for **OpenLeave**, a leave-law rules engine |
+| [`openleave/`](openleave/) | Working prototype of the OpenLeave MVP (see below) |
+| [`tests/`](tests/) | Scenario-based regression suite for the encodings |
+
+## OpenLeave prototype
+
+An executable, citation-backed encoding of U.S. employee leave law: federal **FMLA** plus **California** (CFRA + PFL), **Minnesota** (Paid Leave, live Jan 2026), and **New York** (PFL). Design principles from the survey, made concrete:
+
+- **Every conclusion carries its citation** — determinations return a justification tree, each finding tied to the statute or regulation that produced it.
+- **Discretion is flagged, never compiled** — open-textured questions (e.g. "serious health condition") return `met: null` and a `human_judgment` entry instead of a fabricated answer.
+- **Effective-date time travel** — statutory parameters (SAWW, benefit caps, program launch dates) are effective-dated, so any determination can be evaluated under the law as of any date.
+- **Interaction rules** — FMLA/state concurrency, CA PFL pay + CFRA protection pairing, and the 2026 DOL no-forced-stacking guidance are first-class outputs.
+
+```sh
+python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
+.venv/bin/pytest                                # 30-scenario regression suite
+.venv/bin/uvicorn openleave.api:app            # then open http://127.0.0.1:8000
+```
+
+`GET /` serves a browser eligibility checker; `POST /determinations` takes `{facts, as_of?}` and returns per-regime eligibility, entitlement, benefit estimates, and interaction notes.
+
+> **Prototype disclaimer:** statutory parameter values are approximations for demonstration; verify against agency publications. Decision support, not legal advice.
 
 ## What's covered
 
