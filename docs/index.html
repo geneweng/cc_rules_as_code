@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenLeave — Leave law, as code</title>
+<meta name="description" content="An executable, citation-backed encoding of U.S. employee leave law, sold as an API. Open-source encodings, AI-maintained, attorney-approved.">
+<style>
+  :root {
+    --ink: #1B1C24; --page: #FAFAF6; --oxblood: #6D2130; --gold: #A78B4B;
+    --muted: #5C5F6C; --green: #2E7D3B; --hairline: #DDD9CD; --panel: #F1EFE7;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--page); color: var(--ink); font: 18px/1.6 "Charter", "Georgia", serif; }
+  a { color: var(--oxblood); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, .btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 28px; }
+  .mono { font-family: "Menlo", "Consolas", monospace; }
+
+  /* top bar */
+  header.top { border-bottom: 1px solid var(--gold); background: var(--page); }
+  .top .wrap { display: flex; justify-content: space-between; align-items: baseline; padding-top: 20px; padding-bottom: 14px; }
+  .wordmark { font: 20px/1 "Baskerville", "Times New Roman", serif; letter-spacing: 0.02em; }
+  .wordmark span { color: var(--oxblood); }
+  nav { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  nav a { color: var(--muted); margin-left: 26px; }
+  nav a:hover { color: var(--oxblood); text-decoration: none; }
+
+  /* hero */
+  .hero { padding: 76px 0 70px; }
+  .hero .wrap { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 56px; align-items: center; }
+  .eyebrow { font: 12px/1 "Charter", serif; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold); margin-bottom: 20px; }
+  h1 { font: 52px/1.12 "Baskerville", "Times New Roman", serif; font-weight: normal; margin-bottom: 22px; }
+  h1 em { font-style: italic; color: var(--oxblood); }
+  .hero p.sub { font-size: 20px; color: var(--muted); max-width: 30rem; margin-bottom: 30px; }
+  .btn { display: inline-block; padding: 13px 26px; border-radius: 3px; font: 15px "Charter", serif;
+         letter-spacing: 0.04em; }
+  .btn.primary { background: var(--ink); color: var(--page); }
+  .btn.primary:hover { background: var(--oxblood); text-decoration: none; }
+  .btn.ghost { border: 1px solid var(--hairline); color: var(--ink); margin-left: 10px; }
+  .btn.ghost:hover { border-color: var(--oxblood); text-decoration: none; }
+
+  .exchange { background: var(--panel); border-left: 3px solid var(--gold); border-radius: 0 6px 6px 0;
+              padding: 22px 24px; font-size: 12.5px; line-height: 1.62; white-space: pre; overflow-x: auto; }
+  .exchange .c { color: var(--muted); }
+  .exchange .k { color: var(--oxblood); }
+  .exchange .g { color: var(--green); }
+  .exchange .cite { color: var(--gold); }
+  .exchange b { color: var(--ink); }
+
+  /* stat ribbon */
+  .ribbon { border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
+  .ribbon .wrap { display: flex; flex-wrap: wrap; gap: 8px 0; padding: 26px 28px; }
+  .stat { flex: 1; min-width: 200px; padding-right: 30px; }
+  .stat .n { font: 34px/1 "Baskerville", serif; }
+  .stat .n span { color: var(--oxblood); }
+  .stat .l { font-size: 12.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+
+  /* sections */
+  section.block { padding: 78px 0; }
+  section.block + section.block { border-top: 1px solid var(--hairline); }
+  .sec-eyebrow { font: 15px/1 "Baskerville", serif; color: var(--oxblood); margin-bottom: 14px; }
+  h2 { font: 36px/1.2 "Baskerville", serif; font-weight: normal; margin-bottom: 18px; max-width: 34rem; }
+  h2 em { font-style: italic; color: var(--oxblood); }
+  .lede { font-size: 19px; color: var(--muted); max-width: 40rem; margin-bottom: 40px; }
+
+  .three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 34px; }
+  .card h3 { font: 22px/1.3 "Baskerville", serif; font-weight: normal; margin-bottom: 10px; }
+  .card p { font-size: 15.5px; color: var(--muted); margin-bottom: 16px; }
+  .chip { background: var(--panel); border-left: 3px solid var(--gold); border-radius: 0 4px 4px 0;
+          padding: 12px 14px; font-size: 11.5px; line-height: 1.6; white-space: pre; overflow-x: auto; }
+  .chip .g { color: var(--green); } .chip .x { color: var(--oxblood); } .chip .j { color: var(--gold); }
+  .chip .m { color: var(--muted); }
+
+  /* pipeline band */
+  .band { background: var(--ink); color: var(--page); }
+  .band h2 { color: var(--page); }
+  .band .lede { color: #A6A9B4; }
+  .band .sec-eyebrow { color: var(--gold); }
+  .band .diff { font-size: 15px; line-height: 2; margin-bottom: 36px; white-space: pre; overflow-x: auto; }
+  .band .diff .m { color: #7C7F8C; font-size: 12px; }
+  .band .diff .del { color: #C9737F; text-decoration: line-through; }
+  .band .diff .ins { color: #7DBC86; }
+  .gates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; }
+  .gate { border-top: 1px solid #3A3B45; padding-top: 16px; }
+  .gate .no { font: 24px/1 "Baskerville", serif; color: var(--gold); margin-bottom: 10px; }
+  .gate b { font: 19px "Baskerville", serif; font-weight: normal; display: block; margin-bottom: 6px; }
+  .gate p { font-size: 14.5px; color: #A6A9B4; }
+
+  /* open core */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; }
+  .split ul { list-style: none; }
+  .split li { padding: 12px 0; border-top: 1px solid var(--hairline); font-size: 16px; }
+  .split li b { font-family: "Baskerville", serif; font-weight: normal; font-size: 17.5px; }
+  .split li:first-child { border-top: 0; }
+
+  /* closing */
+  .close { background: var(--ink); color: var(--page); text-align: left; }
+  .close .wrap { padding-top: 90px; padding-bottom: 90px; }
+  .close .eyebrow { color: var(--gold); }
+  .close h2 { font-size: 46px; max-width: 40rem; color: var(--page); }
+  .close p { color: #A6A9B4; margin: 18px 0 34px; max-width: 36rem; }
+
+  footer { border-top: 1px solid var(--hairline); }
+  footer .wrap { padding: 26px 28px; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+                 font-size: 12.5px; color: var(--muted); }
+
+  @media (max-width: 900px) {
+    .hero .wrap, .split { grid-template-columns: 1fr; }
+    .three, .gates { grid-template-columns: 1fr; }
+    h1 { font-size: 40px; }
+    .close h2 { font-size: 34px; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="wordmark">Open<span>Leave</span></div>
+    <nav>
+      <a href="#how">How it works</a>
+      <a href="#pipeline">The pipeline</a>
+      <a href="#opencore">Open core</a>
+      <a href="https://github.com/geneweng/cc_rules_as_code">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Leave law, as code</div>
+      <h1>Every leave decision, backed by <em>the letter of the law</em>.</h1>
+      <p class="sub">OpenLeave is an executable encoding of U.S. employee leave law —
+      FMLA and the state paid-leave programs — served as an API that returns
+      determinations with the statute attached.</p>
+      <a class="btn primary" href="https://github.com/geneweng/cc_rules_as_code">View on GitHub</a>
+      <a class="btn ghost" href="#how">See how it works</a>
+    </div>
+    <div class="exchange mono" aria-label="Example API request and response">
+<span class="c">POST /determinations</span>
+{ "employee": { "work_state": "MN",
+                "hours_last_12mo": 1400, "aww": 1100 },
+  "employer": { "total_employees": 85 },
+  "event":    { "type": "bonding" } }
+
+<span class="c">→ 200 OK</span>
+<span class="k">FMLA</span>           eligible · 12 wks     <span class="cite">[29 U.S.C. § 2611]</span>
+  <span class="g">✓</span> 12 months' employment           <span class="cite">[§ 2611(2)(A)(i)]</span>
+  <span class="g">✓</span> 1,250 hours — worked 1,400      <span class="cite">[§ 2611(2)(A)(ii)]</span>
+  <span class="g">✓</span> 50+ employees in 75 mi — 85     <span class="cite">[§ 2611(2)(B)(ii)]</span>
+<span class="k">MN Paid Leave</span>  eligible · 12 wks · <b>$896.76/wk</b>
+                                     <span class="cite">[Minn. Stat. § 268B.06]</span>
+<span class="k">interaction</span>    leaves run concurrently
+</div>
+  </div>
+</section>
+
+<div class="ribbon">
+  <div class="wrap">
+    <div class="stat"><div class="n">13<span>+DC</span></div><div class="l">states with paid-leave programs</div></div>
+    <div class="stat"><div class="n">1<span>×/yr</span></div><div class="l">every state resets rates &amp; caps</div></div>
+    <div class="stat"><div class="n">1</div><div class="l">remote employee triggers a state's rules</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">vendors selling the rules layer — until now</div></div>
+  </div>
+</div>
+
+<section class="block" id="how">
+  <div class="wrap">
+    <div class="sec-eyebrow">§ 1 · What you get</div>
+    <h2>Determinations with <em>reasoning attached</em>.</h2>
+    <p class="lede">Send facts about a person's situation. Get back, for every applicable
+    law: eligibility, entitlement, the computed benefit — and the authority behind each conclusion.</p>
+    <div class="three">
+      <div class="card">
+        <h3>Justification trees</h3>
+        <p>Every conclusion is a finding tied to a citation. When the answer is no,
+        you see exactly which condition failed — and which still passed.</p>
+        <div class="chip mono"><span class="g">✓</span> 12 months' employment
+<span class="x">✗ 1,250 hours of service</span>
+<span class="m">  hours in last 12 mo: 900</span>
+<span class="m">  [29 U.S.C. § 2611(2)(A)(ii)]</span></div>
+      </div>
+      <div class="card">
+        <h3>Effective-date time travel</h3>
+        <p>Every rate and threshold is effective-dated. Evaluate any determination
+        under the law as of any date — for audits, claims, or pricing next year today.</p>
+        <div class="chip mono"><span class="m">as_of=2025-06-01</span>  benefit: 1177.32
+<span class="m">as_of=2026-09-01</span>  benefit: 1232.36
+<span class="m">as_of=2027-02-01</span>  benefit: <span class="g">1289.84</span></div>
+      </div>
+      <div class="card">
+        <h3>Honest about judgment</h3>
+        <p>Open-textured law — "serious health condition" — is never resolved by the
+        machine. It's flagged and routed to a person, with the regulation attached.</p>
+        <div class="chip mono">eligible: <span class="j">null</span>
+<span class="j">⚖ "serious health condition"</span>
+<span class="m">  requires medical certification</span>
+<span class="m">  [29 C.F.R. § 825.113]</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block band" id="pipeline">
+  <div class="wrap">
+    <div class="sec-eyebrow">§ 2 · The maintenance loop</div>
+    <h2>Amendments become <em style="color:#C9737F">reviewed diffs</em>, not projects.</h2>
+    <p class="lede">Legislatures move; the encoding follows — through three gates.</p>
+    <div class="diff mono">
+<span class="m">// NYSDOL notice: 2027 state average weekly wage</span>
+<span class="m">ny.saww</span>  <span class="del">2026-01-01  $1,839.34</span>
+<span class="m">ny.saww</span>  <span class="ins">+ 2027-01-01  $1,925.14  “Effective January 1, 2027 …”</span></div>
+    <div class="gates">
+      <div class="gate"><div class="no">i</div><b>An LLM drafts.</b>
+        <p>Watches legislative and agency feeds; drafts parameter diffs with the source
+        quoted verbatim. Rule-structure changes always route to a human encoder.</p></div>
+      <div class="gate"><div class="no">ii</div><b>The regression suite gates.</b>
+        <p>Every diff runs against pinned historic determinations. Hallucinated keys and
+        rewritten history fail closed.</p></div>
+      <div class="gate"><div class="no">iii</div><b>An attorney signs.</b>
+        <p>Nothing ships without recorded human approval. Source hash, model, and reviewer
+        travel with every change — and your systems get the webhook.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="opencore">
+  <div class="wrap">
+    <div class="sec-eyebrow">§ 3 · Open core</div>
+    <h2>The code is free. <em>Being current</em> is the product.</h2>
+    <div class="split" style="margin-top:34px">
+      <div>
+        <p style="color:var(--muted); font-size:17px">The encodings and their test suites are open
+        source — audit every line against the statute. What you subscribe to is the guarantee:
+        maintained coverage under an SLA, effective-date history, and amendment alerts that tell
+        you which of your open leaves a change affects.</p>
+        <p style="margin-top:16px; font-size:17px; color:var(--muted)">Today the prototype covers
+        <b style="color:var(--ink)">FMLA, California (CFRA/PFL), Minnesota Paid Leave, and New York
+        PFL</b>, with a 37-scenario regression suite and the amendment pipeline running end to end.</p>
+      </div>
+      <ul>
+        <li><b>Payroll / HRIS / EOR platforms</b> — replace an internal rules team with an API line-item</li>
+        <li><b>Leave-management platforms</b> — shed your largest non-differentiating cost</li>
+        <li><b>Insurers &amp; TPAs</b> — determinations at claims scale, with audit trails</li>
+        <li><b>AI copilots</b> — a citation-backed oracle behind the chat, via MCP</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="close">
+  <div class="wrap">
+    <div class="eyebrow">Design partnerships open — Fall 2026</div>
+    <h2>Stop re-coding the law.<br>Start calling it.</h2>
+    <p>We're onboarding three design partners for the 15-jurisdiction rollout.
+    If your team maintains leave rules by hand, we'd like to talk.</p>
+    <a class="btn primary" style="background:var(--gold); color:var(--ink)" href="mailto:gene.weng@gmail.com">Talk to us</a>
+    <a class="btn ghost" style="border-color:#3A3B45; color:var(--page)" href="https://github.com/geneweng/cc_rules_as_code">Read the code</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>© 2026 OpenLeave · <a href="https://github.com/geneweng/cc_rules_as_code">github.com/geneweng/cc_rules_as_code</a></div>
+    <div>Prototype. Statutory parameters are approximations pending counsel review.
+    Decision support, not legal advice.</div>
+  </div>
+</footer>
+
+</body>
+</html>
