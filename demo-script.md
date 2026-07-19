@@ -43,7 +43,7 @@ export OPENLEAVE_PROPOSALS_DIR=/tmp/demo-proposals  # keep demo proposals out of
 | Work state | `MN` |
 | Hire date | `2025-03-01` |
 | Hours last 12 months | `1400` |
-| Average weekly wage | `1200` |
+| Average weekly wage | `1100` |
 | Employer total employees | `85` |
 | Leave reason | Bonding with a new child |
 | Leave start | `2026-09-01` |

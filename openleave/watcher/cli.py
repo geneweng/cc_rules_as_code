@@ -96,8 +96,11 @@ def cmd_apply(args) -> int:
     for key, entries in overrides.items():
         merged = dict(data.get(key, []))
         merged.update({d: v for d, v in entries})
-        data[key] = sorted(merged.items())
-    parameters.DATA_FILE.write_text(json.dumps(data, indent=2) + "\n")
+        data[key] = [list(item) for item in sorted(merged.items())]
+    # One key per line, matching the file's committed style, so an applied
+    # amendment shows up in review as a one-line diff.
+    lines = ",\n".join(f'  "{k}": {json.dumps(v)}' for k, v in data.items())
+    parameters.DATA_FILE.write_text("{\n" + lines + "\n}\n")
 
     from datetime import datetime, timezone
 
