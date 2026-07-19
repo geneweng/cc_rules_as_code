@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OpenLeave — From Statute to Answer</title>
+<style>
+  :root {
+    --ink: #1B1C24;
+    --page: #FAFAF6;
+    --oxblood: #6D2130;
+    --gold: #A78B4B;
+    --muted: #5C5F6C;
+    --green: #2E7D3B;
+    --hairline: #D8D4C8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #888; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { size: 1280px 720px; margin: 0; }
+
+  .slide {
+    width: 1280px; height: 720px;
+    background: var(--page); color: var(--ink);
+    font: 18px/1.5 "Charter", "Georgia", serif;
+    position: relative; overflow: hidden;
+    page-break-after: always;
+    display: flex; flex-direction: column;
+  }
+
+  .runhead {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 34px 64px 12px;
+    font: 12px/1 "Charter", serif; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--gold);
+  }
+  .runhead b { color: var(--oxblood); font-weight: normal; }
+  .folio {
+    position: absolute; bottom: 26px; left: 64px; right: 64px;
+    display: flex; justify-content: space-between;
+    font: 11px/1 "Menlo", monospace; color: var(--muted); letter-spacing: 0.06em;
+  }
+
+  .body { flex: 1; display: flex; padding: 36px 64px 58px; gap: 44px; min-height: 0; }
+  .margin-col { width: 168px; flex: none; padding-top: 8px; }
+  .marker { font: 54px/1 "Baskerville", "Times New Roman", serif; color: var(--oxblood); }
+  .marker small { display: block; font: 12px/1.5 "Charter", serif; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--muted); margin-top: 10px; }
+  .marginalia {
+    margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--hairline);
+    font: italic 13.5px/1.55 "Baskerville", serif; color: var(--muted);
+  }
+  .marginalia .cite { display: block; font: 10.5px/1.6 "Menlo", monospace;
+    font-style: normal; color: var(--gold); margin-top: 8px; }
+  .main { flex: 1; min-width: 0; }
+
+  h2 { font: 38px/1.15 "Baskerville", "Times New Roman", serif; font-weight: normal; margin: 0 0 18px; }
+  h2 em { font-style: italic; color: var(--oxblood); }
+  .lede { font-size: 20px; line-height: 1.5; margin-bottom: 16px; max-width: 48rem; }
+  .main p { max-width: 48rem; }
+
+  .dark { background: var(--ink); color: var(--page); }
+  .cover { justify-content: center; padding: 0 110px; }
+  .cover .rule { width: 76px; border: 0; border-top: 2px solid var(--gold); margin: 30px 0; }
+  .cover h1 { font: 76px/1.1 "Baskerville", serif; font-weight: normal; }
+  .cover .longtitle { font: italic 23px/1.55 "Baskerville", serif; color: #C9C5B8; max-width: 54rem; }
+  .cover .longtitle b { font-style: normal; font-weight: normal; color: var(--gold);
+    letter-spacing: 0.18em; font-size: 16px; }
+  .cover .meta { margin-top: 42px; font: 13px/1.9 "Menlo", monospace; color: #8B8E9C; letter-spacing: 0.05em; }
+  .cover .meta b { color: var(--gold); font-weight: normal; }
+
+  .mono {
+    font: 12.5px/1.6 "Menlo", monospace; background: #F1EFE7;
+    border-left: 3px solid var(--gold); padding: 16px 20px; border-radius: 0 4px 4px 0;
+    white-space: pre; overflow: hidden;
+  }
+  .mono .c { color: var(--muted); }
+  .mono .k { color: var(--oxblood); }
+  .mono .g { color: var(--green); }
+  .mono .x { color: var(--oxblood); }
+  .mono .cite { color: var(--gold); }
+  .mono .em { color: var(--ink); font-weight: bold; }
+
+  blockquote {
+    font: italic 17px/1.6 "Baskerville", serif; color: #3A3B45;
+    border-left: 2px solid var(--oxblood); padding: 4px 0 4px 20px; margin: 0 0 14px;
+  }
+  blockquote .src { display: block; font: 11px/1.8 "Menlo", monospace; font-style: normal;
+    color: var(--gold); margin-top: 6px; }
+
+  .cols { display: flex; gap: 32px; }
+  .cols > div { flex: 1; min-width: 0; }
+  .small { font-size: 14px; color: var(--muted); }
+  .gold { color: var(--gold); }
+  .lbl { font: 12px/1.4 "Charter", serif; letter-spacing: 0.16em; text-transform: uppercase;
+         color: var(--muted); margin: 0 0 8px; }
+
+  /* chain diagram */
+  .chain { display: flex; align-items: stretch; gap: 0; margin-top: 26px; }
+  .stage { flex: 1; border: 1px solid var(--hairline); background: #F5F3EC;
+           padding: 16px 16px; border-radius: 4px; }
+  .stage .no { font: 22px/1 "Baskerville", serif; color: var(--oxblood); margin-bottom: 6px; }
+  .stage .t { font: 18px/1.2 "Baskerville", serif; margin-bottom: 8px; }
+  .stage .d { font: 11.5px/1.6 "Menlo", monospace; color: var(--muted); }
+  .arrow { align-self: center; font: 26px/1 "Baskerville", serif; color: var(--gold); padding: 0 10px; flex: none; }
+  .loop {
+    margin: 22px 0 0; padding: 14px 20px; border: 1px dashed var(--gold); border-radius: 4px;
+    font: italic 15.5px/1.55 "Baskerville", serif; color: var(--muted); max-width: none;
+  }
+  .loop b { font-style: normal; font-family: "Charter", serif; font-size: 13px;
+            letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- ══════════ COVER ══════════ -->
+<section class="slide dark cover">
+  <div class="longtitle"><b>OPENLEAVE&nbsp;·&nbsp;HOW&nbsp;IT&nbsp;WORKS</b></div>
+  <h1>From statute<br>to answer.</h1>
+  <hr class="rule">
+  <div class="longtitle">The four artifacts of Rules as Code — the raw rule, the coded
+  rule, the user's facts, and the system's result — traced through one real
+  determination from the working prototype.</div>
+  <div class="meta">JULY 2026 &nbsp;·&nbsp; <b>every excerpt is real; every result was produced by running the engine</b></div>
+</section>
+
+<!-- ══════════ § 1 RAW RULES ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — How It Works</span><span>Raw Rules</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 1<small>Raw Rules</small></div>
+      <div class="marginalia">Thresholds, date arithmetic, a piecewise formula —
+        closed-texture law, the kind that encodes faithfully.</div>
+    </div>
+    <div class="main">
+      <h2>What the law <em>says</em>.</h2>
+      <p class="lede">The running example: a Minnesotan hired March 2025, full time at
+      $1,100/week, 85-person employer, bonding leave starting September 1, 2026.
+      Two rules govern it.</p>
+      <blockquote>"The term 'eligible employee' means an employee who has been employed —
+      (i) for at least 12 months by the employer…; and (ii) for at least 1,250 hours of
+      service with such employer during the previous 12-month period… [excluding] any
+      employee… at a worksite at which such employer employs less than 50 employees
+      [within] 75 miles…"
+      <span class="src">29 U.S.C. § 2611(2) — Family and Medical Leave Act (excerpt)</span></blockquote>
+      <blockquote>"The weekly benefit amount is 90% of wages that do not exceed 50% of the
+      state's average weekly wage, plus 66% of wages between 50% and 100% of that wage…
+      capped at the state average weekly wage. Nearly all employers are covered, regardless
+      of size."
+      <span class="src">Minn. Stat. ch. 268B — Minnesota Paid Leave (summarized excerpt)</span></blockquote>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — HOW IT WORKS</span><span>2</span></div>
+</section>
+
+<!-- ══════════ § 2 CODED RULES ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — How It Works</span><span>Coded Rules</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 2<small>Coded Rules</small></div>
+      <div class="marginalia">Each statutory condition becomes a Finding that carries its
+        citation — compare clause-by-clause with § 1.
+        <span class="cite">openleave/regimes/fmla.py</span></div>
+    </div>
+    <div class="main">
+      <h2>The same law, <em>executable</em>.</h2>
+      <div class="mono">
+result.findings = [
+    Finding(
+        key=<span class="g">"tenure"</span>,
+        description=<span class="g">"Employed by this employer for at least 12 months"</span>,
+        met=facts.tenure_months >= 12,
+        citation=Citation(<span class="cite">"29 U.S.C. § 2611(2)(A)(i)"</span>),
+    ),
+    Finding(
+        key=<span class="g">"hours"</span>,
+        description=<span class="g">"At least 1,250 hours of service in the previous 12 months"</span>,
+        met=facts.employee.hours_last_12mo >= min_hours,
+        citation=Citation(<span class="cite">"29 U.S.C. § 2611(2)(A)(ii)"</span>),
+    ),
+    Finding(
+        key=<span class="g">"worksite"</span>,
+        description=<span class="g">"Employer has 50+ employees within 75 miles of the worksite"</span>,
+        met=facts.worksite_headcount >= min_headcount,
+        citation=Citation(<span class="cite">"29 U.S.C. § 2611(2)(B)(ii)"</span>),
+    ),
+]</div>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — HOW IT WORKS</span><span>3</span></div>
+</section>
+
+<!-- ══════════ § 2 cont. FORMULA + PARAMETERS ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — How It Works</span><span>Coded Rules</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 2<small>continued</small></div>
+      <div class="marginalia">Rates and caps are never hard-coded: effective-dated
+        parameters enable “the law as of any date” — and are what the AI amendment
+        pipeline maintains.</div>
+    </div>
+    <div class="main">
+      <h2>Formulas transcribe; <em>numbers stay data</em>.</h2>
+      <div class="lbl">The § 268B.06 benefit formula — a direct transcription of the statute's piecewise structure</div>
+      <div class="mono">
+def _weekly_benefit(aww, saww):          <span class="c"># Minn. Stat. § 268B.06</span>
+    half = 0.5 * saww
+    benefit = 0.9 * min(aww, half)                     <span class="c"># 90% up to 50% of SAWW</span>
+    if aww > half:
+        benefit += 0.66 * (min(aww, saww) - half)      <span class="c"># 66% between 50–100%</span>
+    if aww > saww:
+        benefit += 0.55 * (aww - saww)                 <span class="c"># 55% above</span>
+    return round(min(benefit, saww), 2)                <span class="c"># capped at SAWW</span></div>
+      <div class="lbl" style="margin-top:20px">Effective-dated statutory parameters — openleave/parameters.json</div>
+      <div class="mono">
+<span class="k">"mn.saww"</span>:        [[<span class="g">"2026-01-01"</span>, 1423.00]]
+<span class="k">"fmla.min_hours"</span>:  [[<span class="g">"1993-08-05"</span>, 1250]]
+<span class="k">"ny.saww"</span>:        [[<span class="g">"2025-01-01"</span>, 1757.19], [<span class="g">"2026-01-01"</span>, 1839.34]]</div>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — HOW IT WORKS</span><span>4</span></div>
+</section>
+
+<!-- ══════════ § 3 FACTS ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — How It Works</span><span>Fact Input</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 3<small>Fact Input</small></div>
+      <div class="marginalia">The system — not the user — figures out which laws apply.</div>
+    </div>
+    <div class="main">
+      <h2>What the user <em>tells the system</em>.</h2>
+      <p class="lede">The caller — an HR platform, a payroll system, a chatbot, or a person
+      using the web checker — submits only facts. No legal knowledge required to ask.</p>
+      <div class="mono" style="font-size:14px">
+<span class="c">POST /determinations</span>
+{
+  "facts": {
+    "employee": {
+      "work_state":          <span class="g">"MN"</span>,          <span class="c">← where they work</span>
+      "hire_date":           <span class="g">"2025-03-01"</span>,  <span class="c">← when they were hired</span>
+      "hours_last_12mo":     <span class="g">1400</span>,          <span class="c">← how much they work</span>
+      "average_weekly_wage": <span class="g">1100</span>           <span class="c">← what they earn</span>
+    },
+    "employer": { "total_employees": <span class="g">85</span> },   <span class="c">← how big the employer is</span>
+    "event":    { "type": <span class="g">"bonding"</span>, "start": <span class="g">"2026-09-01"</span> }  <span class="c">← what's happening</span>
+  }
+}</div>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — HOW IT WORKS</span><span>5</span></div>
+</section>
+
+<!-- ══════════ § 4 RESULT ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — How It Works</span><span>Result</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 4<small>Result</small></div>
+      <div class="marginalia">$896.76 = 90% of the first $711.50 (half the MN SAWW)
+        + 66% of the remaining $388.50. The arithmetic is reconstructible from the response.</div>
+    </div>
+    <div class="main">
+      <h2>The determination, <em>reasoning attached</em>.</h2>
+      <div class="mono" style="font-size:13px">
+<span class="k">FMLA (federal)</span>                                    eligible: <span class="g">true</span>
+  <span class="g">✓</span> 12 months' employment  — 18.0 months          <span class="cite">[29 U.S.C. § 2611(2)(A)(i)]</span>
+  <span class="g">✓</span> 1,250 hours of service — 1,400 hours          <span class="cite">[29 U.S.C. § 2611(2)(A)(ii)]</span>
+  <span class="g">✓</span> 50+ employees / 75 mi  — 85 employees         <span class="cite">[29 U.S.C. § 2611(2)(B)(ii)]</span>
+  → 12 weeks · job-protected · unpaid              <span class="cite">[29 U.S.C. § 2614]</span>
+
+<span class="k">Minnesota Paid Leave</span>                              eligible: <span class="g">true</span>
+  <span class="g">✓</span> wage credits ≥ ~$3,922 — $57,200              <span class="cite">[Minn. Stat. § 268B.04]</span>
+  <span class="g">✓</span> covered employment (no size minimum)          <span class="cite">[Minn. Stat. § 268B.01]</span>
+  → 12 weeks · job-protected · <span class="em">$896.76/week</span>       <span class="cite">[Minn. Stat. § 268B.06]</span>
+
+<span class="k">interactions</span>
+  · leaves run concurrently when properly designated
+  · employer may not force substitution of employer paid leave  <span class="cite">[DOL guidance 2026]</span></div>
+      <p style="margin-top:14px" class="small">Condensed from the engine's actual JSON response —
+      every conclusion points back to a § 1 citation, closing the loop.</p>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — HOW IT WORKS</span><span>6</span></div>
+</section>
+
+<!-- ══════════ § 5 VARIATIONS ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — How It Works</span><span>Two Variations</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 5<small>Two Variations</small></div>
+      <div class="marginalia">Open-textured law is flagged and routed to a person —
+        never resolved by the machine.</div>
+    </div>
+    <div class="main">
+      <h2>Honest about <em>no</em>, and about <em>not knowing</em>.</h2>
+      <div class="cols" style="margin-top:18px">
+        <div>
+          <div class="lbl">Same facts, only 900 hours worked</div>
+          <div class="mono" style="font-size:12.5px">
+<span class="k">FMLA</span>                    eligible: <span class="x">false</span>
+  <span class="g">✓</span> 12 months' employment
+  <span class="x">✗ 1,250 hours of service</span>
+    <span class="c">hours in previous 12 mo: 900</span>
+    <span class="cite">[29 U.S.C. § 2611(2)(A)(ii)]</span>
+  <span class="g">✓</span> 50+ employees / 75 mi</div>
+          <p class="small" style="margin-top:10px">When the answer is no, the tree shows
+          exactly which condition failed — and which still passed.</p>
+        </div>
+        <div>
+          <div class="lbl">Leave reason: own health condition</div>
+          <div class="mono" style="font-size:12.5px">
+<span class="k">FMLA</span>                    eligible: <span class="cite">null</span>
+  <span class="g">✓</span> tenure · hours · worksite
+  <span class="cite">⚖ "serious health condition"</span>
+    <span class="c">requires medical certification;</span>
+    <span class="c">not determinable by rule</span>
+    <span class="cite">[29 C.F.R. § 825.113]</span></div>
+          <p class="small" style="margin-top:10px">Not yes, not no: the open-textured
+          question is routed to a human, with the governing regulation attached.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — HOW IT WORKS</span><span>7</span></div>
+</section>
+
+<!-- ══════════ § 6 THE CHAIN ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — How It Works</span><span>The Chain</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 6<small>The Chain</small></div>
+      <div class="marginalia">Text to code to answer — with authority attached at
+        every step.</div>
+    </div>
+    <div class="main">
+      <h2>Every stage <em>cites its neighbor</em>.</h2>
+      <div class="chain">
+        <div class="stage"><div class="no">§ 1</div><div class="t">Raw rule</div>
+          <div class="d">29 U.S.C.<br>§ 2611(2)(A)(ii)<br>"at least 1,250 hours<br>of service"</div></div>
+        <div class="arrow">→</div>
+        <div class="stage"><div class="no">§ 2</div><div class="t">Coded rule</div>
+          <div class="d">Finding(met=…,<br>citation="29 U.S.C.<br>§ 2611(2)(A)(ii)")</div></div>
+        <div class="arrow">←</div>
+        <div class="stage"><div class="no">§ 3</div><div class="t">User facts</div>
+          <div class="d">work_state: MN<br>hours: 1,400<br>aww: $1,100</div></div>
+        <div class="arrow">→</div>
+        <div class="stage"><div class="no">§ 4</div><div class="t">Result</div>
+          <div class="d">eligible: true<br>✓ [§ 2611(2)(A)(ii)]<br>$896.76/week</div></div>
+      </div>
+      <div class="loop"><b>The maintenance loop&nbsp;&nbsp;</b> When the raw rule changes, the
+      amendment pipeline proposes the § 2 diff — LLM-drafted, regression-gated against pinned
+      historic determinations, attorney-approved — so the chain stays closed as the law moves.</div>
+      <p style="margin-top:20px" class="small">Prototype illustration. Statutory excerpts abridged;
+      parameter values are approximations pending counsel review. Decision support, not legal advice.</p>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — HOW IT WORKS</span><span>8</span></div>
+</section>
+
+<!-- ══════════ BACK COVER ══════════ -->
+<section class="slide dark cover">
+  <div class="longtitle"><b>IN&nbsp;WITNESS&nbsp;WHEREOF,</b></div>
+  <hr class="rule">
+  <h1 style="font-size:58px;line-height:1.18">The law, the code, the facts,<br>the answer — one chain.</h1>
+  <div class="meta" style="margin-top:52px">
+    OPENLEAVE &nbsp;·&nbsp; leave law, as code<br>
+    <b>github.com/geneweng/cc_rules_as_code</b> &nbsp;·&nbsp; see how-it-works.md for the full walkthrough
+  </div>
+</section>
+
+</body>
+</html>
