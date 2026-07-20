@@ -8,6 +8,7 @@ dependencies = ["fastapi>=0.110", "pydantic>=2.6", "uvicorn>=0.29"]
 [project.optional-dependencies]
 dev = ["pytest>=8", "httpx>=0.27"]
 watcher = ["anthropic>=0.60"]
+mcp = ["mcp>=1.2"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

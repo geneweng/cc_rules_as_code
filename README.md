@@ -20,6 +20,7 @@ An executable, citation-backed encoding of U.S. employee leave law: federal **FM
 - **Discretion is flagged, never compiled** — open-textured questions (e.g. "serious health condition") return `met: null` and a `human_judgment` entry instead of a fabricated answer.
 - **Effective-date time travel** — statutory parameters (SAWW, benefit caps, program launch dates) are effective-dated, so any determination can be evaluated under the law as of any date.
 - **Interaction rules** — FMLA/state concurrency, CA PFL pay + CFRA protection pairing, and the 2026 DOL no-forced-stacking guidance are first-class outputs.
+- **Coverage is reported, never assumed** — a determination for a state with a paid-leave program this encoding doesn't implement (WA, MA, NJ, …) is flagged `complete: false` with an explicit warning. Silent under-coverage is the most dangerous failure mode for a rules oracle, so the engine refuses to let a partial answer read as a whole one.
 
 ```sh
 python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
@@ -47,6 +48,35 @@ Pipeline guarantees, enforced in code and covered by tests:
 - **The regression suite is the gate.** Proposed diffs run against the 30-scenario suite via a parameter-override mechanism (`OPENLEAVE_PARAM_OVERRIDES`). Forward-dated changes pass; a diff that rewrites an in-force historical value breaks pinned determinations and is rejected — as is any hallucinated parameter key.
 - **Nothing applies without a human.** `apply` refuses unless the proposal is both validation-passing and explicitly approved, and records reviewer + timestamp.
 - **Provenance per proposal.** Each proposal (`proposals/*.json`) carries the source document's SHA-256, the model that drafted it, token usage, validation output, and the full review trail.
+
+### MCP server — the oracle behind an AI assistant
+
+The survey's central architectural claim, made concrete: **LLMs at the edges, a verified rules engine at the core.** `openleave_mcp` exposes the engine as MCP tools so an assistant handles the conversation while every substantive legal conclusion comes from the deterministic, citation-backed engine instead of model recall.
+
+```sh
+.venv/bin/pip install -e '.[mcp]'
+.venv/bin/python -m openleave.mcp_server      # stdio
+```
+
+Register it with Claude Code (`claude mcp add openleave -- /path/to/.venv/bin/python -m openleave.mcp_server`) or in Claude Desktop's config:
+
+```json
+{ "mcpServers": {
+    "openleave": {
+      "command": "/path/to/cc_rules_as_code/.venv/bin/python",
+      "args": ["-m", "openleave.mcp_server"]
+    } } }
+```
+
+Three read-only tools:
+
+| Tool | What it answers |
+|---|---|
+| `openleave_check_leave_eligibility` | Eligibility, entitlement, and benefit amount under every applicable law, each conclusion citing its statute |
+| `openleave_list_jurisdictions` | What's encoded — and which states have programs that are **not**, so the assistant knows when an answer is partial |
+| `openleave_lookup_statutory_parameter` | A single rate, cap, or threshold as it stood on any date |
+
+The tool descriptions instruct the model to call rather than recall ("leave law differs by state and its rates change every year; model recall is unreliable for it"), and the three outcomes an assistant must distinguish — a determined answer, `eligible: null` requiring human judgment, and `coverage.complete: false` meaning the answer is partial — are documented in the tool schema itself.
 
 > **Prototype disclaimer:** statutory parameter values are approximations for demonstration; verify against agency publications. Decision support, not legal advice.
 

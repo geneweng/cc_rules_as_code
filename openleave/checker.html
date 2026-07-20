@@ -24,6 +24,10 @@
   .cite { color:var(--muted); font-size:.8rem; } .detail { color:var(--muted); font-size:.85rem; }
   .ent { background:#f1f5f9; border-radius:.4rem; padding:.6rem .8rem; font-size:.9rem; margin-top:.5rem; }
   .interactions { background:#fffbeb; border:1px solid #fde68a; border-radius:.6rem; padding: .8rem 1.2rem; font-size:.9rem; }
+  .coverage-warn { background:#fef2f2; border:1px solid #fecaca; border-left:4px solid var(--no);
+                   border-radius:.6rem; padding:.8rem 1.2rem; margin-bottom:1rem; font-size:.9rem; }
+  .coverage-warn strong { color:var(--no); }
+  .coverage-note { color:var(--muted); font-size:.82rem; margin-bottom:1rem; }
   .disclaimer { color:var(--muted); font-size:.78rem; margin:1rem 0 2rem; }
 </style>
 </head>
@@ -35,7 +39,10 @@
 <main>
   <form id="f">
     <label>Work state</label>
-    <select name="work_state"><option>CA</option><option>MN</option><option>NY</option><option>TX</option></select>
+    <select name="work_state">
+      <option>CA</option><option>MN</option><option>NY</option>
+      <option>TX</option><option>WA</option>
+    </select>
     <label>Hire date</label><input type="date" name="hire_date" value="2024-03-01" required>
     <label>Hours worked, last 12 months</label><input type="number" name="hours_last_12mo" value="1600" required>
     <label>Hours per week (optional)</label><input type="number" name="hours_per_week" value="40">
@@ -77,6 +84,12 @@ f.addEventListener('submit', async ev => {
   if (!res.ok) { out.innerHTML = '<p class="detail">Error: ' + (await res.text()) + '</p>'; return; }
   const j = await res.json();
   let html = '';
+  if (j.coverage && !j.coverage.complete) {
+    html += '<div class="coverage-warn"><strong>Incomplete coverage for ' + j.coverage.state + '</strong><br>' +
+      j.coverage.warnings.join(' ') + '</div>';
+  } else if (j.coverage && j.coverage.warnings.length) {
+    html += '<p class="coverage-note">' + j.coverage.warnings.join(' ') + '</p>';
+  }
   for (const r of j.regimes) {
     html += `<div class="regime"><h2>${r.name} ${r.applies ? badge(r.eligible) : ''}</h2>`;
     if (r.findings.length) html += '<ul>' + r.findings.map(x =>

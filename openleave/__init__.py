@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from datetime import date
 
-from . import interactions
+from . import coverage, interactions
 from .engine import Citation, Entitlement, Finding, LeaveReason, RegimeResult
 from .facts import Employee, Employer, Facts, LeaveEvent
 from .regimes import california, fmla, minnesota, new_york
@@ -36,6 +36,7 @@ def determine(facts: Facts, as_of: date | None = None) -> dict:
         "as_of": as_of.isoformat(),
         "regimes": [r.as_dict() for r in results if r.applies or r.notes],
         "interactions": interactions.evaluate(results),
+        "coverage": coverage.assess(facts.employee.work_state),
         "disclaimer": DISCLAIMER,
         "engine_version": __version__,
     }
@@ -44,6 +45,7 @@ def determine(facts: Facts, as_of: date | None = None) -> dict:
 __all__ = [
     "Citation",
     "DISCLAIMER",
+    "coverage",
     "Employee",
     "Employer",
     "Entitlement",
