@@ -10,21 +10,22 @@ A survey of **Rules as Code (RaC)** — the practice of publishing an official, 
 | [`rules-as-code-survey.pdf`](rules-as-code-survey.pdf) | The same survey rendered as a PDF |
 | [`product-brainstorm-openleave.md`](product-brainstorm-openleave.md) | Product brainstorm + market validation for **OpenLeave**, a leave-law rules engine |
 | [`openleave/`](openleave/) | Working prototype of the OpenLeave MVP (see below) |
-| [`tests/`](tests/) | Scenario-based regression suite for the encodings |
+| [`tests/`](tests/) | Scenario-based regression suite for the encodings (94 tests) |
 
 ## OpenLeave prototype
 
-An executable, citation-backed encoding of U.S. employee leave law: federal **FMLA** plus **California** (CFRA + PFL), **Minnesota** (Paid Leave, live Jan 2026), and **New York** (PFL). Design principles from the survey, made concrete:
+An executable, citation-backed encoding of U.S. employee leave law: federal **FMLA** plus **California** (CFRA + PFL), **Massachusetts** (PFML), **Minnesota** (Paid Leave), **New Jersey** (FLI), **New York** (PFL), and **Washington** (PFML) — eight regimes across six states. Design principles from the survey, made concrete:
 
 - **Every conclusion carries its citation** — determinations return a justification tree, each finding tied to the statute or regulation that produced it.
 - **Discretion is flagged, never compiled** — open-textured questions (e.g. "serious health condition") return `met: null` and a `human_judgment` entry instead of a fabricated answer.
 - **Effective-date time travel** — statutory parameters (SAWW, benefit caps, program launch dates) are effective-dated, so any determination can be evaluated under the law as of any date.
 - **Interaction rules** — FMLA/state concurrency, CA PFL pay + CFRA protection pairing, and the 2026 DOL no-forced-stacking guidance are first-class outputs.
-- **Coverage is reported, never assumed** — a determination for a state with a paid-leave program this encoding doesn't implement (WA, MA, NJ, …) is flagged `complete: false` with an explicit warning. Silent under-coverage is the most dangerous failure mode for a rules oracle, so the engine refuses to let a partial answer read as a whole one.
+- **Coverage is reported, never assumed** — a determination for a state with a paid-leave program this encoding doesn't implement (currently CO, CT, DC, DE, MD, ME, OR, RI) is flagged `complete: false` with an explicit warning. Silent under-coverage is the most dangerous failure mode for a rules oracle, so the engine refuses to let a partial answer read as a whole one.
+- **Outside the encoded range ≠ no entitlement** — WA, MA, and NJ have paid benefits for years, but their rates are encoded only from 2026 onward. A determination dated earlier says so explicitly rather than returning a denial.
 
 ```sh
 python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
-.venv/bin/pytest                                # 30-scenario regression suite
+.venv/bin/pytest                                # 94-scenario regression suite
 .venv/bin/uvicorn openleave.api:app            # then open http://127.0.0.1:8000
 ```
 
@@ -45,7 +46,7 @@ export ANTHROPIC_API_KEY=...   # the analyze step calls Claude (claude-opus-4-8)
 Pipeline guarantees, enforced in code and covered by tests:
 
 - **Parameter diffs vs. logic changes.** The LLM classifies every change: effective-dated parameter updates (a new SAWW, a new benefit cap) are machine-appliable; anything that changes rule *structure* (new eligibility conditions, changed formulas — see `samples/amendments/mn_sf_2199_2027.txt`) is flagged `requires_human_encoding` and never auto-applied.
-- **The regression suite is the gate.** Proposed diffs run against the 30-scenario suite via a parameter-override mechanism (`OPENLEAVE_PARAM_OVERRIDES`). Forward-dated changes pass; a diff that rewrites an in-force historical value breaks pinned determinations and is rejected — as is any hallucinated parameter key.
+- **The regression suite is the gate.** Proposed diffs run against the full regression suite via a parameter-override mechanism (`OPENLEAVE_PARAM_OVERRIDES`). Forward-dated changes pass; a diff that rewrites an in-force historical value breaks pinned determinations and is rejected — as is any hallucinated parameter key.
 - **Nothing applies without a human.** `apply` refuses unless the proposal is both validation-passing and explicitly approved, and records reviewer + timestamp.
 - **Provenance per proposal.** Each proposal (`proposals/*.json`) carries the source document's SHA-256, the model that drafted it, token usage, validation output, and the full review trail.
 

@@ -9,6 +9,7 @@ findings with met=None and are listed in RegimeResult.human_judgment.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import date
 from enum import Enum
 
 
@@ -82,6 +83,21 @@ class RegimeResult:
             "human_judgment": self.human_judgment,
             "notes": self.notes,
         }
+
+
+def encoded_range_note(program: str, encoded_from: "date") -> str:
+    """Note for a determination dated before a program's encoded parameters.
+
+    Distinct from "the program didn't exist yet": these programs were paying
+    benefits, we simply haven't encoded their historic rates. Saying so is the
+    difference between "no entitlement" and "outside what this engine knows".
+    """
+    return (
+        f"{program} is encoded from {encoded_from.isoformat()} onward. This determination is "
+        f"dated earlier: the program existed and benefits were payable then, but its parameters "
+        f"for that period are not encoded here. Treat this as outside the encoded range, not as "
+        f"an absence of entitlement."
+    )
 
 
 def resolve_eligibility(findings: list[Finding]) -> bool | None:

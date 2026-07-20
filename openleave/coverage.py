@@ -16,7 +16,7 @@ verification by counsel, like every other statutory value in this repo.
 
 from __future__ import annotations
 
-ENCODED_STATES = {"CA", "MN", "NY"}
+ENCODED_STATES = {"CA", "MA", "MN", "NJ", "NY", "WA"}
 
 # States/territories understood to have a mandatory paid family and/or medical
 # leave program that this encoding does NOT yet implement. Value is the short
@@ -26,13 +26,10 @@ UNENCODED_PROGRAM_STATES = {
     "CT": "Connecticut Paid Leave",
     "DC": "DC Paid Family Leave",
     "DE": "Delaware Paid Leave",
-    "MA": "Massachusetts PFML",
     "ME": "Maine Paid Family and Medical Leave",
     "MD": "Maryland FAMLI",
-    "NJ": "New Jersey FLI/TDI",
     "OR": "Oregon Paid Leave",
     "RI": "Rhode Island TCI/TDI",
-    "WA": "Washington Paid Family and Medical Leave",
 }
 
 FEDERAL_ONLY_NOTE = (
@@ -92,4 +89,10 @@ def encoded_jurisdictions() -> list[dict]:
          "provides": "12 weeks family / 12 medical (20 combined), paid + job-protected after 90 days"},
         {"jurisdiction": "New York", "regime": "NY Paid Family Leave", "citation": "N.Y. Workers' Comp. Law art. 9",
          "provides": "12 weeks at 67% of AWW, job-protected"},
+        {"jurisdiction": "Washington", "regime": "WA Paid Family and Medical Leave", "citation": "RCW Title 50A",
+         "provides": "12 weeks family / 12 medical (16 combined), paid; job protection at 25+ employees and 180 days"},
+        {"jurisdiction": "Massachusetts", "regime": "MA Paid Family and Medical Leave", "citation": "M.G.L. c. 175M",
+         "provides": "12 weeks family / 20 medical (26 combined), paid + job protection built into the statute"},
+        {"jurisdiction": "New Jersey", "regime": "NJ Family Leave Insurance", "citation": "N.J.S.A. 43:21-25 et seq.",
+         "provides": "12 weeks at 85% of AWW; job protection via NJFLA, or via FLI itself from 2026-07-17"},
     ]

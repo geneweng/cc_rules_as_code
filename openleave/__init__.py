@@ -11,7 +11,7 @@ from datetime import date
 from . import coverage, interactions
 from .engine import Citation, Entitlement, Finding, LeaveReason, RegimeResult
 from .facts import Employee, Employer, Facts, LeaveEvent
-from .regimes import california, fmla, minnesota, new_york
+from .regimes import california, fmla, massachusetts, minnesota, new_jersey, new_york, washington
 
 __version__ = "0.1.0"
 
@@ -31,6 +31,9 @@ def determine(facts: Facts, as_of: date | None = None) -> dict:
         california.evaluate_pfl(facts, as_of),
         minnesota.evaluate(facts, as_of),
         new_york.evaluate(facts, as_of),
+        washington.evaluate(facts, as_of),
+        massachusetts.evaluate(facts, as_of),
+        new_jersey.evaluate(facts, as_of),
     ]
     return {
         "as_of": as_of.isoformat(),
