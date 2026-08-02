@@ -16,13 +16,12 @@ verification by counsel, like every other statutory value in this repo.
 
 from __future__ import annotations
 
-ENCODED_STATES = {"CA", "CO", "MA", "MN", "NJ", "NY", "OR", "WA"}
+ENCODED_STATES = {"CA", "CO", "CT", "MA", "MN", "NJ", "NY", "OR", "WA"}
 
 # States/territories understood to have a mandatory paid family and/or medical
 # leave program that this encoding does NOT yet implement. Value is the short
 # program name used in the warning text.
 UNENCODED_PROGRAM_STATES = {
-    "CT": "Connecticut Paid Leave",
     "DC": "DC Paid Family Leave",
     "DE": "Delaware Paid Leave",
     "ME": "Maine Paid Family and Medical Leave",
@@ -97,4 +96,6 @@ def encoded_jurisdictions() -> list[dict]:
          "provides": "12 weeks (16 with pregnancy complications), paid; job protection after 180 days, any employer size"},
         {"jurisdiction": "Oregon", "regime": "Paid Leave Oregon", "citation": "ORS ch. 657B",
          "provides": "12 weeks (14 for pregnancy), paid; 100% wage replacement for low earners; job restoration after 90 days"},
+        {"jurisdiction": "Connecticut", "regime": "Connecticut Paid Leave", "citation": "Conn. Gen. Stat. § 31-49e et seq.",
+         "provides": "12 weeks (14 for pregnancy), paid; benefit pegged to the minimum wage; job protection via CT FMLA (1+ employee, 3 months)"},
     ]

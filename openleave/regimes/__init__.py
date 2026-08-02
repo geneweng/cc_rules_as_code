@@ -1,6 +1,7 @@
 from . import (
     california,
     colorado,
+    connecticut,
     fmla,
     massachusetts,
     minnesota,
@@ -13,6 +14,7 @@ from . import (
 __all__ = [
     "california",
     "colorado",
+    "connecticut",
     "fmla",
     "massachusetts",
     "minnesota",

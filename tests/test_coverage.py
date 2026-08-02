@@ -22,12 +22,12 @@ class TestAssess:
         assert c["warnings"] == []
 
     def test_unencoded_program_state_warns_and_is_incomplete(self):
-        c = coverage.assess("CT")
+        c = coverage.assess("RI")
         assert c["encoded"] is False
         assert c["complete"] is False
-        assert c["program"] == "Connecticut Paid Leave"
+        assert c["program"] == "Rhode Island TCI/TDI"
         assert any("not yet encoded" in w for w in c["warnings"])
-        assert any("Connecticut Paid Leave" in w for w in c["warnings"])
+        assert any("Rhode Island TCI/TDI" in w for w in c["warnings"])
 
     def test_no_program_state_is_complete_with_a_note(self):
         c = coverage.assess("TX")
@@ -36,7 +36,7 @@ class TestAssess:
         assert any("No state paid-leave program" in w for w in c["warnings"])
 
     def test_lowercase_input_normalizes(self):
-        assert coverage.assess("ct")["complete"] is False
+        assert coverage.assess("ri")["complete"] is False
 
     def test_every_encoded_state_is_absent_from_the_unencoded_list(self):
         assert not (coverage.ENCODED_STATES & set(coverage.UNENCODED_PROGRAM_STATES))
@@ -44,7 +44,7 @@ class TestAssess:
 
 class TestDeterminationCoverage:
     def test_uncovered_state_determination_is_flagged_incomplete(self):
-        result = determine(facts_for("CT"))
+        result = determine(facts_for("RI"))
         # FMLA still answers, but the result must not read as the whole picture
         assert any(r["regime"] == "fmla" and r["eligible"] for r in result["regimes"])
         assert result["coverage"]["complete"] is False
@@ -61,5 +61,5 @@ class TestDeterminationCoverage:
 
     def test_encoded_jurisdictions_listed_for_discovery(self):
         rows = coverage.encoded_jurisdictions()
-        assert len(rows) == 10
+        assert len(rows) == 11
         assert all(r["citation"] for r in rows)

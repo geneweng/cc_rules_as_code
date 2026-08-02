@@ -13,11 +13,13 @@ DOL_2026_NOTE = (
 # State regimes that run concurrently with FMLA for the same qualifying reason.
 STATE_LEAVE_REGIMES = (
     "ca_cfra", "mn_paid_leave", "ny_pfl", "wa_pfml", "ma_pfml", "nj_fli", "co_famli", "or_pfml",
+    "ct_pfml",
 )
 
 # State regimes that pay benefits (and so trigger the no-forced-stacking rule).
 PAID_REGIMES = (
     "ca_pfl", "mn_paid_leave", "ny_pfl", "wa_pfml", "ma_pfml", "nj_fli", "co_famli", "or_pfml",
+    "ct_pfml",
 )
 
 # Regimes that replace wages without carrying job protection of their own.
