@@ -14,7 +14,7 @@ The arc so far: internet survey → validated product brainstorm → working eng
 amendment pipeline → go-to-market collateral (decks, video, landing page) → MCP server →
 expanded jurisdiction coverage.
 
-## Current state (all committed, tree clean, 167 tests passing)
+## Current state (all committed, tree clean, 187 tests passing)
 
 **The engine** (`openleave/`) — sixteen regimes across fourteen jurisdictions. **Every
 comprehensive U.S. paid-family-leave program is now encoded.**
@@ -49,17 +49,30 @@ comprehensive U.S. paid-family-leave program is now encoded.**
 - Regime modules in `openleave/regimes/`; coverage in `openleave/coverage.py`; interactions in
   `openleave/interactions.py`.
 
-**The verification manifest** (`openleave/references.json` + `references.py`) — maps all 105
-parameters to statute + agency URL + a plain-English meaning, grouped by jurisdiction with
+**The verification manifest** (`openleave/references.json` + `references.py`) — maps all 112
+parameters (leave + wage-and-hour) to statute + agency URL + a plain-English meaning, grouped by jurisdiction with
 `verified`/`verified_by`/`verified_on` sign-off fields and structural "claims" (logic/formulas
 that aren't single numbers). This is the worksheet for the counsel-verification pass — the #1
 gate before real use. Guarded by `tests/test_references.py`: it must document *exactly* the
 encoded parameter set (adding a rate without a citation fails CI), and nothing can be marked
 verified without a named reviewer + date. `python -m openleave.references {check,summary,report}`;
 the generated `references-worksheet.md` is the lawyer-facing artifact. The MCP parameter-lookup
-tool now returns each value's citation/source/verified status. **Nothing is verified yet (0/15).**
-(Building the manifest surfaced and led to fixing a real data issue: the Minnesota threshold key
-had a 'saaw' typo, now corrected to `mn.wage_threshold_fraction_of_saww`.)
+tool now returns each value's citation/source/verified status. **Nothing is verified yet (0/18
+jurisdiction entries — 15 leave + 3 wage).** (Building the manifest surfaced and led to fixing a
+real data issue: the Minnesota threshold key had a 'saaw' typo, now `mn.wage_threshold_fraction_of_saww`.)
+
+**Wage & hour** (`openleave/wagehour/` — sibling package to the leave engine; scope in
+`wage-hour-expansion-scope.md`). **Phase 1 vertical slice built:** minimum wage (with tip-credit
+handling) + final-pay-on-separation timing (with accrued-vacation payout), for federal + CA + WA.
+New fact model (`WageFacts`/`Separation`, event → ongoing-state) and entry point
+`assess_wage_hour(facts, as_of)`, sibling to `determine()`. Reuses `parameters`, `engine`
+(Finding/Citation), and a wage-specific locality `coverage` assessor. Showcases: effective-dated
+compliance (a wage that clears CA's 2025 floor fails its 2026 floor), the CA/WA tip-credit
+prohibition vs the federal $2.13 credit, loud Seattle-locality under-coverage warnings, and CA's
+immediate-final-pay + waiting-time-penalty + mandatory vacation payout vs WA's next-pay-period
+rule. **Deferred to Phase 2 (deliberately): overtime math and exempt classification** (the duties
+test is open-textured / high-liability). NOT yet wired into MCP or the FastAPI surface — that is
+the obvious next small step.
 
 **The AI amendment pipeline** (`openleave/watcher/`) — LLM drafts a parameter/logic diff from
 an amendment doc → regression suite gates it (`OPENLEAVE_PARAM_OVERRIDES`) → human approves →
@@ -84,7 +97,7 @@ https://geneweng.github.io/cc_rules_as_code/** (GitHub Pages, `main`/`/docs`).
 
 ```sh
 cd ~/cc_projects/cc_rules_as_code
-.venv/bin/pytest -q                                   # 167 tests
+.venv/bin/pytest -q                                   # 187 tests
 .venv/bin/uvicorn openleave.api:app                   # checker at http://127.0.0.1:8000
 .venv/bin/python -m openleave.mcp_server              # MCP over stdio
 .venv/bin/python -m openleave.watcher --help          # amendment pipeline CLI
@@ -108,7 +121,7 @@ Video/render scratch work lived under the session scratchpad (not in the repo).
 - **The demo video narration is synthetic TTS** — fine for a prototype, re-record with a human
   voice for anything customer-facing. Scene 5's LLM `analyze` step was narrated without
   claiming that specific run was live (no API key).
-- **Traction is internal only** — 167 tests and a working pipeline are engineering traction, not
+- **Traction is internal only** — 187 tests and a working pipeline are engineering traction, not
   market traction. No real design partner, lawyer, or dollar has touched this yet.
 
 ## Decisions already made (don't relitigate)
@@ -129,8 +142,11 @@ Video/render scratch work lived under the session scratchpad (not in the repo).
    TDI, intentionally not modeled (the engine is about family/medical leave, not pure disability).
    Adding own-disability TDI (HI, plus the NJ/NY/CA disability halves) would be a deliberate scope
    expansion, not a gap-fill. The bigger frontier now is #2.
-2. **Wage-and-hour / termination-rules expansion** — the "wedge is leave, market is
-   employment law" thesis from the deck.
+2. **Wage-and-hour / termination-rules expansion** — scoped (`wage-hour-expansion-scope.md`) and
+   **Phase 1 built** (minimum wage + final pay, federal/CA/WA, in `openleave/wagehour/`).
+   Immediate next steps: wire wage-hour into MCP + FastAPI (surface parity with leave); then
+   Phase 1.5 (top locality minimum wages: Seattle, NYC, SF, LA, Chicago, ...); then Phase 2
+   (overtime + exempt classification — encode the salary threshold, flag the duties test).
 3. **Accuracy verification pass** — the per-jurisdiction reference manifest now EXISTS
    (`references.json` + `references-worksheet.md`, 0/15 verified). What remains is the human
    step: get an employment lawyer to work the worksheet and record sign-off. Still the prereq

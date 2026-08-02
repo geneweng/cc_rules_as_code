@@ -10,7 +10,8 @@ A survey of **Rules as Code (RaC)** — the practice of publishing an official, 
 | [`rules-as-code-survey.pdf`](rules-as-code-survey.pdf) | The same survey rendered as a PDF |
 | [`product-brainstorm-openleave.md`](product-brainstorm-openleave.md) | Product brainstorm + market validation for **OpenLeave**, a leave-law rules engine |
 | [`openleave/`](openleave/) | Working prototype of the OpenLeave MVP (see below) |
-| [`tests/`](tests/) | Scenario-based regression suite for the encodings (167 tests) |
+| [`tests/`](tests/) | Scenario-based regression suite for the encodings (187 tests) |
+| [`wage-hour-expansion-scope.md`](wage-hour-expansion-scope.md) | Scoping doc for the wage-and-hour expansion (the "market is employment law" thesis) |
 
 ## OpenLeave prototype
 
@@ -26,7 +27,7 @@ An executable, citation-backed encoding of U.S. employee leave law: federal **FM
 
 ```sh
 python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
-.venv/bin/pytest                                # 167-scenario regression suite
+.venv/bin/pytest                                # 187-scenario regression suite
 .venv/bin/uvicorn openleave.api:app            # then open http://127.0.0.1:8000
 ```
 
@@ -84,7 +85,7 @@ The tool descriptions instruct the model to call rather than recall ("leave law 
 
 ### Verification manifest — the gate before real use
 
-Every statutory value here is web-researched and **unverified by counsel** — the single most important thing to fix before anyone relies on a determination. `openleave/references.json` is the worksheet for that review: it maps **all 105 encoded parameters** to a plain-English meaning, the governing statute, and the agency page a reviewer checks them against, grouped by jurisdiction with sign-off fields (`verified` / `verified_by` / `verified_on`) and a list of structural claims (eligibility logic, formulas, job-protection rules) that aren't single numbers.
+Every statutory value here is web-researched and **unverified by counsel** — the single most important thing to fix before anyone relies on a determination. `openleave/references.json` is the worksheet for that review: it maps **all 112 encoded parameters** (leave and wage-and-hour) to a plain-English meaning, the governing statute, and the agency page a reviewer checks them against, grouped by jurisdiction with sign-off fields (`verified` / `verified_by` / `verified_on`) and a list of structural claims (eligibility logic, formulas, job-protection rules) that aren't single numbers.
 
 ```sh
 .venv/bin/python -m openleave.references check     # every parameter is documented (CI-gated)
@@ -93,6 +94,27 @@ Every statutory value here is web-researched and **unverified by counsel** — t
 ```
 
 The manifest can't drift: a test asserts it documents **exactly** the set of encoded parameters, so adding a rate without a citation breaks the build, and a jurisdiction can't be marked `verified` without a named reviewer and date. The MCP parameter-lookup tool returns each value's citation, source, and verification status alongside the number, so an assistant can cite it and flag that it's still pending review. The generated [`references-worksheet.md`](references-worksheet.md) is the artifact an employment lawyer works through, one jurisdiction at a time.
+
+### Wage & hour (`openleave/wagehour/`) — the next domain, Phase 1
+
+The [scoping doc](wage-hour-expansion-scope.md) lays out the "wedge is leave, market is employment law" expansion. This is its **Phase 1 vertical slice**: **minimum wage** (with tip-credit handling) and **final-pay-on-separation** timing (with accrued-vacation payout), for the federal floor plus **California** and **Washington**. It's a sibling capability that reuses the leave engine's substrate — the effective-dated `parameters`, the `Finding`/`Citation` justification tree, and the coverage-reporting reflex.
+
+```python
+from datetime import date
+from openleave.wagehour import assess_wage_hour, WageFacts, Separation, SeparationType
+
+assess_wage_hour(WageFacts(work_state="CA", hourly_rate=15.00), date(2026, 2, 1))
+# -> minimum_wage topic: applicable $16.90, rate_meets_minimum = False (violation), each finding cited
+```
+
+What the slice demonstrates:
+
+- **Effective-dated compliance** — a $16.60 wage clears California's 2025 floor ($16.50) and **fails** its 2026 floor ($16.90). Compliance is a function of the date, not a static lookup.
+- **The tip credit, done honestly** — California and Washington prohibit it (full minimum in cash, tips on top; `Cal. Lab. Code § 351`, `RCW 49.46.020(3)`); the federal rule permits a $2.13 cash wage if tips reach $7.25. The engine flags "only CA/WA tip rules are encoded" for other states rather than guessing.
+- **Locality coverage, loudly** — a Seattle worksite returns `coverage.complete: false` because Seattle's $21.30 minimum isn't encoded and the $17.13 state figure would **understate** the floor. Silent locality under-coverage is the wage-and-hour analogue of returning "FMLA only," and the same guard prevents it.
+- **Final pay with real teeth** — California's immediate-on-firing deadline, the 72-hour rule for a no-notice quit, waiting-time-penalty exposure for late payment, and mandatory accrued-vacation payout (valued: 40 hrs × $30 = $1,200) — contrasted with Washington's next-pay-period rule and policy-dependent vacation (returned as `met: null`, a human-judgment point).
+
+Deliberately deferred to Phase 2 (see the scope doc): **overtime** math and **exempt classification** — the latter because its duties test is open-textured and the liability of getting it wrong is misclassification. Encoding the salary threshold and flagging the duties test for human judgment is the honest design; auto-answering it is not.
 
 ## What's covered
 

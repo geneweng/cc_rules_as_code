@@ -4,7 +4,7 @@
 
 **How to use:** A reviewer works one jurisdiction at a time: open the source pages, check each parameter's value(s) and effective date(s) against the agency's published figures and the cited statute, check each structural claim, then set verified/verified_by/verified_on. Run `python -m openleave.references check` to confirm the manifest still covers every encoded parameter.
 
-**Progress:** 0/15 jurisdictions verified; 105/105 parameters documented.
+**Progress:** 0/18 jurisdictions verified; 112/112 parameters documented.
 
 ## CA — California Paid Family Leave (PFL) and CFRA
 
@@ -25,6 +25,26 @@
 
 - ☐ PFL provides wage replacement only; CFRA supplies the job protection (5+ employees).
 - ☐ The 2025 rate change raised the low-earner rate to 90% and standard rate to 70%.
+
+## CA-WAGE — California wage & hour — minimum wage and final pay
+
+- **Status:** UNVERIFIED — pending counsel review
+- **Statute:** Cal. Lab. Code §§ 1182.12 (min wage), 201-203 (final pay), 227.3 (vacation), 351 (tips)
+- **Sources:** https://www.dir.ca.gov/dlse/faq_minimumwage.htm, https://www.dir.ca.gov/dlse/FAQ_Paydays.htm
+
+| ✓ | Parameter | Meaning | Encoded value(s) [effective date] |
+|---|---|---|---|
+| ☐ | `minwage.CA` | California state minimum wage, all employers ($/hr) | 16.5 [2025-01-01]; 16.9 [2026-01-01] |
+| ☐ | `finalpay.CA.quit_no_notice_hours` | Deadline to pay a no-notice quit (hours) | 72 [2000-01-01] |
+| ☐ | `finalpay.CA.waiting_time_penalty_max_days` | Maximum § 203 waiting-time penalty (days of wages) | 30 [2000-01-01] |
+
+**Structural claims to verify (not single numbers):**
+
+- ☐ Minimum wage is CPI-indexed annually: $16.50 (2025) -> $16.90 (2026), all employer sizes.
+- ☐ California prohibits the tip credit (Lab. Code § 351): tipped workers get full minimum in cash.
+- ☐ Fired/laid off -> pay immediately; quit with 72h notice -> last day; quit without -> within 72h.
+- ☐ Accrued vacation is earned wages and must be paid out (§ 227.3).
+- ☐ The finalpay.* effective dates are 'in force since at least 2000' floors, not researched precisely.
 
 ## CO — Colorado Family and Medical Leave Insurance (FAMLI)
 
@@ -124,6 +144,24 @@
 - ☐ Coverage depends on employer size AND reason: <10 not covered, 10-24 parental-only, 25+ all reasons.
 - ☐ Benefits began 2026-01-01; max $900 / min $100 is fixed for 2026 and 2027.
 - ☐ Delaware provides job restoration to eligible employees.
+
+## FED-WAGE — Federal wage & hour (FLSA) — minimum wage and tip credit
+
+- **Status:** UNVERIFIED — pending counsel review
+- **Statute:** 29 U.S.C. §§ 206, 203(m); 29 C.F.R. Part 531
+- **Sources:** https://www.dol.gov/agencies/whd/minimum-wage, https://www.dol.gov/agencies/whd/flsa
+
+| ✓ | Parameter | Meaning | Encoded value(s) [effective date] |
+|---|---|---|---|
+| ☐ | `minwage.federal` | Federal minimum wage ($/hr) | 7.25 [2009-07-24] |
+| ☐ | `minwage.federal.tipped_cash` | Federal tipped cash minimum wage ($/hr) | 2.13 [1991-04-01] |
+| ☐ | `minwage.federal.tip_credit_max` | Maximum federal tip credit ($/hr) | 5.12 [1991-04-01] |
+
+**Structural claims to verify (not single numbers):**
+
+- ☐ Federal minimum wage has been $7.25 since 2009-07-24.
+- ☐ Tipped cash wage $2.13 + max tip credit $5.12 = the $7.25 floor; tips must make up the difference.
+- ☐ State minimum wages and state tip-credit rules override this floor where higher/stricter.
 
 ## FMLA — Federal Family and Medical Leave Act
 
@@ -336,3 +374,20 @@
 - ☐ Eligibility is 820 hours across ANY Washington employer, not tenure with the current one.
 - ☐ Job protection is a separate test that expanded on 2026-01-01 (50->25 employees, 12mo->180 days, 1,250-hr rule removed).
 - ☐ Two-tier benefit: 90% up to 50% of SAWW, then 50%.
+
+## WA-WAGE — Washington wage & hour — minimum wage and final pay
+
+- **Status:** UNVERIFIED — pending counsel review
+- **Statute:** RCW 49.46.020 (min wage), 49.46.020(3) (tips), 49.48.010 (final pay)
+- **Sources:** https://www.lni.wa.gov/workers-rights/wages/minimum-wage/, https://www.lni.wa.gov/workers-rights/wages/getting-paid/
+
+| ✓ | Parameter | Meaning | Encoded value(s) [effective date] |
+|---|---|---|---|
+| ☐ | `minwage.WA` | Washington state minimum wage ($/hr) | 16.66 [2025-01-01]; 17.13 [2026-01-01] |
+
+**Structural claims to verify (not single numbers):**
+
+- ☐ Minimum wage is CPI-indexed annually: $16.66 (2025) -> $17.13 (2026), highest state rate in the nation.
+- ☐ Washington prohibits the tip credit: tipped workers get full minimum in cash.
+- ☐ Final wages are due by the end of the next established pay period; no statutory vacation payout.
+- ☐ Many WA localities (Seattle $21.30 in 2026, SeaTac, Tukwila, etc.) set higher minimums — not encoded.

@@ -103,5 +103,12 @@
   "ri.tdi.weeks": [["2026-07-01", 30]],
   "fmla.weeks": [["1993-08-05", 12]],
   "fmla.min_hours": [["1993-08-05", 1250]],
-  "fmla.min_worksite_headcount": [["1993-08-05", 50]]
+  "fmla.min_worksite_headcount": [["1993-08-05", 50]],
+  "minwage.federal": [["2009-07-24", 7.25]],
+  "minwage.federal.tipped_cash": [["1991-04-01", 2.13]],
+  "minwage.federal.tip_credit_max": [["1991-04-01", 5.12]],
+  "minwage.CA": [["2025-01-01", 16.5], ["2026-01-01", 16.9]],
+  "minwage.WA": [["2025-01-01", 16.66], ["2026-01-01", 17.13]],
+  "finalpay.CA.quit_no_notice_hours": [["2000-01-01", 72]],
+  "finalpay.CA.waiting_time_penalty_max_days": [["2000-01-01", 30]]
 }

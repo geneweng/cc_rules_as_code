@@ -351,6 +351,61 @@
         "Job protection is a separate test that expanded on 2026-01-01 (50->25 employees, 12mo->180 days, 1,250-hr rule removed).",
         "Two-tier benefit: 90% up to 50% of SAWW, then 50%."
       ]
+    },
+    "FED-WAGE": {
+      "program": "Federal wage & hour (FLSA) — minimum wage and tip credit",
+      "statute": "29 U.S.C. §§ 206, 203(m); 29 C.F.R. Part 531",
+      "sources": ["https://www.dol.gov/agencies/whd/minimum-wage", "https://www.dol.gov/agencies/whd/flsa"],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "minwage.federal": "Federal minimum wage ($/hr)",
+        "minwage.federal.tipped_cash": "Federal tipped cash minimum wage ($/hr)",
+        "minwage.federal.tip_credit_max": "Maximum federal tip credit ($/hr)"
+      },
+      "claims": [
+        "Federal minimum wage has been $7.25 since 2009-07-24.",
+        "Tipped cash wage $2.13 + max tip credit $5.12 = the $7.25 floor; tips must make up the difference.",
+        "State minimum wages and state tip-credit rules override this floor where higher/stricter."
+      ]
+    },
+    "CA-WAGE": {
+      "program": "California wage & hour — minimum wage and final pay",
+      "statute": "Cal. Lab. Code §§ 1182.12 (min wage), 201-203 (final pay), 227.3 (vacation), 351 (tips)",
+      "sources": ["https://www.dir.ca.gov/dlse/faq_minimumwage.htm", "https://www.dir.ca.gov/dlse/FAQ_Paydays.htm"],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "minwage.CA": "California state minimum wage, all employers ($/hr)",
+        "finalpay.CA.quit_no_notice_hours": "Deadline to pay a no-notice quit (hours)",
+        "finalpay.CA.waiting_time_penalty_max_days": "Maximum § 203 waiting-time penalty (days of wages)"
+      },
+      "claims": [
+        "Minimum wage is CPI-indexed annually: $16.50 (2025) -> $16.90 (2026), all employer sizes.",
+        "California prohibits the tip credit (Lab. Code § 351): tipped workers get full minimum in cash.",
+        "Fired/laid off -> pay immediately; quit with 72h notice -> last day; quit without -> within 72h.",
+        "Accrued vacation is earned wages and must be paid out (§ 227.3).",
+        "The finalpay.* effective dates are 'in force since at least 2000' floors, not researched precisely."
+      ]
+    },
+    "WA-WAGE": {
+      "program": "Washington wage & hour — minimum wage and final pay",
+      "statute": "RCW 49.46.020 (min wage), 49.46.020(3) (tips), 49.48.010 (final pay)",
+      "sources": ["https://www.lni.wa.gov/workers-rights/wages/minimum-wage/", "https://www.lni.wa.gov/workers-rights/wages/getting-paid/"],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "minwage.WA": "Washington state minimum wage ($/hr)"
+      },
+      "claims": [
+        "Minimum wage is CPI-indexed annually: $16.66 (2025) -> $17.13 (2026), highest state rate in the nation.",
+        "Washington prohibits the tip credit: tipped workers get full minimum in cash.",
+        "Final wages are due by the end of the next established pay period; no statutory vacation payout.",
+        "Many WA localities (Seattle $21.30 in 2026, SeaTac, Tukwila, etc.) set higher minimums — not encoded."
+      ]
     }
   }
 }
