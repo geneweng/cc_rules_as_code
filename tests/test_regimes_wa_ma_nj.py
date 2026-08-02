@@ -187,10 +187,12 @@ class TestCoverageAndInteractions:
         for state in ("WA", "MA", "NJ"):
             assert determine(make_facts(state))["coverage"]["complete"] is True
 
-    def test_rhode_island_remains_a_declared_gap(self):
-        result = determine(make_facts("RI"))
+    def test_hawaii_remains_a_declared_gap(self):
+        # Every comprehensive paid-family-leave program is encoded; Hawaii's
+        # own-disability-only TDI is the representative remaining gap.
+        result = determine(make_facts("HI"))
         assert result["coverage"]["complete"] is False
-        assert "Rhode Island TCI/TDI" in result["coverage"]["program"]
+        assert "Hawaii Temporary Disability Insurance" in result["coverage"]["program"]
 
     def test_fmla_runs_concurrently_with_each_new_regime(self):
         for state, label in (("WA", "Washington"), ("MA", "Massachusetts"), ("NJ", "New Jersey")):

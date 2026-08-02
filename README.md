@@ -10,23 +10,23 @@ A survey of **Rules as Code (RaC)** — the practice of publishing an official, 
 | [`rules-as-code-survey.pdf`](rules-as-code-survey.pdf) | The same survey rendered as a PDF |
 | [`product-brainstorm-openleave.md`](product-brainstorm-openleave.md) | Product brainstorm + market validation for **OpenLeave**, a leave-law rules engine |
 | [`openleave/`](openleave/) | Working prototype of the OpenLeave MVP (see below) |
-| [`tests/`](tests/) | Scenario-based regression suite for the encodings (140 tests) |
+| [`tests/`](tests/) | Scenario-based regression suite for the encodings (159 tests) |
 
 ## OpenLeave prototype
 
-An executable, citation-backed encoding of U.S. employee leave law: federal **FMLA** plus **California** (CFRA + PFL), **Colorado** (FAMLI), **Connecticut** (Paid Leave), **DC** (Paid Family Leave), **Maryland** (FAMLI), **Massachusetts** (PFML), **Minnesota** (Paid Leave), **New Jersey** (FLI), **New York** (PFL), **Oregon** (Paid Leave), and **Washington** (PFML) — thirteen regimes across eleven jurisdictions. Design principles from the survey, made concrete:
+An executable, citation-backed encoding of U.S. employee leave law: federal **FMLA** plus **California** (CFRA + PFL), **Colorado** (FAMLI), **Connecticut** (Paid Leave), **DC** (Paid Family Leave), **Delaware** (Paid Leave), **Maine** (PFML), **Maryland** (FAMLI), **Massachusetts** (PFML), **Minnesota** (Paid Leave), **New Jersey** (FLI), **New York** (PFL), **Oregon** (Paid Leave), **Rhode Island** (TDI + TCI), and **Washington** (PFML) — **every comprehensive U.S. paid-leave program**: sixteen regimes across fourteen jurisdictions. Design principles from the survey, made concrete:
 
 - **Every conclusion carries its citation** — determinations return a justification tree, each finding tied to the statute or regulation that produced it.
 - **Discretion is flagged, never compiled** — open-textured questions (e.g. "serious health condition") return `met: null` and a `human_judgment` entry instead of a fabricated answer.
 - **Effective-date time travel** — statutory parameters (SAWW, benefit caps, program launch dates) are effective-dated, so any determination can be evaluated under the law as of any date.
 - **Interaction rules** — FMLA/state concurrency, CA PFL pay + CFRA protection pairing, and the 2026 DOL no-forced-stacking guidance are first-class outputs.
-- **Coverage is reported, never assumed** — a determination for a state with a paid-leave program this encoding doesn't implement (currently DE, ME, RI) is flagged `complete: false` with an explicit warning. Silent under-coverage is the most dangerous failure mode for a rules oracle, so the engine refuses to let a partial answer read as a whole one.
-- **Outside the encoded range ≠ no entitlement** — WA, MA, NJ, CO, OR, CT, and DC have paid benefits for years, but their rates are encoded only from 2025/2026 onward. A determination dated earlier says so explicitly rather than returning a denial.
+- **Coverage is reported, never assumed** — every comprehensive paid-family-leave program is now encoded, but the engine still reports its own limits: a state whose only program is own-disability TDI that this engine doesn't model (Hawaii) is flagged `complete: false` with an explicit warning. Silent under-coverage is the most dangerous failure mode for a rules oracle, so the engine refuses to let a partial answer read as a whole one.
+- **Outside the encoded range ≠ no entitlement** — most state programs have paid benefits for years, but their rates are encoded only from 2025/2026 onward. A determination dated earlier says so explicitly rather than returning a denial.
 - **Enacted ≠ in force** — Maryland's FAMLI is law but does not pay benefits until 2028-01-03. A 2026 determination returns a *pending-program* notice with the start date, not a benefit (which can't be claimed yet) and not a denial (the entitlement is coming). This is the mirror image of the encoded-range case, and it keeps the program from reading as either a false "no benefit" or silent under-coverage.
 
 ```sh
 python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
-.venv/bin/pytest                                # 140-scenario regression suite
+.venv/bin/pytest                                # 159-scenario regression suite
 .venv/bin/uvicorn openleave.api:app            # then open http://127.0.0.1:8000
 ```
 

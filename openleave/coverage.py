@@ -16,15 +16,16 @@ verification by counsel, like every other statutory value in this repo.
 
 from __future__ import annotations
 
-ENCODED_STATES = {"CA", "CO", "CT", "DC", "MA", "MD", "MN", "NJ", "NY", "OR", "WA"}
+ENCODED_STATES = {
+    "CA", "CO", "CT", "DC", "DE", "MA", "MD", "ME", "MN", "NJ", "NY", "OR", "RI", "WA",
+}
 
-# States/territories understood to have a mandatory paid family and/or medical
-# leave program that this encoding does NOT yet implement. Value is the short
-# program name used in the warning text.
+# States/territories understood to have a mandatory paid leave program that this
+# encoding does NOT implement. Value is the short program name used in the warning.
+# Every comprehensive paid-FAMILY-leave program is now encoded; what remains are
+# own-disability-only TDI programs (Hawaii), which this engine does not model.
 UNENCODED_PROGRAM_STATES = {
-    "DE": "Delaware Paid Leave",
-    "ME": "Maine Paid Family and Medical Leave",
-    "RI": "Rhode Island TCI/TDI",
+    "HI": "Hawaii Temporary Disability Insurance",
 }
 
 FEDERAL_ONLY_NOTE = (
@@ -100,4 +101,10 @@ def encoded_jurisdictions() -> list[dict]:
          "provides": "12 weeks + 2 prenatal, paid; benefit pegged to the minimum wage; no earnings minimum; job protection via the narrower DC FMLA (20+ employees)"},
         {"jurisdiction": "Maryland", "regime": "Maryland FAMLI", "citation": "Md. Code, Lab. & Empl. § 8.3-101 et seq.",
          "provides": "ENACTED BUT NOT YET PAYABLE — benefits begin 2028-01-03; then 12 weeks (24 combined), $50-$1,000/wk"},
+        {"jurisdiction": "Delaware", "regime": "Delaware Paid Leave", "citation": "19 Del. C. ch. 37",
+         "provides": "12 weeks parental / 6 weeks medical-family, paid (80% AWW, $900 cap); coverage scales with employer size (10+ / 25+)"},
+        {"jurisdiction": "Maine", "regime": "Maine Paid Family and Medical Leave", "citation": "26 M.R.S. ch. 7, subch. 6-A",
+         "provides": "12 weeks (16 combined), paid; 90%/66% formula capped at 100% of SAWW; job protection after 120 days"},
+        {"jurisdiction": "Rhode Island", "regime": "RI Temporary Disability & Caregiver Insurance", "citation": "R.I. Gen. Laws ch. 28-41",
+         "provides": "TCI 8 weeks (job-protected) / TDI 30 weeks; 4.62% of high-quarter wages, $148-$1,150/wk"},
     ]
