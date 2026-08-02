@@ -1,6 +1,6 @@
 # Session State — OpenLeave / Rules-as-Code
 
-*Handoff note so work can resume after a restart. Last updated after the Connecticut encoding.*
+*Handoff note so work can resume after a restart. Last updated after the DC + Maryland encodings.*
 
 ## What this project is
 
@@ -13,13 +13,20 @@ The arc so far: internet survey → validated product brainstorm → working eng
 amendment pipeline → go-to-market collateral (decks, video, landing page) → MCP server →
 expanded jurisdiction coverage.
 
-## Current state (all committed, tree clean, 124 tests passing)
+## Current state (all committed, tree clean, 140 tests passing)
 
-**The engine** (`openleave/`) — eleven regimes across nine states:
-- Federal FMLA; CA (CFRA + PFL); CO (FAMLI); CT (Paid Leave); MA (PFML); MN (Paid Leave);
-  NJ (FLI); NY (PFL); OR (Paid Leave); WA (PFML). CT's benefit is pegged to the minimum
-  wage (not a SAWW) and its job protection comes from the separate CT FMLA (1+ employee,
-  3 months), computed inline.
+**The engine** (`openleave/`) — thirteen regimes across eleven jurisdictions:
+- Federal FMLA; CA (CFRA + PFL); CO (FAMLI); CT (Paid Leave); DC (Paid Family Leave);
+  MD (FAMLI); MA (PFML); MN (Paid Leave); NJ (FLI); NY (PFL); OR (Paid Leave); WA (PFML).
+- CT and DC pin their benefit to the **minimum wage** (not a SAWW). CT's job protection
+  comes from the *broader* CT FMLA (1+ employee, 3 months); DC's from the *narrower* DC FMLA
+  (20+ employees, 12 months, 1,000 hours) — so DC pays far more workers than it protects.
+- **MD is enacted but not payable until 2028-01-03.** Its regime returns a *pending-program*
+  notice (via `engine.not_yet_in_force_note`) for any earlier date — `applies=False` + note,
+  so it stays out of interactions but coverage still reports `complete: true`. This is the
+  mirror of `encoded_range_note`. MD's launch-year SAWW isn't published, so its in-force
+  (2028+) path returns `weekly_benefit: None` with the statutory bounds ($50–$1,000) rather
+  than a fabricated figure.
 - Design invariants: every finding cites its statute; open-textured questions return
   `eligible: null` + `human_judgment` (never fabricated); effective-dated parameters enable
   "law as of any date"; cross-regime interaction rules; **coverage reporting** — a state with
@@ -53,7 +60,7 @@ https://geneweng.github.io/cc_rules_as_code/** (GitHub Pages, `main`/`/docs`).
 
 ```sh
 cd ~/cc_projects/cc_rules_as_code
-.venv/bin/pytest -q                                   # 124 tests
+.venv/bin/pytest -q                                   # 140 tests
 .venv/bin/uvicorn openleave.api:app                   # checker at http://127.0.0.1:8000
 .venv/bin/python -m openleave.mcp_server              # MCP over stdio
 .venv/bin/python -m openleave.watcher --help          # amendment pipeline CLI
@@ -66,17 +73,18 @@ Video/render scratch work lived under the session scratchpad (not in the repo).
 ## Important truths to preserve
 
 - **The disclaimer is load-bearing.** Every surface says statutory parameters are
-  "approximations pending counsel review." The CT/CO/OR/WA/MA/NJ (and all) figures came from web
-  research (2025-2026 rates) and have NOT been verified by an employment lawyer. This must happen
-  before anyone relies on a determination. This is the #1 gate before real use. The CT/CO/OR
-  regime docstrings cite their sources inline (ctpaidleave.org, famli.colorado.gov, oregon.gov) —
-  the seed of the per-jurisdiction reference manifest that verification will need.
+  "approximations pending counsel review." The DC/MD/CT/CO/OR/WA/MA/NJ (and all) figures came from
+  web research (2025-2026 rates) and have NOT been verified by an employment lawyer. This must
+  happen before anyone relies on a determination. This is the #1 gate before real use. The
+  CT/DC/CO/OR/MD regime docstrings cite their sources inline (ctpaidleave.org,
+  dcpaidfamilyleave.dc.gov, famli.colorado.gov, oregon.gov, paidleave.maryland.gov) — the seed of
+  the per-jurisdiction reference manifest that verification will need.
 - **The investor deck's ask numbers ($2.5M, hiring plan, 18mo) are invented placeholders** —
   replace with real intentions before showing an actual investor.
 - **The demo video narration is synthetic TTS** — fine for a prototype, re-record with a human
   voice for anything customer-facing. Scene 5's LLM `analyze` step was narrated without
   claiming that specific run was live (no API key).
-- **Traction is internal only** — 124 tests and a working pipeline are engineering traction, not
+- **Traction is internal only** — 140 tests and a working pipeline are engineering traction, not
   market traction. No real design partner, lawyer, or dollar has touched this yet.
 
 ## Decisions already made (don't relitigate)
@@ -92,8 +100,9 @@ Video/render scratch work lived under the session scratchpad (not in the repo).
 
 ## Natural next steps (open, not started)
 
-1. **More jurisdictions.** Declared gaps still warned about: DC, DE, MD, ME, RI.
-   `openleave_list_jurisdictions` / `coverage.UNENCODED_PROGRAM_STATES` is the worklist.
+1. **More jurisdictions.** Declared gaps still warned about: DE, ME, RI. These are the last three
+   state programs not encoded. `coverage.UNENCODED_PROGRAM_STATES` is the worklist. After these,
+   the wedge-to-employment-law expansion (#2) is the bigger frontier.
 2. **Wage-and-hour / termination-rules expansion** — the "wedge is leave, market is
    employment law" thesis from the deck.
 3. **Accuracy verification pass** — get an employment lawyer to check the encoded figures

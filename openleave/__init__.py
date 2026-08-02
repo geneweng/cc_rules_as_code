@@ -1,7 +1,8 @@
 """OpenLeave — an executable, citation-backed encoding of U.S. employee leave law.
 
-PROTOTYPE: covers federal FMLA plus California, Colorado, Connecticut, Massachusetts,
-Minnesota, New Jersey, New York, Oregon, and Washington — eleven regimes across nine states.
+PROTOTYPE: covers federal FMLA plus California, Colorado, Connecticut, DC, Maryland,
+Massachusetts, Minnesota, New Jersey, New York, Oregon, and Washington — thirteen regimes
+across eleven jurisdictions (Maryland is enacted but not payable until 2028).
 Parameter values are approximations for demonstration; this is not legal advice.
 """
 
@@ -16,7 +17,9 @@ from .regimes import (
     california,
     colorado,
     connecticut,
+    dc,
     fmla,
+    maryland,
     massachusetts,
     minnesota,
     new_jersey,
@@ -49,6 +52,8 @@ def determine(facts: Facts, as_of: date | None = None) -> dict:
         colorado.evaluate(facts, as_of),
         oregon.evaluate(facts, as_of),
         connecticut.evaluate(facts, as_of),
+        dc.evaluate(facts, as_of),
+        maryland.evaluate(facts, as_of),
     ]
     return {
         "as_of": as_of.isoformat(),

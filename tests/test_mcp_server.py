@@ -112,12 +112,15 @@ class TestListJurisdictions:
     def test_json_shape(self):
         out = call(openleave_list_jurisdictions(JurisdictionsInput(response_format="json")))
         data = json.loads(out)
-        assert set(data["encoded_states"]) == {"CA", "CO", "CT", "MA", "MN", "NJ", "NY", "OR", "WA"}
+        assert set(data["encoded_states"]) == {
+            "CA", "CO", "CT", "DC", "MA", "MD", "MN", "NJ", "NY", "OR", "WA"
+        }
         assert "RI" in data["known_gaps"]
         assert "WA" not in data["known_gaps"]
         assert "CT" not in data["known_gaps"]
+        assert "MD" not in data["known_gaps"]
         assert "bonding" in data["leave_reasons"]
-        assert len(data["encoded_regimes"]) == 11
+        assert len(data["encoded_regimes"]) == 13
 
 
 class TestLookupParameter:

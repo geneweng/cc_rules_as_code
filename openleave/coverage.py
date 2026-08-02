@@ -16,16 +16,14 @@ verification by counsel, like every other statutory value in this repo.
 
 from __future__ import annotations
 
-ENCODED_STATES = {"CA", "CO", "CT", "MA", "MN", "NJ", "NY", "OR", "WA"}
+ENCODED_STATES = {"CA", "CO", "CT", "DC", "MA", "MD", "MN", "NJ", "NY", "OR", "WA"}
 
 # States/territories understood to have a mandatory paid family and/or medical
 # leave program that this encoding does NOT yet implement. Value is the short
 # program name used in the warning text.
 UNENCODED_PROGRAM_STATES = {
-    "DC": "DC Paid Family Leave",
     "DE": "Delaware Paid Leave",
     "ME": "Maine Paid Family and Medical Leave",
-    "MD": "Maryland FAMLI",
     "RI": "Rhode Island TCI/TDI",
 }
 
@@ -98,4 +96,8 @@ def encoded_jurisdictions() -> list[dict]:
          "provides": "12 weeks (14 for pregnancy), paid; 100% wage replacement for low earners; job restoration after 90 days"},
         {"jurisdiction": "Connecticut", "regime": "Connecticut Paid Leave", "citation": "Conn. Gen. Stat. § 31-49e et seq.",
          "provides": "12 weeks (14 for pregnancy), paid; benefit pegged to the minimum wage; job protection via CT FMLA (1+ employee, 3 months)"},
+        {"jurisdiction": "District of Columbia", "regime": "DC Paid Family Leave", "citation": "D.C. Code § 32-541.01 et seq.",
+         "provides": "12 weeks + 2 prenatal, paid; benefit pegged to the minimum wage; no earnings minimum; job protection via the narrower DC FMLA (20+ employees)"},
+        {"jurisdiction": "Maryland", "regime": "Maryland FAMLI", "citation": "Md. Code, Lab. & Empl. § 8.3-101 et seq.",
+         "provides": "ENACTED BUT NOT YET PAYABLE — benefits begin 2028-01-03; then 12 weeks (24 combined), $50-$1,000/wk"},
     ]

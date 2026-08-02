@@ -100,6 +100,22 @@ def encoded_range_note(program: str, encoded_from: "date") -> str:
     )
 
 
+def not_yet_in_force_note(program: str, in_force: "date") -> str:
+    """Note for a determination dated before a program's benefits begin.
+
+    The opposite of `encoded_range_note`: there the program was paying and we
+    lack the rates; here the program is enacted but pays nothing yet. A pending
+    program is not a denial, and it is not silent under-coverage either — the
+    caller is told exactly when benefits start.
+    """
+    return (
+        f"{program} is enacted but not yet in force: benefits become payable on "
+        f"{in_force.isoformat()}. A determination dated before then has no state benefit to "
+        f"compute — this is a pending program, not a denial of entitlement. Federal FMLA and any "
+        f"other in-force law still apply."
+    )
+
+
 def resolve_eligibility(findings: list[Finding]) -> bool | None:
     """Combine findings: False if any hard condition fails, None if the only
     unresolved conditions require human judgment, True otherwise."""

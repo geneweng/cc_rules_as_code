@@ -61,5 +61,5 @@ class TestDeterminationCoverage:
 
     def test_encoded_jurisdictions_listed_for_discovery(self):
         rows = coverage.encoded_jurisdictions()
-        assert len(rows) == 11
+        assert len(rows) == 13
         assert all(r["citation"] for r in rows)
