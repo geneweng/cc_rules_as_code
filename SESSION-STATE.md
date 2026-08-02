@@ -14,7 +14,7 @@ The arc so far: internet survey → validated product brainstorm → working eng
 amendment pipeline → go-to-market collateral (decks, video, landing page) → MCP server →
 expanded jurisdiction coverage.
 
-## Current state (all committed, tree clean, 159 tests passing)
+## Current state (all committed, tree clean, 167 tests passing)
 
 **The engine** (`openleave/`) — sixteen regimes across fourteen jurisdictions. **Every
 comprehensive U.S. paid-family-leave program is now encoded.**
@@ -49,6 +49,18 @@ comprehensive U.S. paid-family-leave program is now encoded.**
 - Regime modules in `openleave/regimes/`; coverage in `openleave/coverage.py`; interactions in
   `openleave/interactions.py`.
 
+**The verification manifest** (`openleave/references.json` + `references.py`) — maps all 105
+parameters to statute + agency URL + a plain-English meaning, grouped by jurisdiction with
+`verified`/`verified_by`/`verified_on` sign-off fields and structural "claims" (logic/formulas
+that aren't single numbers). This is the worksheet for the counsel-verification pass — the #1
+gate before real use. Guarded by `tests/test_references.py`: it must document *exactly* the
+encoded parameter set (adding a rate without a citation fails CI), and nothing can be marked
+verified without a named reviewer + date. `python -m openleave.references {check,summary,report}`;
+the generated `references-worksheet.md` is the lawyer-facing artifact. The MCP parameter-lookup
+tool now returns each value's citation/source/verified status. **Nothing is verified yet (0/15).**
+Note the manifest already flagged one real data issue: the `mn.wage_threshold_fraction_of_saaw`
+key has a 'saaw' typo.
+
 **The AI amendment pipeline** (`openleave/watcher/`) — LLM drafts a parameter/logic diff from
 an amendment doc → regression suite gates it (`OPENLEAVE_PARAM_OVERRIDES`) → human approves →
 apply. Nothing ships without passing tests + explicit sign-off. Uses `claude-opus-4-8` via
@@ -72,7 +84,7 @@ https://geneweng.github.io/cc_rules_as_code/** (GitHub Pages, `main`/`/docs`).
 
 ```sh
 cd ~/cc_projects/cc_rules_as_code
-.venv/bin/pytest -q                                   # 159 tests
+.venv/bin/pytest -q                                   # 167 tests
 .venv/bin/uvicorn openleave.api:app                   # checker at http://127.0.0.1:8000
 .venv/bin/python -m openleave.mcp_server              # MCP over stdio
 .venv/bin/python -m openleave.watcher --help          # amendment pipeline CLI
@@ -96,7 +108,7 @@ Video/render scratch work lived under the session scratchpad (not in the repo).
 - **The demo video narration is synthetic TTS** — fine for a prototype, re-record with a human
   voice for anything customer-facing. Scene 5's LLM `analyze` step was narrated without
   claiming that specific run was live (no API key).
-- **Traction is internal only** — 159 tests and a working pipeline are engineering traction, not
+- **Traction is internal only** — 167 tests and a working pipeline are engineering traction, not
   market traction. No real design partner, lawyer, or dollar has touched this yet.
 
 ## Decisions already made (don't relitigate)
@@ -119,8 +131,10 @@ Video/render scratch work lived under the session scratchpad (not in the repo).
    expansion, not a gap-fill. The bigger frontier now is #2.
 2. **Wage-and-hour / termination-rules expansion** — the "wedge is leave, market is
    employment law" thesis from the deck.
-3. **Accuracy verification pass** — get an employment lawyer to check the encoded figures
-   against primary sources; add a per-jurisdiction reference list. (Prereq for real use.)
+3. **Accuracy verification pass** — the per-jurisdiction reference manifest now EXISTS
+   (`references.json` + `references-worksheet.md`, 0/15 verified). What remains is the human
+   step: get an employment lawyer to work the worksheet and record sign-off. Still the prereq
+   for real use — the tooling is built, the review hasn't happened.
 4. If pivoting to a real venture: design-partner interview prep, real ask numbers, a
    due-diligence packet.
 

@@ -153,6 +153,20 @@ class TestLookupParameter:
         assert params["fmla.min_hours"] == 1250
         assert len(params) >= 17
 
+    def test_lookup_returns_source_provenance(self):
+        # The oracle hands back where a value comes from and whether it is verified,
+        # so an assistant can cite it and flag that it is pending counsel review.
+        out = call(openleave_lookup_statutory_parameter(
+            ParameterLookupInput(key="wa.saww", as_of="2026-06-01", response_format="json")))
+        source = json.loads(out)["source"]
+        assert source["jurisdiction"] == "WA"
+        assert source["statute"]
+        assert source["sources"]
+        assert source["verified"] is False  # nothing signed off yet
+        md = call(openleave_lookup_statutory_parameter(
+            ParameterLookupInput(key="wa.saww", as_of="2026-06-01")))
+        assert "UNVERIFIED" in md
+
 
 class TestProtocolEndToEnd:
     """Drives the server as a subprocess over stdio, as a real MCP client would."""

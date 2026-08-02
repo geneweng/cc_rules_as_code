@@ -10,7 +10,7 @@ A survey of **Rules as Code (RaC)** — the practice of publishing an official, 
 | [`rules-as-code-survey.pdf`](rules-as-code-survey.pdf) | The same survey rendered as a PDF |
 | [`product-brainstorm-openleave.md`](product-brainstorm-openleave.md) | Product brainstorm + market validation for **OpenLeave**, a leave-law rules engine |
 | [`openleave/`](openleave/) | Working prototype of the OpenLeave MVP (see below) |
-| [`tests/`](tests/) | Scenario-based regression suite for the encodings (159 tests) |
+| [`tests/`](tests/) | Scenario-based regression suite for the encodings (167 tests) |
 
 ## OpenLeave prototype
 
@@ -26,7 +26,7 @@ An executable, citation-backed encoding of U.S. employee leave law: federal **FM
 
 ```sh
 python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
-.venv/bin/pytest                                # 159-scenario regression suite
+.venv/bin/pytest                                # 167-scenario regression suite
 .venv/bin/uvicorn openleave.api:app            # then open http://127.0.0.1:8000
 ```
 
@@ -81,6 +81,18 @@ Three read-only tools:
 The tool descriptions instruct the model to call rather than recall ("leave law differs by state and its rates change every year; model recall is unreliable for it"), and the three outcomes an assistant must distinguish — a determined answer, `eligible: null` requiring human judgment, and `coverage.complete: false` meaning the answer is partial — are documented in the tool schema itself.
 
 > **Prototype disclaimer:** statutory parameter values are approximations for demonstration; verify against agency publications. Decision support, not legal advice.
+
+### Verification manifest — the gate before real use
+
+Every statutory value here is web-researched and **unverified by counsel** — the single most important thing to fix before anyone relies on a determination. `openleave/references.json` is the worksheet for that review: it maps **all 105 encoded parameters** to a plain-English meaning, the governing statute, and the agency page a reviewer checks them against, grouped by jurisdiction with sign-off fields (`verified` / `verified_by` / `verified_on`) and a list of structural claims (eligibility logic, formulas, job-protection rules) that aren't single numbers.
+
+```sh
+.venv/bin/python -m openleave.references check     # every parameter is documented (CI-gated)
+.venv/bin/python -m openleave.references summary    # verification progress
+.venv/bin/python -m openleave.references report references-worksheet.md   # reviewer worksheet
+```
+
+The manifest can't drift: a test asserts it documents **exactly** the set of encoded parameters, so adding a rate without a citation breaks the build, and a jurisdiction can't be marked `verified` without a named reviewer and date. The MCP parameter-lookup tool returns each value's citation, source, and verification status alongside the number, so an assistant can cite it and flag that it's still pending review. The generated [`references-worksheet.md`](references-worksheet.md) is the artifact an employment lawyer works through, one jurisdiction at a time.
 
 ## What's covered
 

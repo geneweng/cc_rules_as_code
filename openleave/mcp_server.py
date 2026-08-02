@@ -23,7 +23,7 @@ from typing import Any, Optional
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from . import DISCLAIMER, __version__, coverage, determine, parameters
+from . import DISCLAIMER, __version__, coverage, determine, parameters, references
 from .engine import LeaveReason
 from .facts import Employee, Employer, Facts, LeaveEvent
 
@@ -471,16 +471,32 @@ async def openleave_lookup_statutory_parameter(params: ParameterLookupInput) -> 
         )
 
     history = parameters.current_entries()[key]
+    source = references.citation_for(key)
     if params.response_format == ResponseFormat.JSON:
         return json.dumps(
-            {"key": key, "as_of": as_of.isoformat(), "value": value, "history": history}, indent=2
+            {
+                "key": key,
+                "as_of": as_of.isoformat(),
+                "value": value,
+                "history": history,
+                "source": source,
+            },
+            indent=2,
         )
     lines = [
         f"# `{key}` = **{value}**",
         f"_In force on {as_of.isoformat()}._",
-        "",
-        "Effective-dated history:",
     ]
+    if source:
+        verified = "verified by counsel" if source["verified"] else "UNVERIFIED — pending counsel review"
+        lines += [
+            "",
+            f"**{source['description']}** ({source['jurisdiction']})",
+            f"- Statute: {source['statute']}",
+            f"- Source: {', '.join(source['sources'])}",
+            f"- Status: {verified}",
+        ]
+    lines += ["", "Effective-dated history:"]
     lines += [f"- {eff}: {val}" for eff, val in history]
     lines += ["", f"_{DISCLAIMER}_"]
     return "\n".join(lines)

@@ -1,0 +1,356 @@
+{
+  "_meta": {
+    "purpose": "Per-jurisdiction verification manifest. Maps every encoded statutory parameter to the primary source and agency page a reviewer checks it against, plus the structural claims (eligibility logic, formulas, job-protection rules) that are not single numbers.",
+    "disclaimer": "Every value in this repo is web-researched and UNVERIFIED by counsel. `verified: false` on a jurisdiction means no employment lawyer has signed off yet. This manifest is the worksheet for that review, not evidence it has happened.",
+    "how_to_use": "A reviewer works one jurisdiction at a time: open the source pages, check each parameter's value(s) and effective date(s) against the agency's published figures and the cited statute, check each structural claim, then set verified/verified_by/verified_on. Run `python -m openleave.references check` to confirm the manifest still covers every encoded parameter.",
+    "last_researched": "2026-08"
+  },
+  "jurisdictions": {
+    "FMLA": {
+      "program": "Federal Family and Medical Leave Act",
+      "statute": "29 U.S.C. §§ 2601-2654; 29 C.F.R. Part 825",
+      "sources": ["https://www.dol.gov/agencies/whd/fmla"],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "fmla.weeks": "Leave entitlement in a 12-month period (weeks)",
+        "fmla.min_hours": "Hours worked in prior 12 months to qualify",
+        "fmla.min_worksite_headcount": "Employees within 75 miles for employer coverage"
+      },
+      "claims": [
+        "Employee must have worked 12 months for the employer (need not be consecutive).",
+        "Leave is unpaid and job-protected; runs concurrently with state paid leave for the same reason."
+      ]
+    },
+    "CA": {
+      "program": "California Paid Family Leave (PFL) and CFRA",
+      "statute": "Cal. Unemp. Ins. Code §§ 3300-3306 (PFL); Cal. Gov. Code § 12945.2 (CFRA)",
+      "sources": [
+        "https://edd.ca.gov/en/disability/paid-family-leave/",
+        "https://calcivilrights.ca.gov/"
+      ],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "ca.saww": "State average weekly wage used in the PFL benefit tiers ($)",
+        "ca.pfl.weeks": "PFL benefit duration (weeks)",
+        "ca.pfl.max_weekly_benefit": "PFL maximum weekly benefit ($)",
+        "ca.pfl.low_earner_rate": "Wage-replacement rate below the SAWW breakpoint (fraction)",
+        "ca.pfl.standard_rate": "Wage-replacement rate above the SAWW breakpoint (fraction)",
+        "ca.pfl.min_base_period_earnings": "Minimum base-period earnings to qualify ($)"
+      },
+      "claims": [
+        "PFL provides wage replacement only; CFRA supplies the job protection (5+ employees).",
+        "The 2025 rate change raised the low-earner rate to 90% and standard rate to 70%."
+      ]
+    },
+    "CO": {
+      "program": "Colorado Family and Medical Leave Insurance (FAMLI)",
+      "statute": "C.R.S. Title 8, Article 13.3",
+      "sources": [
+        "https://famli.colorado.gov/",
+        "https://famli.colorado.gov/individuals-and-families/how-famli-works"
+      ],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "co.saww": "State average weekly wage ($)",
+        "co.max_weekly_benefit": "Maximum weekly benefit, = 90% of SAWW ($)",
+        "co.min_base_period_earnings": "Minimum wages earned in Colorado to qualify ($)",
+        "co.weeks": "Base leave duration (weeks)",
+        "co.pregnancy_complication_weeks": "Additional weeks for pregnancy/childbirth complications",
+        "co.combined.weeks": "Maximum combined weeks including the pregnancy addition",
+        "co.job_protection.min_service_days": "Days of service for job protection"
+      },
+      "claims": [
+        "Eligibility is a $-earned floor across any employer, not an hours or tenure test.",
+        "Job protection has NO employer-size threshold (unlike FMLA).",
+        "Max weekly benefit changed mid-year on 2026-07-01 ($1,381.45 -> $1,448.02)."
+      ]
+    },
+    "CT": {
+      "program": "Connecticut Paid Leave, with CT FMLA job protection",
+      "statute": "Conn. Gen. Stat. § 31-49e et seq. (paid leave); § 31-51kk et seq. (CT FMLA)",
+      "sources": [
+        "https://ctpaidleave.org/",
+        "https://www.ctdol.state.ct.us/"
+      ],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "ct.minimum_wage": "State minimum wage; the whole benefit schedule is pegged to it ($/hr)",
+        "ct.pfml.cap_hours": "Cap as a multiple of the hourly minimum wage (hours)",
+        "ct.pfml.tier_break_hours": "Tier breakpoint as a multiple of the hourly minimum wage (hours)",
+        "ct.pfml.tier1_rate": "Wage-replacement rate below the breakpoint (fraction)",
+        "ct.pfml.tier2_rate": "Wage-replacement rate above the breakpoint (fraction)",
+        "ct.pfml.min_high_quarter_earnings": "Highest-quarter base-period earnings to qualify ($)",
+        "ct.weeks": "Base leave duration (weeks)",
+        "ct.pregnancy_extra_weeks": "Additional weeks for pregnancy incapacity",
+        "ct.combined.weeks": "Maximum combined weeks",
+        "ct.fmla.min_tenure_months": "Months of service for CT FMLA job protection"
+      },
+      "claims": [
+        "Cap = 60x and breakpoint = 40x the hourly minimum wage; both move when the wage moves.",
+        "The 2026-01-01 minimum-wage rise ($16.35 -> $16.94) raised the cap $981.00 -> $1,016.40.",
+        "Job protection is the SEPARATE CT FMLA, which reaches employers with a single employee."
+      ]
+    },
+    "DC": {
+      "program": "DC Paid Family Leave, with DC FMLA job protection",
+      "statute": "D.C. Code § 32-541.01 et seq. (paid leave); § 32-501 et seq. (DC FMLA)",
+      "sources": [
+        "https://dcpaidfamilyleave.dc.gov/",
+        "https://does.dc.gov/page/dc-paid-family-leave"
+      ],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "dc.minimum_wage": "DC minimum wage; the benefit threshold is pegged to it ($/hr)",
+        "dc.pfl.max_weekly_benefit": "Maximum weekly benefit set by DOES ($)",
+        "dc.pfl.threshold_multiple": "Tier-1 ceiling as a multiple of (min wage x 40 hrs)",
+        "dc.pfl.tier1_rate": "Wage-replacement rate below the threshold (fraction)",
+        "dc.pfl.tier2_rate": "Wage-replacement rate above the threshold (fraction)",
+        "dc.weeks": "Leave duration per type (parental/family/medical, weeks)",
+        "dc.pfl.prenatal_weeks": "Additional prenatal leave (weeks)",
+        "dc.combined.weeks": "Maximum combined weeks including prenatal",
+        "dc.fmla.min_employees": "Employer-size threshold for DC FMLA job protection",
+        "dc.fmla.min_tenure_months": "Months of service for DC FMLA job protection",
+        "dc.fmla.min_hours": "Hours in prior year for DC FMLA job protection"
+      },
+      "claims": [
+        "DC PFL has NO earnings, hours, or tenure minimum for benefits.",
+        "Job protection is the NARROWER DC FMLA (20+ employees), so DC pays more workers than it protects.",
+        "DC minimum wage rises $17.95 -> $18.40 on 2026-07-01, widening the 90% band.",
+        "Max weekly benefit is $1,190 for leave dates on or after 2025-09-28."
+      ]
+    },
+    "DE": {
+      "program": "Delaware Paid Leave (Healthy Delaware Families Act)",
+      "statute": "19 Del. C. ch. 37",
+      "sources": [
+        "https://labor.delaware.gov/delaware-paid-leave",
+        "https://laborfiles.delaware.gov/main/pfl/Employer_and_TPAs_Guide_to_DPL.pdf"
+      ],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "de.wage_replacement_rate": "Wage-replacement rate (fraction)",
+        "de.max_weekly_benefit": "Maximum weekly benefit, 2026-2027 ($)",
+        "de.min_weekly_benefit": "Minimum weekly benefit, 2026-2027 ($)",
+        "de.parental.weeks": "Parental (bonding) leave duration (weeks)",
+        "de.medical_family.weeks": "Medical/family leave duration per 24 months (weeks)",
+        "de.combined.weeks": "Maximum combined weeks per application year",
+        "de.parental.min_employees": "Employer size to owe parental leave",
+        "de.medical_family.min_employees": "Employer size to owe medical/family leave",
+        "de.eligibility.min_months": "Months of service to qualify",
+        "de.eligibility.min_hours": "Hours in prior 12 months to qualify"
+      },
+      "claims": [
+        "Coverage depends on employer size AND reason: <10 not covered, 10-24 parental-only, 25+ all reasons.",
+        "Benefits began 2026-01-01; max $900 / min $100 is fixed for 2026 and 2027.",
+        "Delaware provides job restoration to eligible employees."
+      ]
+    },
+    "MA": {
+      "program": "Massachusetts Paid Family and Medical Leave (PFML)",
+      "statute": "M.G.L. c. 175M",
+      "sources": ["https://www.mass.gov/orgs/department-of-family-and-medical-leave"],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "ma.saww": "State average weekly wage ($)",
+        "ma.max_weekly_benefit": "Maximum weekly benefit, = 64% of SAWW ($)",
+        "ma.min_base_period_earnings": "Minimum base-period earnings to qualify ($)",
+        "ma.family.weeks": "Family leave duration (weeks)",
+        "ma.medical.weeks": "Medical leave duration (weeks)",
+        "ma.combined.weeks": "Maximum combined weeks per benefit year"
+      },
+      "claims": [
+        "Two-tier benefit (80% then 50%) capped at 64% of SAWW.",
+        "Eligibility includes a self-referential 30x-weekly-benefit earnings test.",
+        "Job protection is built into c. 175M itself; no companion statute needed.",
+        "7-day unpaid waiting period at the start of leave."
+      ]
+    },
+    "MD": {
+      "program": "Maryland FAMLI (Time to Care Act) - NOT YET IN FORCE",
+      "statute": "Md. Code, Lab. & Empl. § 8.3-101 et seq.",
+      "sources": ["https://paidleave.maryland.gov/"],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "md.eligibility.min_hours": "Hours worked in Maryland in prior 4 quarters to qualify",
+        "md.weeks": "Base leave duration (weeks)",
+        "md.extended.weeks": "Maximum weeks when combining bonding + own serious health condition",
+        "md.pfl.max_weekly_benefit": "Maximum weekly benefit ($)",
+        "md.pfl.min_weekly_benefit": "Minimum weekly benefit ($)",
+        "md.job_protection.min_employees": "Employer-size threshold for job restoration"
+      },
+      "claims": [
+        "Benefits are NOT payable until 2028-01-03 (HB 102, 2025); contributions begin 2027-01-01.",
+        "The launch-year SAWW is set annually by the Secretary of Labor and is not yet published.",
+        "This encoding returns weekly_benefit=None on/after the in-force date rather than a fabricated figure."
+      ]
+    },
+    "ME": {
+      "program": "Maine Paid Family and Medical Leave (PFML)",
+      "statute": "26 M.R.S. ch. 7, subch. 6-A (§ 850-A et seq.)",
+      "sources": ["https://www.maine.gov/paidleave/"],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "me.saww": "State average weekly wage; also the benefit cap ($)",
+        "me.tier1_rate": "Wage-replacement rate below the breakpoint (fraction)",
+        "me.tier2_rate": "Wage-replacement rate above the breakpoint (fraction)",
+        "me.tier_threshold_fraction": "Breakpoint as a fraction of the SAWW",
+        "me.eligibility_saww_multiple": "Base-period earnings floor as a multiple of the SAWW",
+        "me.weeks": "Leave duration (weeks)",
+        "me.combined.weeks": "Maximum combined weeks per benefit year",
+        "me.job_protection.min_service_days": "Days of service for job protection"
+      },
+      "claims": [
+        "Second tier is 66% (not the usual 50%), capped at 100% of the SAWW.",
+        "Benefits began 2026-05-01; the SAWW/cap rose $1,198 -> $1,249.12 on 2026-07-01.",
+        "Eligibility is 6x the SAWW earned in the base period."
+      ]
+    },
+    "MN": {
+      "program": "Minnesota Paid Leave",
+      "statute": "Minn. Stat. ch. 268B",
+      "sources": ["https://paidleave.mn.gov/"],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "mn.saww": "State average weekly wage ($)",
+        "mn.wage_threshold_fraction_of_saaw": "Earnings floor as a fraction of the SAWW",
+        "mn.family.weeks": "Family leave duration (weeks)",
+        "mn.medical.weeks": "Medical leave duration (weeks)",
+        "mn.combined.weeks": "Maximum combined weeks per benefit year"
+      },
+      "claims": [
+        "Benefits begin 2026-01-01; paid and job-protected after 90 days.",
+        "Note the parameter key spelling 'saaw' is a typo carried in the data; verify it maps to the SAWW."
+      ]
+    },
+    "NJ": {
+      "program": "New Jersey Family Leave Insurance (FLI), with NJFLA job protection",
+      "statute": "N.J.S.A. 43:21-25 et seq. (FLI); N.J.S.A. 34:11B-1 et seq. (NJFLA)",
+      "sources": ["https://www.nj.gov/labor/myleavebenefits/"],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "nj.fli.weeks": "FLI benefit duration (weeks)",
+        "nj.fli.wage_replacement_rate": "Wage-replacement rate (fraction)",
+        "nj.fli.max_weekly_benefit": "FLI maximum weekly benefit ($)",
+        "nj.fli.min_base_year_earnings": "Base-year earnings to qualify ($)",
+        "nj.fli.base_week_earnings": "Weekly earnings that count as a 'base week' ($)",
+        "nj.njfla.min_employees": "Employer size for NJFLA job protection",
+        "nj.njfla.min_hours": "Hours in prior 12 months for NJFLA job protection"
+      },
+      "claims": [
+        "FLI pays 85% but historically carried no job protection of its own.",
+        "A3451 adds FLI reinstatement from 2026-07-17; before that, protection is NJFLA-only.",
+        "NJFLA thresholds (30 employees, 1,000 hours) are strictly easier than FMLA's, so FMLA is never NJ FLI's sole fallback protector.",
+        "Low earners meeting only the 20-base-week alternative return eligible=null (needs week-level data)."
+      ]
+    },
+    "NY": {
+      "program": "New York Paid Family Leave (PFL)",
+      "statute": "N.Y. Workers' Comp. Law art. 9",
+      "sources": ["https://paidfamilyleave.ny.gov/"],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "ny.saww": "State average weekly wage ($)",
+        "ny.pfl.weeks": "PFL benefit duration (weeks)",
+        "ny.pfl.wage_replacement_rate": "Wage-replacement rate (fraction)"
+      },
+      "claims": [
+        "Benefit is 67% of the employee's average weekly wage, capped at 67% of the SAWW.",
+        "PFL is job-protected."
+      ]
+    },
+    "OR": {
+      "program": "Paid Leave Oregon",
+      "statute": "ORS ch. 657B",
+      "sources": ["https://paidleave.oregon.gov/"],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "or.saww": "State average weekly wage ($)",
+        "or.max_weekly_benefit": "Maximum weekly benefit, = 120% of SAWW ($)",
+        "or.min_weekly_benefit": "Minimum weekly benefit, = 5% of SAWW ($)",
+        "or.min_base_year_earnings": "Base-year earnings to qualify ($)",
+        "or.weeks": "Leave duration (weeks)",
+        "or.pregnancy_extra_weeks": "Additional weeks for pregnancy-related conditions",
+        "or.combined.weeks": "Maximum combined weeks per benefit year",
+        "or.job_protection.min_service_days": "Days of service for job restoration"
+      },
+      "claims": [
+        "Low earners (<= 65% of SAWW) are replaced at 100% of wages, then 50% above.",
+        "Job restoration applies at EVERY employer size (the 25-employee line is about premiums).",
+        "Benefit-year figures update ~late June; $1,692.16 cap applies from 2026-06-28."
+      ]
+    },
+    "RI": {
+      "program": "Rhode Island Temporary Disability (TDI) + Temporary Caregiver (TCI) Insurance",
+      "statute": "R.I. Gen. Laws ch. 28-41",
+      "sources": ["https://dlt.ri.gov/individuals/temporary-disability-caregiver-insurance"],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "ri.benefit_rate_of_high_quarter": "Weekly benefit as a fraction of highest base-period quarter",
+        "ri.aww_cap_fraction": "Benefit ceiling as a fraction of the average weekly wage",
+        "ri.max_weekly_benefit": "Maximum weekly benefit before dependency allowance ($)",
+        "ri.min_weekly_benefit": "Minimum weekly benefit ($)",
+        "ri.min_base_period_earnings": "Base-period earnings for the primary eligibility test ($)",
+        "ri.tci.weeks": "Temporary Caregiver Insurance duration (weeks)",
+        "ri.tdi.weeks": "Temporary Disability Insurance duration (weeks)"
+      },
+      "claims": [
+        "Benefit is 4.62% of the highest base-period quarter, not to exceed 85% of the AWW.",
+        "TCI (bonding/family) is job-protected; TDI (own disability) is not.",
+        "Military-exigency leave is not a covered reason.",
+        "A dependency allowance (up to $1,552 with five dependents) is NOT modeled by the engine.",
+        "Max $1,150 / min $148 effective 2026-07-01."
+      ]
+    },
+    "WA": {
+      "program": "Washington Paid Family and Medical Leave (PFML)",
+      "statute": "RCW Title 50A",
+      "sources": ["https://paidleave.wa.gov/"],
+      "verified": false,
+      "verified_by": null,
+      "verified_on": null,
+      "parameters": {
+        "wa.saww": "State average weekly wage ($)",
+        "wa.max_weekly_benefit": "Maximum weekly benefit ($)",
+        "wa.min_hours": "Hours in the qualifying period to be benefit-eligible",
+        "wa.family.weeks": "Family leave duration (weeks)",
+        "wa.medical.weeks": "Medical leave duration (weeks)",
+        "wa.combined.weeks": "Maximum combined weeks per claim year",
+        "wa.job_protection.min_employees": "Employer size for job protection (from 2026)",
+        "wa.job_protection.min_service_days": "Days of service for job protection (from 2026)"
+      },
+      "claims": [
+        "Eligibility is 820 hours across ANY Washington employer, not tenure with the current one.",
+        "Job protection is a separate test that expanded on 2026-01-01 (50->25 employees, 12mo->180 days, 1,250-hr rule removed).",
+        "Two-tier benefit: 90% up to 50% of SAWW, then 50%."
+      ]
+    }
+  }
+}
