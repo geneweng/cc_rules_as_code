@@ -217,7 +217,7 @@
 | ✓ | Parameter | Meaning | Encoded value(s) [effective date] |
 |---|---|---|---|
 | ☐ | `mn.saww` | State average weekly wage ($) | 1423.0 [2026-01-01] |
-| ☐ | `mn.wage_threshold_fraction_of_saaw` | Earnings floor as a fraction of the SAWW | 0.053 [2026-01-01] |
+| ☐ | `mn.wage_threshold_fraction_of_saww` | Earnings floor as a fraction of the SAWW | 0.053 [2026-01-01] |
 | ☐ | `mn.family.weeks` | Family leave duration (weeks) | 12 [2026-01-01] |
 | ☐ | `mn.medical.weeks` | Medical leave duration (weeks) | 12 [2026-01-01] |
 | ☐ | `mn.combined.weeks` | Maximum combined weeks per benefit year | 20 [2026-01-01] |
@@ -225,7 +225,7 @@
 **Structural claims to verify (not single numbers):**
 
 - ☐ Benefits begin 2026-01-01; paid and job-protected after 90 days.
-- ☐ Note the parameter key spelling 'saaw' is a typo carried in the data; verify it maps to the SAWW.
+- ☐ The earnings floor is 5.3% of the SAWW (annualized): verify the threshold fraction and that it is applied to 52x the weekly wage.
 
 ## NJ — New Jersey Family Leave Insurance (FLI), with NJFLA job protection
 

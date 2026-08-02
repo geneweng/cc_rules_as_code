@@ -43,7 +43,7 @@ def evaluate(facts: Facts, as_of: date) -> RegimeResult:
         return result
 
     saww = parameters.get("mn.saww", as_of)
-    threshold = parameters.get("mn.wage_threshold_fraction_of_saaw", as_of) * saww * 52
+    threshold = parameters.get("mn.wage_threshold_fraction_of_saww", as_of) * saww * 52
     wages = facts.base_period_wages
 
     result.findings = [

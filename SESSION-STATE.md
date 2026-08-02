@@ -58,8 +58,8 @@ encoded parameter set (adding a rate without a citation fails CI), and nothing c
 verified without a named reviewer + date. `python -m openleave.references {check,summary,report}`;
 the generated `references-worksheet.md` is the lawyer-facing artifact. The MCP parameter-lookup
 tool now returns each value's citation/source/verified status. **Nothing is verified yet (0/15).**
-Note the manifest already flagged one real data issue: the `mn.wage_threshold_fraction_of_saaw`
-key has a 'saaw' typo.
+(Building the manifest surfaced and led to fixing a real data issue: the Minnesota threshold key
+had a 'saaw' typo, now corrected to `mn.wage_threshold_fraction_of_saww`.)
 
 **The AI amendment pipeline** (`openleave/watcher/`) — LLM drafts a parameter/logic diff from
 an amendment doc → regression suite gates it (`OPENLEAVE_PARAM_OVERRIDES`) → human approves →

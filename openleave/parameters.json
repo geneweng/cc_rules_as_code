@@ -3,7 +3,7 @@
   "ny.pfl.weeks": [["2021-01-01", 12]],
   "ny.pfl.wage_replacement_rate": [["2021-01-01", 0.67]],
   "mn.saww": [["2026-01-01", 1423.0]],
-  "mn.wage_threshold_fraction_of_saaw": [["2026-01-01", 0.053]],
+  "mn.wage_threshold_fraction_of_saww": [["2026-01-01", 0.053]],
   "mn.family.weeks": [["2026-01-01", 12]],
   "mn.medical.weeks": [["2026-01-01", 12]],
   "mn.combined.weeks": [["2026-01-01", 20]],
