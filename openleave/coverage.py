@@ -16,19 +16,17 @@ verification by counsel, like every other statutory value in this repo.
 
 from __future__ import annotations
 
-ENCODED_STATES = {"CA", "MA", "MN", "NJ", "NY", "WA"}
+ENCODED_STATES = {"CA", "CO", "MA", "MN", "NJ", "NY", "OR", "WA"}
 
 # States/territories understood to have a mandatory paid family and/or medical
 # leave program that this encoding does NOT yet implement. Value is the short
 # program name used in the warning text.
 UNENCODED_PROGRAM_STATES = {
-    "CO": "Colorado FAMLI",
     "CT": "Connecticut Paid Leave",
     "DC": "DC Paid Family Leave",
     "DE": "Delaware Paid Leave",
     "ME": "Maine Paid Family and Medical Leave",
     "MD": "Maryland FAMLI",
-    "OR": "Oregon Paid Leave",
     "RI": "Rhode Island TCI/TDI",
 }
 
@@ -95,4 +93,8 @@ def encoded_jurisdictions() -> list[dict]:
          "provides": "12 weeks family / 20 medical (26 combined), paid + job protection built into the statute"},
         {"jurisdiction": "New Jersey", "regime": "NJ Family Leave Insurance", "citation": "N.J.S.A. 43:21-25 et seq.",
          "provides": "12 weeks at 85% of AWW; job protection via NJFLA, or via FLI itself from 2026-07-17"},
+        {"jurisdiction": "Colorado", "regime": "Colorado FAMLI", "citation": "C.R.S. Title 8, Art. 13.3",
+         "provides": "12 weeks (16 with pregnancy complications), paid; job protection after 180 days, any employer size"},
+        {"jurisdiction": "Oregon", "regime": "Paid Leave Oregon", "citation": "ORS ch. 657B",
+         "provides": "12 weeks (14 for pregnancy), paid; 100% wage replacement for low earners; job restoration after 90 days"},
     ]

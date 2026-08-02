@@ -70,10 +70,10 @@ class TestCheckEligibility:
         assert "29 C.F.R. § 825.113" in out
 
     def test_uncovered_program_state_leads_with_incomplete_coverage(self):
-        out = call(openleave_check_leave_eligibility(eligibility(work_state="OR")))
+        out = call(openleave_check_leave_eligibility(eligibility(work_state="CT")))
         banner = out.split("## ")[0]
         assert "INCOMPLETE COVERAGE" in banner  # before any regime section
-        assert "Oregon Paid Leave" in banner
+        assert "Connecticut Paid Leave" in banner
         assert "INCOMPLETE COVERAGE" not in out.split(banner)[1]  # stated once, not repeated
 
     def test_state_without_a_program_is_not_flagged_incomplete(self):
@@ -107,16 +107,17 @@ class TestListJurisdictions:
         out = call(openleave_list_jurisdictions(JurisdictionsInput()))
         assert "Minnesota Paid Leave" in out
         assert "Known gaps" in out
-        assert "**OR** — Oregon Paid Leave" in out
+        assert "**CT** — Connecticut Paid Leave" in out
 
     def test_json_shape(self):
         out = call(openleave_list_jurisdictions(JurisdictionsInput(response_format="json")))
         data = json.loads(out)
-        assert set(data["encoded_states"]) == {"CA", "MA", "MN", "NJ", "NY", "WA"}
-        assert "OR" in data["known_gaps"]
+        assert set(data["encoded_states"]) == {"CA", "CO", "MA", "MN", "NJ", "NY", "OR", "WA"}
+        assert "CT" in data["known_gaps"]
         assert "WA" not in data["known_gaps"]
+        assert "OR" not in data["known_gaps"]
         assert "bonding" in data["leave_reasons"]
-        assert len(data["encoded_regimes"]) == 8
+        assert len(data["encoded_regimes"]) == 10
 
 
 class TestLookupParameter:

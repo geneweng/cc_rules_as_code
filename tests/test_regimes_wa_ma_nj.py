@@ -187,10 +187,10 @@ class TestCoverageAndInteractions:
         for state in ("WA", "MA", "NJ"):
             assert determine(make_facts(state))["coverage"]["complete"] is True
 
-    def test_oregon_remains_a_declared_gap(self):
-        result = determine(make_facts("OR"))
+    def test_connecticut_remains_a_declared_gap(self):
+        result = determine(make_facts("CT"))
         assert result["coverage"]["complete"] is False
-        assert "Oregon Paid Leave" in result["coverage"]["program"]
+        assert "Connecticut Paid Leave" in result["coverage"]["program"]
 
     def test_fmla_runs_concurrently_with_each_new_regime(self):
         for state, label in (("WA", "Washington"), ("MA", "Massachusetts"), ("NJ", "New Jersey")):
