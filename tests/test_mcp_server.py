@@ -15,7 +15,9 @@ from openleave.mcp_server import (
     JurisdictionsInput,
     LeaveEligibilityInput,
     ParameterLookupInput,
+    WageHourInput,
     openleave_check_leave_eligibility,
+    openleave_check_wage_hour,
     openleave_list_jurisdictions,
     openleave_lookup_statutory_parameter,
 )
@@ -168,6 +170,50 @@ class TestLookupParameter:
         assert "UNVERIFIED" in md
 
 
+class TestCheckWageHour:
+    def test_minimum_wage_markdown_flags_violation(self):
+        out = call(openleave_check_wage_hour(
+            WageHourInput(work_state="CA", hourly_rate=15.0, as_of="2026-02-01")))
+        assert "Minimum wage" in out
+        assert "$16.90" in out
+        assert "✗" in out  # below the floor
+        assert "Cal. Lab. Code" in out
+
+    def test_effective_dating_in_json(self):
+        clears = call(openleave_check_wage_hour(
+            WageHourInput(work_state="CA", hourly_rate=16.60, as_of="2025-06-01", response_format="json")))
+        fails = call(openleave_check_wage_hour(
+            WageHourInput(work_state="CA", hourly_rate=16.60, as_of="2026-06-01", response_format="json")))
+        assert json.loads(clears)["topics"][0]["data"]["rate_compliant"] is True
+        assert json.loads(fails)["topics"][0]["data"]["rate_compliant"] is False
+
+    def test_locality_leads_with_incomplete_coverage(self):
+        out = call(openleave_check_wage_hour(
+            WageHourInput(work_state="WA", hourly_rate=17.13, work_locality="Seattle", as_of="2026-02-01")))
+        banner = out.split("## ")[0]
+        assert "INCOMPLETE COVERAGE" in banner
+        assert "Seattle" in banner
+
+    def test_final_pay_and_vacation_payout(self):
+        out = call(openleave_check_wage_hour(WageHourInput(
+            work_state="CA", hourly_rate=30.0, separation_type="fired",
+            separation_last_day="2026-03-02", final_pay_date="2026-03-07",
+            accrued_vacation_hours=40, as_of="2026-03-02", response_format="json")))
+        fp = next(t for t in json.loads(out)["topics"] if t["topic"] == "final_pay")
+        assert fp["data"]["deadline"] == "2026-03-02"
+        assert fp["data"]["paid_on_time"] is False
+        assert fp["data"]["vacation_payout_owed"] == 1200.0
+
+    def test_separation_type_without_last_day_is_an_error(self):
+        out = call(openleave_check_wage_hour(WageHourInput(work_state="CA", separation_type="fired")))
+        assert out.startswith("Error:")
+        assert "separation_last_day" in out
+
+    def test_bad_state_rejected_by_schema(self):
+        with pytest.raises(ValueError):
+            WageHourInput(work_state="CALIF")
+
+
 class TestProtocolEndToEnd:
     """Drives the server as a subprocess over stdio, as a real MCP client would."""
 
@@ -192,15 +238,20 @@ class TestProtocolEndToEnd:
                         "work_state": "TOOLONG", "hire_date": "2025-03-01",
                         "leave_start_date": "2026-09-01", "leave_reason": "bonding",
                         "hours_last_12mo": 1400, "employer_total_employees": 85}})
-                    return names, ok, bad
+                    wage = await session.call_tool("openleave_check_wage_hour", {"params": {
+                        "work_state": "CA", "hourly_rate": 15.0, "as_of": "2026-02-01"}})
+                    return names, ok, bad, wage
 
-        names, ok, bad = asyncio.run(asyncio.wait_for(session_run(), timeout=60))
+        names, ok, bad, wage = asyncio.run(asyncio.wait_for(session_run(), timeout=60))
 
         assert names == {
             "openleave_check_leave_eligibility",
             "openleave_list_jurisdictions",
             "openleave_lookup_statutory_parameter",
+            "openleave_check_wage_hour",
         }
         assert ok.isError is False
         assert "$896.76/week" in ok.content[0].text
         assert bad.isError is True  # schema violation surfaces as a tool error
+        assert wage.isError is False
+        assert "$16.90" in wage.content[0].text  # wage tool dispatches over the protocol too

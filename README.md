@@ -10,7 +10,7 @@ A survey of **Rules as Code (RaC)** — the practice of publishing an official, 
 | [`rules-as-code-survey.pdf`](rules-as-code-survey.pdf) | The same survey rendered as a PDF |
 | [`product-brainstorm-openleave.md`](product-brainstorm-openleave.md) | Product brainstorm + market validation for **OpenLeave**, a leave-law rules engine |
 | [`openleave/`](openleave/) | Working prototype of the OpenLeave MVP (see below) |
-| [`tests/`](tests/) | Scenario-based regression suite for the encodings (187 tests) |
+| [`tests/`](tests/) | Scenario-based regression suite for the encodings (197 tests) |
 | [`wage-hour-expansion-scope.md`](wage-hour-expansion-scope.md) | Scoping doc for the wage-and-hour expansion (the "market is employment law" thesis) |
 
 ## OpenLeave prototype
@@ -27,11 +27,11 @@ An executable, citation-backed encoding of U.S. employee leave law: federal **FM
 
 ```sh
 python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
-.venv/bin/pytest                                # 187-scenario regression suite
+.venv/bin/pytest                                # 197-scenario regression suite
 .venv/bin/uvicorn openleave.api:app            # then open http://127.0.0.1:8000
 ```
 
-`GET /` serves a browser eligibility checker; `POST /determinations` takes `{facts, as_of?}` and returns per-regime eligibility, entitlement, benefit estimates, and interaction notes.
+`GET /` serves a browser eligibility checker; `POST /determinations` takes `{facts, as_of?}` and returns per-regime eligibility, entitlement, benefit estimates, and interaction notes. The wage-and-hour engine (below) has parallel surfaces: `GET /wage-hour` (browser checker) and `POST /wage-hour/determinations`.
 
 ### LLM amendment-watcher pipeline
 
@@ -71,13 +71,14 @@ Register it with Claude Code (`claude mcp add openleave -- /path/to/.venv/bin/py
     } } }
 ```
 
-Three read-only tools:
+Four read-only tools:
 
 | Tool | What it answers |
 |---|---|
-| `openleave_check_leave_eligibility` | Eligibility, entitlement, and benefit amount under every applicable law, each conclusion citing its statute |
+| `openleave_check_leave_eligibility` | Eligibility, entitlement, and benefit amount under every applicable leave law, each conclusion citing its statute |
+| `openleave_check_wage_hour` | The applicable minimum wage (with tip-credit handling) and, on separation, final-pay timing and accrued-vacation payout — each with its citation |
 | `openleave_list_jurisdictions` | What's encoded — and which states have programs that are **not**, so the assistant knows when an answer is partial |
-| `openleave_lookup_statutory_parameter` | A single rate, cap, or threshold as it stood on any date |
+| `openleave_lookup_statutory_parameter` | A single rate, cap, or threshold as it stood on any date, with its source and verification status |
 
 The tool descriptions instruct the model to call rather than recall ("leave law differs by state and its rates change every year; model recall is unreliable for it"), and the three outcomes an assistant must distinguish — a determined answer, `eligible: null` requiring human judgment, and `coverage.complete: false` meaning the answer is partial — are documented in the tool schema itself.
 
@@ -113,6 +114,8 @@ What the slice demonstrates:
 - **The tip credit, done honestly** — California and Washington prohibit it (full minimum in cash, tips on top; `Cal. Lab. Code § 351`, `RCW 49.46.020(3)`); the federal rule permits a $2.13 cash wage if tips reach $7.25. The engine flags "only CA/WA tip rules are encoded" for other states rather than guessing.
 - **Locality coverage, loudly** — a Seattle worksite returns `coverage.complete: false` because Seattle's $21.30 minimum isn't encoded and the $17.13 state figure would **understate** the floor. Silent locality under-coverage is the wage-and-hour analogue of returning "FMLA only," and the same guard prevents it.
 - **Final pay with real teeth** — California's immediate-on-firing deadline, the 72-hour rule for a no-notice quit, waiting-time-penalty exposure for late payment, and mandatory accrued-vacation payout (valued: 40 hrs × $30 = $1,200) — contrasted with Washington's next-pay-period rule and policy-dependent vacation (returned as `met: null`, a human-judgment point).
+
+The slice has full surface parity with leave: the `openleave_check_wage_hour` MCP tool, a `POST /wage-hour/determinations` API endpoint, and a browser checker at `GET /wage-hour` (linked from the leave checker).
 
 Deliberately deferred to Phase 2 (see the scope doc): **overtime** math and **exempt classification** — the latter because its duties test is open-textured and the liability of getting it wrong is misclassification. Encoding the salary threshold and flagging the duties test for human judgment is the honest design; auto-answering it is not.
 

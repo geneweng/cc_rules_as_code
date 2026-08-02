@@ -26,6 +26,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from . import DISCLAIMER, __version__, coverage, determine, parameters, references
 from .engine import LeaveReason
 from .facts import Employee, Employer, Facts, LeaveEvent
+from .wagehour import PayBasis, Separation, SeparationType, WageFacts, assess_wage_hour
 
 mcp = FastMCP("openleave_mcp")
 
@@ -132,6 +133,57 @@ class ParameterLookupInput(BaseModel):
     )
 
 
+class WageHourInput(BaseModel):
+    """Facts describing one worker's wage-and-hour situation, and optionally a separation."""
+
+    model_config = ConfigDict(str_strip_whitespace=True, validate_assignment=True, extra="forbid")
+
+    work_state: str = Field(
+        ..., description="Two-letter state code where the employee works, e.g. 'CA'",
+        min_length=2, max_length=2,
+    )
+    work_locality: Optional[str] = Field(
+        default=None,
+        description="City or county if known, e.g. 'Seattle'. Localities may set higher minimum "
+        "wages; supplying this makes coverage warnings precise.",
+    )
+    employer_total_employees: int = Field(default=1, ge=1, le=10_000_000)
+    pay_basis: PayBasis = Field(default=PayBasis.HOURLY, description="'hourly' or 'salary'")
+    hourly_rate: Optional[float] = Field(
+        default=None, ge=0,
+        description="Effective hourly cash wage, needed to check minimum-wage compliance.",
+    )
+    is_tipped: bool = Field(default=False, description="Worker regularly receives tips")
+    weekly_hours: Optional[float] = Field(default=None, ge=0, le=168)
+    separation_type: Optional[SeparationType] = Field(
+        default=None,
+        description="Set to assess final pay: 'fired', 'laid_off', 'quit_with_notice' (72+ hours' "
+        "notice), or 'quit_without_notice'. Requires separation_last_day.",
+    )
+    separation_last_day: Optional[date] = Field(
+        default=None, description="Last day of employment; required when separation_type is set."
+    )
+    final_pay_date: Optional[date] = Field(
+        default=None, description="When final wages were actually paid, to check timeliness."
+    )
+    accrued_vacation_hours: Optional[float] = Field(
+        default=None, ge=0, description="Unused accrued vacation/PTO hours at separation."
+    )
+    as_of: Optional[date] = Field(
+        default=None, description="Evaluate under the law in force on this date. Defaults to today."
+    )
+    response_format: ResponseFormat = Field(
+        default=ResponseFormat.MARKDOWN, description="'markdown' for readable output, 'json' for the raw structure"
+    )
+
+    @field_validator("work_state")
+    @classmethod
+    def _upper_state(cls, v: str) -> str:
+        if not v.isalpha():
+            raise ValueError("work_state must be two letters, e.g. 'CA'")
+        return v.upper()
+
+
 # --------------------------------------------------------------------------
 # Shared formatting helpers
 # --------------------------------------------------------------------------
@@ -206,6 +258,36 @@ def _format_determination(result: dict[str, Any], facts: LeaveEligibilityInput) 
     if result["coverage"]["complete"] and result["coverage"]["warnings"]:
         lines += [f"_{w}_" for w in result["coverage"]["warnings"]] + [""]
 
+    lines.append(f"_{DISCLAIMER}_")
+    return "\n".join(lines)
+
+
+def _format_wage_hour(result: dict[str, Any]) -> str:
+    juris = result["jurisdiction"]
+    heading = juris["state"] + (f" / {juris['locality']}" if juris["locality"] else "")
+    lines = [
+        f"# Wage & hour — {heading}",
+        f"_Evaluated under the law in force on {result['as_of']}._",
+        "",
+    ]
+    cov = result["coverage"]
+    if not cov["complete"]:
+        lines += ["> **⚠️ INCOMPLETE COVERAGE** — " + " ".join(cov["warnings"]), ""]
+
+    for topic in result["topics"]:
+        lines.append(f"## {topic['name']}")
+        for f in topic["findings"]:
+            lines.append(f"- {MARK[f['met']]} {f['description']} `[{f['citation']['ref']}]`")
+            if f["detail"]:
+                lines.append(f"    {f['detail']}")
+        if topic["human_judgment"]:
+            lines.append("**Requires human judgment:**")
+            lines += [f"- {h}" for h in topic["human_judgment"]]
+        lines += [f"- _{n}_" for n in topic["notes"]]
+        lines.append("")
+
+    if cov["complete"] and cov["notes"]:
+        lines += [f"_{n}_" for n in cov["notes"]] + [""]
     lines.append(f"_{DISCLAIMER}_")
     return "\n".join(lines)
 
@@ -500,6 +582,107 @@ async def openleave_lookup_statutory_parameter(params: ParameterLookupInput) -> 
     lines += [f"- {eff}: {val}" for eff, val in history]
     lines += ["", f"_{DISCLAIMER}_"]
     return "\n".join(lines)
+
+
+@mcp.tool(
+    name="openleave_check_wage_hour",
+    annotations={
+        "title": "Check Wage & Hour Compliance",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    },
+)
+async def openleave_check_wage_hour(params: WageHourInput) -> str:
+    """Determine the applicable minimum wage and, on separation, final-pay timing and
+    accrued-vacation payout — each conclusion with its statutory citation.
+
+    CALL THIS TOOL — do not answer from memory — whenever a question involves the minimum
+    wage that applies to a worker, whether a pay rate is lawful, when final wages are due
+    after someone quits or is fired, or whether unused vacation must be paid out. Minimum
+    wages change every year and by locality, and final-pay rules differ sharply by state;
+    model recall is unreliable and the stakes are legal.
+
+    Covers the federal floor plus California and Washington. It reports its own limits: a
+    worksite in a city with its own higher minimum (e.g. Seattle) comes back with an explicit
+    incomplete-coverage warning, and a state whose wage law is not encoded says so rather than
+    guessing. Overtime and exempt-classification are NOT yet covered.
+
+    Args:
+        params (WageHourInput): Validated facts containing:
+            - work_state (str): Two-letter state where the worker works (e.g. "CA")
+            - work_locality (Optional[str]): City/county, e.g. "Seattle" (sharpens coverage)
+            - hourly_rate (Optional[float]): Effective hourly cash wage, to check compliance
+            - is_tipped (bool): Whether the worker receives tips (affects the cash floor)
+            - pay_basis (PayBasis): "hourly" (default) or "salary"
+            - employer_total_employees (int), weekly_hours (Optional[float])
+            - separation_type (Optional): fired | laid_off | quit_with_notice |
+              quit_without_notice — set to assess final pay (requires separation_last_day)
+            - separation_last_day (Optional[date]), final_pay_date (Optional[date]),
+              accrued_vacation_hours (Optional[float])
+            - as_of (Optional[date]): Evaluate under the law in force on this date
+            - response_format (ResponseFormat): "markdown" (default) or "json"
+
+    Returns:
+        str: Markdown (default) or JSON of the form:
+        {
+          "as_of": str,
+          "jurisdiction": { "state": str, "locality": str | null },
+          "topics": [
+            {
+              "topic": str,                 # "minimum_wage" | "final_pay"
+              "name": str,
+              "findings": [ { "key", "description", "met": bool|null, "citation", "detail" } ],
+              "data": { ... },              # computed values (applicable_minimum, deadline, ...)
+              "human_judgment": [str],      # points a human must decide
+              "notes": [str]
+            }
+          ],
+          "coverage": { "complete": bool, "warnings": [str], "notes": [str] },
+          "disclaimer": str, "engine_version": str
+        }
+
+    Examples:
+        - Use when: "Is $15/hour legal in California in 2026?" -> work_state="CA",
+          hourly_rate=15, as_of="2026-02-01" (returns a violation: the floor is $16.90).
+        - Use when: "We fired a CA employee Monday and haven't paid them — problem?" ->
+          separation_type="fired", separation_last_day=..., final_pay_date=...
+        - Don't use when: The question is about leave eligibility or benefits (use
+          openleave_check_leave_eligibility).
+
+    Error Handling:
+        - Pydantic rejects malformed dates, bad state codes, and out-of-range numbers.
+        - separation_last_day is required when separation_type is set; otherwise returns "Error: ...".
+    """
+    try:
+        separation = None
+        if params.separation_type is not None:
+            if params.separation_last_day is None:
+                return _error("separation_last_day is required when separation_type is set.")
+            separation = Separation(
+                type=params.separation_type,
+                last_day=params.separation_last_day,
+                final_pay_date=params.final_pay_date,
+                accrued_vacation_hours=params.accrued_vacation_hours,
+            )
+        facts = WageFacts(
+            work_state=params.work_state,
+            work_locality=params.work_locality,
+            employer_total_employees=params.employer_total_employees,
+            pay_basis=params.pay_basis,
+            hourly_rate=params.hourly_rate,
+            is_tipped=params.is_tipped,
+            weekly_hours=params.weekly_hours,
+            separation=separation,
+        )
+        result = assess_wage_hour(facts, as_of=params.as_of)
+    except ValueError as e:
+        return _error(f"Could not evaluate these facts: {e}")
+
+    if params.response_format == ResponseFormat.JSON:
+        return json.dumps(result, indent=2)
+    return _format_wage_hour(result)
 
 
 def main() -> None:

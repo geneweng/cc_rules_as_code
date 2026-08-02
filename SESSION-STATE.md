@@ -14,7 +14,7 @@ The arc so far: internet survey → validated product brainstorm → working eng
 amendment pipeline → go-to-market collateral (decks, video, landing page) → MCP server →
 expanded jurisdiction coverage.
 
-## Current state (all committed, tree clean, 187 tests passing)
+## Current state (all committed, tree clean, 197 tests passing)
 
 **The engine** (`openleave/`) — sixteen regimes across fourteen jurisdictions. **Every
 comprehensive U.S. paid-family-leave program is now encoded.**
@@ -71,8 +71,9 @@ compliance (a wage that clears CA's 2025 floor fails its 2026 floor), the CA/WA 
 prohibition vs the federal $2.13 credit, loud Seattle-locality under-coverage warnings, and CA's
 immediate-final-pay + waiting-time-penalty + mandatory vacation payout vs WA's next-pay-period
 rule. **Deferred to Phase 2 (deliberately): overtime math and exempt classification** (the duties
-test is open-textured / high-liability). NOT yet wired into MCP or the FastAPI surface — that is
-the obvious next small step.
+test is open-textured / high-liability). **Full surface parity with leave:** MCP tool
+`openleave_check_wage_hour`, API `POST /wage-hour/determinations`, and a browser checker at
+`GET /wage-hour` (`wage_checker.html`, linked from the leave checker; verified via screenshot).
 
 **The AI amendment pipeline** (`openleave/watcher/`) — LLM drafts a parameter/logic diff from
 an amendment doc → regression suite gates it (`OPENLEAVE_PARAM_OVERRIDES`) → human approves →
@@ -80,13 +81,14 @@ apply. Nothing ships without passing tests + explicit sign-off. Uses `claude-opu
 structured outputs. The `analyze` step needs `ANTHROPIC_API_KEY` (not set in the dev sessions
 so far — the demo used an offline-drafted proposal of the same shape).
 
-**The MCP server** (`openleave/mcp_server.py`) — three read-only tools
-(`openleave_check_leave_eligibility`, `openleave_list_jurisdictions`,
+**The MCP server** (`openleave/mcp_server.py`) — four read-only tools
+(`openleave_check_leave_eligibility`, `openleave_check_wage_hour`, `openleave_list_jurisdictions`,
 `openleave_lookup_statutory_parameter`) so an AI assistant calls the verified oracle instead of
-recalling leave law. Verified end-to-end over stdio with a real MCP client.
+recalling employment law. Verified end-to-end over stdio with a real MCP client (all four tools).
 
-**Surfaces:** FastAPI at `openleave/api.py` (`GET /` = browser checker `openleave/checker.html`,
-`POST /determinations`). Landing page at `docs/index.html`, **live at
+**Surfaces:** FastAPI at `openleave/api.py` (`GET /` = leave checker `openleave/checker.html`,
+`POST /determinations`; `GET /wage-hour` = wage checker `openleave/wage_checker.html`,
+`POST /wage-hour/determinations`). Landing page at `docs/index.html`, **live at
 https://geneweng.github.io/cc_rules_as_code/** (GitHub Pages, `main`/`/docs`).
 
 **Collateral (all in repo root):** `rules-as-code-survey.{md,pdf}`,
@@ -97,7 +99,7 @@ https://geneweng.github.io/cc_rules_as_code/** (GitHub Pages, `main`/`/docs`).
 
 ```sh
 cd ~/cc_projects/cc_rules_as_code
-.venv/bin/pytest -q                                   # 187 tests
+.venv/bin/pytest -q                                   # 197 tests
 .venv/bin/uvicorn openleave.api:app                   # checker at http://127.0.0.1:8000
 .venv/bin/python -m openleave.mcp_server              # MCP over stdio
 .venv/bin/python -m openleave.watcher --help          # amendment pipeline CLI
@@ -121,7 +123,7 @@ Video/render scratch work lived under the session scratchpad (not in the repo).
 - **The demo video narration is synthetic TTS** — fine for a prototype, re-record with a human
   voice for anything customer-facing. Scene 5's LLM `analyze` step was narrated without
   claiming that specific run was live (no API key).
-- **Traction is internal only** — 187 tests and a working pipeline are engineering traction, not
+- **Traction is internal only** — 197 tests and a working pipeline are engineering traction, not
   market traction. No real design partner, lawyer, or dollar has touched this yet.
 
 ## Decisions already made (don't relitigate)
@@ -144,9 +146,9 @@ Video/render scratch work lived under the session scratchpad (not in the repo).
    expansion, not a gap-fill. The bigger frontier now is #2.
 2. **Wage-and-hour / termination-rules expansion** — scoped (`wage-hour-expansion-scope.md`) and
    **Phase 1 built** (minimum wage + final pay, federal/CA/WA, in `openleave/wagehour/`).
-   Immediate next steps: wire wage-hour into MCP + FastAPI (surface parity with leave); then
-   Phase 1.5 (top locality minimum wages: Seattle, NYC, SF, LA, Chicago, ...); then Phase 2
-   (overtime + exempt classification — encode the salary threshold, flag the duties test).
+   Surface parity DONE (MCP tool + API + browser checker). Immediate next steps: Phase 1.5
+   (top locality minimum wages: Seattle, NYC, SF, LA, Chicago, ...); then Phase 2 (overtime +
+   exempt classification — encode the salary threshold, flag the duties test).
 3. **Accuracy verification pass** — the per-jurisdiction reference manifest now EXISTS
    (`references.json` + `references-worksheet.md`, 0/15 verified). What remains is the human
    step: get an employment lawyer to work the worksheet and record sign-off. Still the prereq

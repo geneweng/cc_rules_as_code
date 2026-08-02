@@ -21,4 +21,4 @@ build-backend = "setuptools.build_meta"
 packages = ["openleave", "openleave.regimes", "openleave.watcher", "openleave.wagehour"]
 
 [tool.setuptools.package-data]
-openleave = ["checker.html", "parameters.json", "references.json"]
+openleave = ["checker.html", "wage_checker.html", "parameters.json", "references.json"]

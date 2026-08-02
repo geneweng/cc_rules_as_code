@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenLeave — Wage & Hour Checker</title>
+<style>
+  :root { --ok:#15803d; --no:#b91c1c; --judge:#b45309; --line:#e2e8f0; --muted:#64748b; }
+  * { box-sizing:border-box; }
+  body { font:15px/1.5 -apple-system, "Segoe UI", sans-serif; margin:0; color:#0f172a; background:#f8fafc; }
+  header { background:#0f172a; color:#f8fafc; padding:1.2rem 1.5rem; }
+  header h1 { margin:0; font-size:1.2rem; } header p { margin:.2rem 0 0; color:#94a3b8; font-size:.85rem; }
+  header a { color:#93c5fd; text-decoration:none; }
+  main { max-width:60rem; margin:1.5rem auto; padding:0 1rem; display:grid; grid-template-columns:minmax(16rem,20rem) 1fr; gap:1.5rem; }
+  @media (max-width:44rem){ main{ grid-template-columns:1fr; } }
+  form { background:#fff; border:1px solid var(--line); border-radius:.6rem; padding:1rem; align-self:start; }
+  label { display:block; font-size:.8rem; font-weight:600; color:var(--muted); margin:.7rem 0 .15rem; }
+  input, select { width:100%; padding:.4rem .5rem; border:1px solid var(--line); border-radius:.4rem; font:inherit; }
+  .row { display:flex; align-items:center; gap:.4rem; margin-top:.7rem; }
+  .row input { width:auto; } .row label { margin:0; }
+  fieldset { border:1px solid var(--line); border-radius:.5rem; margin:1rem 0 0; padding:.3rem .8rem .8rem; }
+  legend { font-size:.78rem; font-weight:600; color:var(--muted); padding:0 .3rem; }
+  button { margin-top:1rem; width:100%; padding:.55rem; border:0; border-radius:.4rem; background:#0f172a; color:#fff; font:inherit; font-weight:600; cursor:pointer; }
+  .topic { background:#fff; border:1px solid var(--line); border-radius:.6rem; padding:1rem 1.2rem; margin-bottom:1rem; }
+  .topic h2 { margin:0 0 .3rem; font-size:1rem; }
+  ul { margin:.5rem 0; padding-left:1.1rem; } li { margin:.3rem 0; }
+  .cite { color:var(--muted); font-size:.8rem; } .detail { color:var(--muted); font-size:.85rem; }
+  .judge { background:#fffbeb; border:1px solid #fde68a; border-radius:.5rem; padding:.5rem .8rem; font-size:.85rem; margin-top:.5rem; }
+  .coverage-warn { background:#fef2f2; border:1px solid #fecaca; border-left:4px solid var(--no);
+                   border-radius:.6rem; padding:.8rem 1.2rem; margin-bottom:1rem; font-size:.9rem; }
+  .coverage-warn strong { color:var(--no); }
+  .coverage-note { color:var(--muted); font-size:.82rem; margin-bottom:1rem; }
+  .disclaimer { color:var(--muted); font-size:.78rem; margin:1rem 0 2rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>OpenLeave — Wage &amp; Hour Checker</h1>
+  <p>Prototype · minimum wage + final pay · federal, CA, WA · every conclusion cites its source · not legal advice · <a href="/">leave checker →</a></p>
+</header>
+<main>
+  <form id="f">
+    <label>Work state</label>
+    <select name="work_state"><option>CA</option><option>WA</option><option>TX</option></select>
+    <label>Work locality (optional)</label>
+    <input name="work_locality" placeholder="e.g. Seattle">
+    <label>Hourly rate $ (optional)</label>
+    <input type="number" step="0.01" name="hourly_rate" value="16.00">
+    <div class="row"><input type="checkbox" id="tip" name="is_tipped"><label for="tip">Tipped employee</label></div>
+    <label>Employer total employees</label>
+    <input type="number" name="employer_total_employees" value="25">
+    <label>Evaluate as of</label>
+    <input type="date" name="as_of" value="2026-02-01">
+    <fieldset>
+      <legend>Separation (optional)</legend>
+      <label>Type</label>
+      <select name="separation_type">
+        <option value="">— none —</option>
+        <option value="fired">Fired</option>
+        <option value="laid_off">Laid off</option>
+        <option value="quit_with_notice">Quit, 72h+ notice</option>
+        <option value="quit_without_notice">Quit, no notice</option>
+      </select>
+      <label>Last day</label><input type="date" name="separation_last_day" value="2026-03-02">
+      <label>Final pay date (optional)</label><input type="date" name="final_pay_date">
+      <label>Accrued vacation hours (optional)</label><input type="number" name="accrued_vacation_hours">
+    </fieldset>
+    <button>Check compliance</button>
+  </form>
+  <section>
+    <div id="out"><p class="detail">Fill in the facts and press “Check compliance”.</p></div>
+    <p class="disclaimer" id="disc"></p>
+  </section>
+</main>
+<script>
+const f = document.getElementById('f'), out = document.getElementById('out');
+const mark = m => m === true ? '✓' : m === false ? '✗' : '⚖';
+f.addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const d = Object.fromEntries(new FormData(f));
+  const num = v => v === '' || v == null ? null : Number(v);
+  const facts = {
+    work_state: d.work_state,
+    work_locality: d.work_locality || null,
+    employer_total_employees: Number(d.employer_total_employees) || 1,
+    hourly_rate: num(d.hourly_rate),
+    is_tipped: d.is_tipped === 'on',
+  };
+  if (d.separation_type) {
+    facts.separation = {
+      type: d.separation_type, last_day: d.separation_last_day,
+      final_pay_date: d.final_pay_date || null, accrued_vacation_hours: num(d.accrued_vacation_hours),
+    };
+  }
+  const res = await fetch('/wage-hour/determinations', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ facts, as_of: d.as_of || null }) });
+  if (!res.ok) { out.innerHTML = '<p class="detail">Error: ' + (await res.text()) + '</p>'; return; }
+  const j = await res.json();
+  let html = '';
+  if (j.coverage && !j.coverage.complete) {
+    html += '<div class="coverage-warn"><strong>Incomplete coverage</strong><br>' +
+      j.coverage.warnings.join(' ') + '</div>';
+  } else if (j.coverage && j.coverage.notes.length) {
+    html += '<p class="coverage-note">' + j.coverage.notes.join(' ') + '</p>';
+  }
+  for (const t of j.topics) {
+    html += `<div class="topic"><h2>${t.name}</h2>`;
+    if (t.findings.length) html += '<ul>' + t.findings.map(x =>
+      `<li>${mark(x.met)} ${x.description} <span class="cite">[${x.citation.ref}]</span>` +
+      (x.detail ? `<br><span class="detail">${x.detail}</span>` : '') + '</li>').join('') + '</ul>';
+    if (t.human_judgment.length) html += '<div class="judge"><strong>Requires human judgment</strong><ul>' +
+      t.human_judgment.map(h => `<li>${h}</li>`).join('') + '</ul></div>';
+    if (t.notes.length) html += `<p class="detail">${t.notes.join(' ')}</p>`;
+    html += '</div>';
+  }
+  out.innerHTML = html || '<p class="detail">No wage-hour topics for these facts.</p>';
+  document.getElementById('disc').textContent = j.disclaimer + ' · evaluated as of ' + j.as_of;
+});
+</script>
+</body>
+</html>
