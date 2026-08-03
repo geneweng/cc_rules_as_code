@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OpenLeave — Reference Deployment Architecture</title>
+<style>
+  :root {
+    --ink: #1B1C24; --page: #FAFAF6; --oxblood: #6D2130; --gold: #A78B4B;
+    --muted: #5C5F6C; --green: #2E7D3B; --hairline: #D8D4C8; --panel: #F1EFE7;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #888; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { size: 1280px 860px; margin: 0; }
+
+  .canvas {
+    width: 1280px; height: 860px; background: var(--page); color: var(--ink);
+    font: 14px/1.45 "Charter", "Georgia", serif; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; padding: 34px 48px 24px;
+  }
+  .head { display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px solid var(--gold); padding-bottom: 12px; }
+  .head h1 { font: 27px/1.1 "Baskerville", serif; font-weight: normal; }
+  .head h1 em { font-style: italic; color: var(--oxblood); }
+  .head .tag { font: 11px/1 "Charter", serif; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); }
+  .head .tag b { color: var(--oxblood); font-weight: normal; }
+
+  .grid { flex: 1; display: flex; gap: 20px; padding-top: 18px; min-height: 0; }
+  .serving { flex: 2; display: flex; flex-direction: column; }
+  .sidebar { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+
+  .band { border: 1px solid var(--hairline); background: var(--panel); border-radius: 5px;
+    padding: 11px 14px; display: flex; align-items: center; gap: 16px; }
+  .band .lbl { width: 96px; flex: none; font: 10.5px/1.35 "Charter", serif; letter-spacing: 0.13em;
+    text-transform: uppercase; color: var(--oxblood); }
+  .band .lbl span { display: block; color: var(--muted); letter-spacing: 0.06em; font-size: 9px; margin-top: 3px; }
+  .band .row { flex: 1; display: flex; gap: 10px; }
+  .node { flex: 1; background: #fff; border: 1px solid var(--hairline); border-radius: 4px;
+    padding: 8px 11px; }
+  .node .t { font: 13.5px/1.2 "Baskerville", serif; }
+  .node .d { font: 10.5px/1.45 "Menlo", monospace; color: var(--muted); margin-top: 4px; }
+
+  .band.core { background: var(--ink); border-color: var(--ink); }
+  .band.core .lbl { color: var(--gold); }
+  .band.core .node { background: #24252F; border-color: #34353F; }
+  .band.core .node .t { color: var(--page); }
+  .band.core .node .d { color: #A9ABBA; }
+  .band.core .node .t em { color: var(--gold); font-style: normal; }
+
+  .flow { display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 5px 0; color: var(--gold); }
+  .flow .ar { font: 15px/1 "Baskerville", serif; }
+  .flow .cap { font: 10.5px/1 "Menlo", monospace; color: var(--muted); letter-spacing: 0.04em; }
+
+  .sidebox { border: 1px solid var(--hairline); background: var(--panel); border-radius: 5px;
+    padding: 12px 14px; }
+  .sidebox.dash { border-style: dashed; border-color: var(--gold); background: #FBF9F2; }
+  .sidebox .st { font: 10.5px/1.35 "Charter", serif; letter-spacing: 0.13em; text-transform: uppercase;
+    color: var(--oxblood); margin-bottom: 8px; }
+  .sidebox .st span { color: var(--muted); letter-spacing: 0.05em; }
+  .pipe { display: flex; flex-direction: column; gap: 0; }
+  .pipe .step { display: flex; gap: 8px; align-items: baseline; padding: 3px 0; }
+  .pipe .step .n { font: 12px/1.3 "Baskerville", serif; color: var(--oxblood); width: 14px; flex: none; }
+  .pipe .step .x { font: 11px/1.4 "Charter", serif; }
+  .pipe .step .x b { color: var(--gold); font-weight: normal; font-family: "Menlo", monospace; font-size: 10px; }
+  .pipe .down { color: var(--gold); font-size: 11px; padding-left: 4px; line-height: 1; }
+  .sidebox .note { font: italic 11.5px/1.5 "Baskerville", serif; color: var(--muted); }
+  .sidebox .kv { font: 11px/1.7 "Menlo", monospace; color: var(--muted); }
+  .sidebox .kv b { color: var(--oxblood); font-weight: normal; }
+  .feed { font: 10px/1.3 "Menlo", monospace; color: var(--gold); text-align: right; margin-top: 6px; }
+
+  .crosscut { margin-top: 12px; border: 1px solid var(--hairline); border-left: 3px solid var(--gold);
+    background: var(--panel); border-radius: 0 5px 5px 0; padding: 10px 16px; display: flex;
+    align-items: baseline; gap: 16px; }
+  .crosscut .lbl { font: 10.5px/1.35 "Charter", serif; letter-spacing: 0.13em; text-transform: uppercase;
+    color: var(--oxblood); flex: none; }
+  .crosscut .items { font: 11.5px/1.5 "Menlo", monospace; color: var(--muted); }
+
+  .foot { display: flex; justify-content: space-between; align-items: baseline; margin-top: 14px; }
+  .foot .legend { font: italic 12px/1.5 "Baskerville", serif; color: var(--muted); max-width: 60rem; }
+  .foot .legend b { font-style: normal; color: var(--oxblood); }
+  .foot .brand { font: 10px/1 "Menlo", monospace; color: var(--muted); letter-spacing: 0.06em; flex: none; }
+  .gold { color: var(--gold); }
+</style>
+</head>
+<body>
+<div class="canvas">
+
+  <div class="head">
+    <h1>Reference <em>deployment</em> architecture</h1>
+    <div class="tag"><b>OpenLeave</b> &nbsp;·&nbsp; API-first · usage-based · stateless</div>
+  </div>
+
+  <div class="grid">
+
+    <!-- SERVING PATH -->
+    <div class="serving">
+
+      <div class="band">
+        <div class="lbl">Consumers<span>who call it</span></div>
+        <div class="row">
+          <div class="node"><div class="t">Platform</div><div class="d">payroll / HRIS / EOR<br>embeds the API</div></div>
+          <div class="node"><div class="t">AI HR copilot</div><div class="d">MCP client<br>call, don't recall</div></div>
+          <div class="node"><div class="t">Dashboard</div><div class="d">browser checker<br>/ admin UI</div></div>
+        </div>
+      </div>
+
+      <div class="flow"><span class="ar">▼</span><span class="cap">HTTPS · MCP over stdio/SSE</span></div>
+
+      <div class="band">
+        <div class="lbl">Edge<span>cache + shield</span></div>
+        <div class="row">
+          <div class="node"><div class="t">CDN + WAF</div><div class="d">TLS · DDoS · bot filtering</div></div>
+          <div class="node"><div class="t">Edge cache</div><div class="d">determinations are deterministic<br>→ (facts + date + version) cacheable</div></div>
+        </div>
+      </div>
+
+      <div class="flow"><span class="ar">▼</span></div>
+
+      <div class="band">
+        <div class="lbl">Gateway<span>+ auth</span></div>
+        <div class="row">
+          <div class="node"><div class="t">API gateway</div><div class="d">API keys · scopes · rate limit<br>usage metering →</div></div>
+          <div class="node"><div class="t">Identity</div><div class="d">WorkOS / Auth0<br>SSO · SCIM (dashboard)</div></div>
+        </div>
+      </div>
+
+      <div class="flow"><span class="ar">▼</span><span class="cap">validated request + as_of date</span></div>
+
+      <div class="band core">
+        <div class="lbl">Core<span>compute</span></div>
+        <div class="row">
+          <div class="node"><div class="t">Stateless <em>determination</em> service</div>
+            <div class="d">FastAPI + OpenLeave engine + MCP server<br>autoscaling (Cloud Run / Fargate) · scales to zero</div></div>
+          <div class="node"><div class="t"><em>No PII stored</em></div>
+            <div class="d">facts in, cited answer out;<br>nothing persisted in the hot path</div></div>
+        </div>
+      </div>
+
+      <div class="flow"><span class="ar">▼</span><span class="cap">provenance only — hashed refs, not raw PII</span></div>
+
+      <div class="band">
+        <div class="lbl">Data<span>audit only</span></div>
+        <div class="row">
+          <div class="node"><div class="t">Tokenized audit log</div><div class="d">Postgres · determination provenance,<br>engine version, tokenized subject refs</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+      <div class="sidebox">
+        <div class="st">Billing <span>· usage-based</span></div>
+        <div class="kv"><b>Stripe</b> — metered subscriptions<br><b>Orb / Metronome</b> — per-determination</div>
+        <div class="feed">◀ usage events from the gateway</div>
+      </div>
+
+      <div class="sidebox dash">
+        <div class="st">Content pipeline <span>· the moat</span></div>
+        <div class="pipe">
+          <div class="step"><span class="n">1</span><span class="x">Amendment / agency notice</span></div>
+          <div class="down">▼</div>
+          <div class="step"><span class="n">2</span><span class="x">LLM drafts a <b>parameter diff</b></span></div>
+          <div class="down">▼</div>
+          <div class="step"><span class="n">3</span><span class="x">Regression suite <b>gates</b> it</span></div>
+          <div class="down">▼</div>
+          <div class="step"><span class="n">4</span><span class="x"><b>Counsel review</b> + sign-off</span></div>
+          <div class="down">▼</div>
+          <div class="step"><span class="n">5</span><span class="x">Publish <b>versioned</b> content</span></div>
+        </div>
+        <div class="feed">deploys new params ▶ into Core</div>
+      </div>
+
+      <div class="sidebox">
+        <div class="st">Observability</div>
+        <div class="kv">metrics · traces · structured logs<br>error tracking · uptime SLA</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="crosscut">
+    <div class="lbl">Security &amp; compliance<br><span style="color:var(--muted);letter-spacing:.05em;font-size:9px">cross-cutting</span></div>
+    <div class="items">secrets manager &nbsp;·&nbsp; least-privilege IAM &nbsp;·&nbsp; TLS in transit + at rest &nbsp;·&nbsp;
+      dependency / vuln scanning &nbsp;·&nbsp; DPA + data minimization &nbsp;·&nbsp; SOC 2 Type II (Vanta) &nbsp;·&nbsp;
+      E&amp;O insurance &nbsp;·&nbsp; "decision support, not legal advice" in every response</div>
+  </div>
+
+  <div class="foot">
+    <div class="legend"><b>Reading it:</b> statelessness makes the serving path cacheable and PII-light — the
+      hard scaling is <span class="gold">verified content</span> (the pipeline, right), not compute. Marketing
+      site + browser checker are static, hosted separately. <em>Reference topology — a target, not yet built.</em></div>
+    <div class="brand">OPENLEAVE · github.com/geneweng/cc_rules_as_code</div>
+  </div>
+
+</div>
+</body>
+</html>

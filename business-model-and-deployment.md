@@ -58,7 +58,9 @@ Treat this as the #1 workstream. Everything below is comparatively solved-proble
 ## 3. Hosting / deployment
 
 The core determination is **stateless, CPU-only, fast, with no external calls** (pure Python +
-in-memory parameters). It is trivially scalable, cache-friendly, and runs almost anywhere.
+in-memory parameters). It is trivially scalable, cache-friendly, and runs almost anywhere. See the
+one-page reference topology: [`deployment-architecture.pdf`](deployment-architecture.pdf) (source:
+[`deployment-architecture.html`](deployment-architecture.html)).
 
 | Stage | Recommendation | Why |
 |---|---|---|
