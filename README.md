@@ -13,6 +13,7 @@ A survey of **Rules as Code (RaC)** — the practice of publishing an official, 
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How OpenLeave is built and why — layers, data flow, honesty invariants, extension points |
 | [`tests/`](tests/) | Scenario-based regression suite for the encodings (224 tests) |
 | [`wage-hour-expansion-scope.md`](wage-hour-expansion-scope.md) | Scoping doc for the wage-and-hour expansion (the "market is employment law" thesis) |
+| **Go-to-market kit** | Strategy, pitch, pricing, and outreach — see [Business and go-to-market collateral](#business-and-go-to-market-collateral) |
 
 ## OpenLeave prototype
 
@@ -134,6 +135,40 @@ What the slice demonstrates:
 - **Final pay with real teeth** — California's immediate-on-firing deadline, the 72-hour rule for a no-notice quit, waiting-time-penalty exposure for late payment, and mandatory accrued-vacation payout (valued: 40 hrs × $30 = $1,200) — contrasted with Washington's next-pay-period rule and policy-dependent vacation (returned as `met: null`, a human-judgment point).
 
 Full surface parity with leave: the `openleave_check_wage_hour` MCP tool, a `POST /wage-hour/determinations` API endpoint, and a browser checker at `GET /wage-hour` (linked from the leave checker).
+
+## Business and go-to-market collateral
+
+Beyond the working prototype, the repo carries the commercialization kit — strategy, pitch, pricing, and outreach — all in the same statute-book visual identity. The one-page sheets and decks are authored in HTML and rendered to PDF via headless Chrome.
+
+**Strategy and narrative**
+
+| Doc | What it is |
+|---|---|
+| [`product-brainstorm-openleave.md`](product-brainstorm-openleave.md) | Why leave law — the market-validated product pick |
+| [`wage-hour-expansion-scope.md`](wage-hour-expansion-scope.md) | Scoping the "market is employment law" expansion |
+| [`business-model-and-deployment.md`](business-model-and-deployment.md) | Business model (API-first, usage-based, open-core), hosting, auth, security, scalability |
+| [`pricing-model-sketch.md`](pricing-model-sketch.md) | First-draft pricing model — tiers, metering, the open-core line |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | How OpenLeave is built and why — layers, data flow, honesty invariants |
+
+**Pitch and sales sheets** — one-page PDFs (each `*.pdf` has an `*.html` source that renders to it)
+
+| File | What it is |
+|---|---|
+| [`design-partner-onepager.pdf`](design-partner-onepager.pdf) | The "why embed OpenLeave" sell for platforms and AI copilots |
+| [`pricing-sheet.pdf`](pricing-sheet.pdf) | One-page visual pricing sheet (illustrative) |
+| [`deployment-architecture.pdf`](deployment-architecture.pdf) | Reference deployment topology |
+| [`architecture-deck.pdf`](architecture-deck.pdf) · [`ARCHITECTURE.pdf`](ARCHITECTURE.pdf) | The architecture as a 12-slide deck and a rendered document |
+| [`investor-deck.pdf`](investor-deck.pdf) | Investor pitch deck |
+| [`sales-pitch.pdf`](sales-pitch.pdf) | Short sales pitch |
+| [`how-it-works-deck.pdf`](how-it-works-deck.pdf) · [`how-it-works.pdf`](how-it-works.pdf) | Raw rule → coded rule → facts → result, as a deck and a doc |
+| [`demo-video.mp4`](demo-video.mp4) | Recorded walkthrough of the prototype |
+
+**Outreach and the live site**
+
+| Item | What it is |
+|---|---|
+| [`design-partner-outreach.md`](design-partner-outreach.md) | Cold-outbound email copy for platforms and AI copilots |
+| [`docs/index.html`](docs/index.html) | Landing page — **live at [geneweng.github.io/cc_rules_as_code](https://geneweng.github.io/cc_rules_as_code/)** |
 
 ## What's covered
 
