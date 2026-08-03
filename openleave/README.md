@@ -201,6 +201,9 @@ date.
 
 ## Layout
 
+For the design rationale behind this layout — the layers, data flow, and the honesty invariants that
+shape the core — see [`ARCHITECTURE.md`](../ARCHITECTURE.md).
+
 ```
 openleave/
   engine.py          Finding / Citation / RegimeResult; the shared justification-tree types
