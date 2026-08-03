@@ -9,7 +9,7 @@ A survey of **Rules as Code (RaC)** — the practice of publishing an official, 
 | [`rules-as-code-survey.md`](rules-as-code-survey.md) | The survey in Markdown, with ~30 linked sources |
 | [`rules-as-code-survey.pdf`](rules-as-code-survey.pdf) | The same survey rendered as a PDF |
 | [`product-brainstorm-openleave.md`](product-brainstorm-openleave.md) | Product brainstorm + market validation for **OpenLeave**, a leave-law rules engine |
-| [`openleave/`](openleave/) | Working prototype of the OpenLeave MVP (see below) |
+| [`openleave/`](openleave/) | Working prototype of the OpenLeave MVP — see its [package README](openleave/README.md) for install, the sample agent, MCP, and API |
 | [`tests/`](tests/) | Scenario-based regression suite for the encodings (224 tests) |
 | [`wage-hour-expansion-scope.md`](wage-hour-expansion-scope.md) | Scoping doc for the wage-and-hour expansion (the "market is employment law" thesis) |
 
