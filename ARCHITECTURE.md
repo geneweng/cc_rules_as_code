@@ -129,7 +129,7 @@ evaluate(facts, as_of):
 ```
 
 **Wage & hour.** Each topic is a module in `wagehour/` exposing `assess(facts, as_of) -> WageTopic
-| None` (returning `None` when it doesn't apply — e.g. no separation → no final-pay topic).
+| None` (returning `None` when it doesn't apply — e.g. no separation means no final-pay topic).
 `assess_wage_hour()` runs minimum wage, then optionally exemption, overtime, and final pay.
 
 The two dispatchers are deliberately parallel:
@@ -236,7 +236,7 @@ reflex, and the verification manifest — and adds only what is genuinely differ
 This is the template for a third domain (e.g. meal/rest breaks, WARN-Act notice): keep the shared
 substrate, add a fact shape + entry point + assessors + manifest entries.
 
-The `exemptions` ↔ `overtime` coupling is the one intentional intra-domain dependency: overtime is
+The coupling between `exemptions` and `overtime` is the one intentional intra-domain dependency: overtime is
 owed only to non-exempt workers, so `overtime.assess` consults `exemptions.salary_test` to state its
 result as conditional when a worker is *possibly* exempt (salary test met, duties test unresolved).
 Even here the duties test is never decided — it is passed through as human judgment.
