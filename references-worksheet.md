@@ -4,7 +4,7 @@
 
 **How to use:** A reviewer works one jurisdiction at a time: open the source pages, check each parameter's value(s) and effective date(s) against the agency's published figures and the cited statute, check each structural claim, then set verified/verified_by/verified_on. Run `python -m openleave.references check` to confirm the manifest still covers every encoded parameter.
 
-**Progress:** 0/18 jurisdictions verified; 124/124 parameters documented.
+**Progress:** 0/18 jurisdictions verified; 130/130 parameters documented.
 
 ## CA — California Paid Family Leave (PFL) and CFRA
 
@@ -42,6 +42,9 @@
 | ☐ | `minwage.CA.los_angeles_county` | Unincorporated LA County local minimum wage ($/hr; adjusts July 1) | 17.81 [2025-07-01] |
 | ☐ | `minwage.CA.oakland` | Oakland local minimum wage ($/hr; adjusts Jan 1) | 17.34 [2026-01-01] |
 | ☐ | `minwage.CA.san_jose` | San Jose local minimum wage ($/hr; adjusts Jan 1) | 18.45 [2026-01-01] |
+| ☐ | `exempt.CA.multiplier` | Exemption salary threshold as a multiple of the state minimum wage | 2.0 [2000-01-01] |
+| ☐ | `overtime.CA.daily_threshold_hours` | Daily hours before 1.5x overtime is owed | 8 [2000-01-01] |
+| ☐ | `overtime.CA.double_time_daily_hours` | Daily hours before 2x double-time is owed | 12 [2000-01-01] |
 
 **Structural claims to verify (not single numbers):**
 
@@ -52,6 +55,8 @@
 - ☐ The finalpay.* effective dates are 'in force since at least 2000' floors, not researched precisely.
 - ☐ Local minimum wages (SF $19.18, LA city $17.87, LA county $17.81 from 2025-07-01; Oakland $17.34, San Jose $18.45 from 2026-01-01) govern where higher than the state rate; the local ordinance citations are prototype approximations.
 - ☐ Several localities have employer-size tiers; the encoded rate is the standard/large-employer rate.
+- ☐ Exemption threshold is 2x the state minimum wage for a full-time week: $70,304/yr in 2026 (computer professionals and licensed professionals have separate rules, not encoded).
+- ☐ Daily overtime: 1.5x over 8 hours, 2x over 12; the 7th consecutive workday is 1.5x for 8 hours then 2x; the weekly 40-hour rule applies without pyramiding.
 
 ## CO — Colorado Family and Medical Leave Insurance (FAMLI)
 
@@ -163,12 +168,16 @@
 | ☐ | `minwage.federal` | Federal minimum wage ($/hr) | 7.25 [2009-07-24] |
 | ☐ | `minwage.federal.tipped_cash` | Federal tipped cash minimum wage ($/hr) | 2.13 [1991-04-01] |
 | ☐ | `minwage.federal.tip_credit_max` | Maximum federal tip credit ($/hr) | 5.12 [1991-04-01] |
+| ☐ | `exempt.federal.salary_weekly` | White-collar exemption salary threshold ($/week) | 684.0 [2020-01-01] |
+| ☐ | `overtime.federal.weekly_threshold_hours` | Weekly hours before overtime is owed | 40 [1940-10-24] |
 
 **Structural claims to verify (not single numbers):**
 
 - ☐ Federal minimum wage has been $7.25 since 2009-07-24.
 - ☐ Tipped cash wage $2.13 + max tip credit $5.12 = the $7.25 floor; tips must make up the difference.
 - ☐ State minimum wages and state tip-credit rules override this floor where higher/stricter.
+- ☐ The $684/week exemption threshold is the 2019 level, restored after the 2024 DOL rule was vacated (Nov 2024) and formally reinstated May 2026 — encoded as the governing standard throughout.
+- ☐ FLSA overtime is 1.5x over 40 hours/week; the higher of federal and state salary threshold governs exemption (most favorable to the employee).
 
 ## FMLA — Federal Family and Medical Leave Act
 
@@ -398,12 +407,14 @@
 | ☐ | `minwage.WA.everett` | Everett local minimum wage ($/hr) | 20.77 [2026-01-01] |
 | ☐ | `minwage.WA.bellingham` | Bellingham local minimum wage ($/hr) | 19.13 [2026-01-01] |
 | ☐ | `minwage.WA.king_county` | Unincorporated King County local minimum wage ($/hr) | 20.82 [2026-01-01] |
+| ☐ | `exempt.WA.multiplier` | Exemption salary threshold as a multiple of the state minimum wage | 2.25 [2026-01-01] |
 
 **Structural claims to verify (not single numbers):**
 
 - ☐ Minimum wage is CPI-indexed annually: $16.66 (2025) -> $17.13 (2026), highest state rate in the nation.
 - ☐ Washington prohibits the tip credit: tipped workers get full minimum in cash.
 - ☐ Final wages are due by the end of the next established pay period; no statutory vacation payout.
+- ☐ Exemption threshold is 2.25x the state minimum wage in 2026 ($80,168/yr), phasing to 2.5x by 2028; overtime is 1.5x over 40 hours/week (no daily overtime).
 - ☐ Encoded 2026 local minimums: Seattle $21.30, Tukwila $21.65, Burien $21.63, Renton $21.57, King County $20.82, Everett $20.77, Bellingham $19.13; local ordinance citations are prototype approximations.
 - ☐ SeaTac's ~$20.74 applies only to hospitality/transportation workers, not city-wide — deliberately NOT encoded, still warned.
 - ☐ Several localities have employer-size tiers; the encoded rate is the standard/large-employer rate.

@@ -52,6 +52,14 @@
     <label>Evaluate as of</label>
     <input type="date" name="as_of" value="2026-02-01">
     <fieldset>
+      <legend>Overtime &amp; exemption (optional)</legend>
+      <label>Hours worked this week</label><input type="number" step="0.5" name="weekly_hours" placeholder="e.g. 48">
+      <label>Daily hours (CA only, comma-separated)</label><input name="daily_hours" placeholder="e.g. 10,10,10,10,8,0,0">
+      <label>Nondiscretionary bonus $ this week</label><input type="number" step="0.01" name="nondiscretionary_bonus">
+      <div class="row"><input type="checkbox" id="ex" name="claimed_exempt"><label for="ex">Employer claims exempt</label></div>
+      <label>Annual salary $ (if salaried)</label><input type="number" name="annual_salary" placeholder="e.g. 75000">
+    </fieldset>
+    <fieldset>
       <legend>Separation (optional)</legend>
       <label>Type</label>
       <select name="separation_type">
@@ -85,6 +93,11 @@ f.addEventListener('submit', async ev => {
     employer_total_employees: Number(d.employer_total_employees) || 1,
     hourly_rate: num(d.hourly_rate),
     is_tipped: d.is_tipped === 'on',
+    weekly_hours: num(d.weekly_hours),
+    daily_hours: d.daily_hours ? d.daily_hours.split(',').map(x => Number(x.trim())) : null,
+    nondiscretionary_bonus: num(d.nondiscretionary_bonus),
+    claimed_exempt: d.claimed_exempt === 'on',
+    annual_salary: num(d.annual_salary),
   };
   if (d.separation_type) {
     facts.separation = {

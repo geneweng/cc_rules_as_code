@@ -186,6 +186,104 @@ class TestFinalPayUnencodedState:
         assert any("not encoded" in n for n in fp["notes"])
 
 
+class TestOvertime:
+    def test_flsa_weekly_overtime(self):
+        r = assess_wage_hour(
+            WageFacts(work_state="WA", hourly_rate=25.0, weekly_hours=48), date(2026, 2, 1))
+        ot = topic(r, "overtime")
+        assert ot["data"]["overtime_hours_1_5x"] == pytest.approx(8.0)
+        assert ot["data"]["overtime_premium_owed"] == pytest.approx(100.0)  # 8 * 0.5 * $25
+
+    def test_no_overtime_at_forty_hours(self):
+        r = assess_wage_hour(
+            WageFacts(work_state="TX", hourly_rate=20.0, weekly_hours=40), date(2026, 2, 1))
+        assert topic(r, "overtime")["data"]["overtime_hours_1_5x"] == pytest.approx(0.0)
+
+    def test_california_daily_overtime_and_double_time(self):
+        # One 13-hour day: 8 straight, 4 at 1.5x (8-12), 1 at 2x (>12).
+        r = assess_wage_hour(
+            WageFacts(work_state="CA", hourly_rate=20.0, daily_hours=[13, 0, 0, 0, 0, 0, 0]),
+            date(2026, 2, 1))
+        ot = topic(r, "overtime")
+        assert ot["data"]["overtime_hours_1_5x"] == pytest.approx(4.0)
+        assert ot["data"]["overtime_hours_2x"] == pytest.approx(1.0)
+        assert ot["data"]["overtime_premium_owed"] == pytest.approx(60.0)  # 4*.5*20 + 1*1*20
+
+    def test_california_seventh_consecutive_day(self):
+        # 7 x 8 hours: days 1-6 straight (48h -> 8 over 40 to weekly OT), day 7 all OT.
+        r = assess_wage_hour(
+            WageFacts(work_state="CA", hourly_rate=20.0, daily_hours=[8, 8, 8, 8, 8, 8, 8]),
+            date(2026, 2, 1))
+        ot = topic(r, "overtime")
+        assert ot["data"]["overtime_hours_1_5x"] == pytest.approx(16.0)
+        assert ot["data"]["straight_hours"] == pytest.approx(40.0)
+
+    def test_california_weekly_only_without_daily_breakdown(self):
+        r = assess_wage_hour(
+            WageFacts(work_state="CA", hourly_rate=20.0, weekly_hours=50), date(2026, 2, 1))
+        ot = topic(r, "overtime")
+        assert ot["data"]["overtime_hours_1_5x"] == pytest.approx(10.0)
+        assert any("daily_hours" in n for n in ot["notes"])
+
+    def test_blended_regular_rate_with_bonus(self):
+        r = assess_wage_hour(
+            WageFacts(work_state="WA", hourly_rate=20.0, weekly_hours=50, nondiscretionary_bonus=100),
+            date(2026, 2, 1))
+        ot = topic(r, "overtime")
+        assert ot["data"]["regular_rate"] == pytest.approx(22.0)  # (20*50 + 100)/50
+        assert ot["data"]["overtime_premium_owed"] == pytest.approx(110.0)  # 10 * 0.5 * 22
+
+    def test_overtime_conditional_when_possibly_exempt(self):
+        r = assess_wage_hour(
+            WageFacts(work_state="CA", hourly_rate=40.0, weekly_hours=50, claimed_exempt=True,
+                      annual_salary=90000), date(2026, 2, 1))
+        ot = topic(r, "overtime")
+        assert any("may be EXEMPT" in n for n in ot["notes"])
+        assert ot["human_judgment"]
+
+
+class TestExemption:
+    def test_salary_below_threshold_is_definitively_non_exempt(self):
+        r = assess_wage_hour(
+            WageFacts(work_state="CA", claimed_exempt=True, annual_salary=60000, weekly_hours=50,
+                      hourly_rate=30), date(2026, 2, 1))
+        ex = topic(r, "exemption")
+        assert ex["data"]["status"] == "non_exempt_salary_below_threshold"
+        assert ex["data"]["salary_meets_threshold"] is False
+        assert finding(ex, "salary_basis")["met"] is False
+
+    def test_california_threshold_is_two_times_minimum_wage(self):
+        r = assess_wage_hour(
+            WageFacts(work_state="CA", annual_salary=80000, claimed_exempt=True), date(2026, 2, 1))
+        # 2 * $16.90 * 40 * 52 = $70,304
+        assert topic(r, "exemption")["data"]["applicable_salary_threshold_annual"] == pytest.approx(70304.0)
+
+    def test_washington_threshold_is_2_25_times_minimum_wage(self):
+        r = assess_wage_hour(
+            WageFacts(work_state="WA", annual_salary=90000, claimed_exempt=True), date(2026, 2, 1))
+        # 2.25 * $17.13 * 40 * 52 = $80,168.40
+        assert topic(r, "exemption")["data"]["applicable_salary_threshold_annual"] == pytest.approx(80168.4)
+
+    def test_duties_test_is_never_auto_resolved(self):
+        r = assess_wage_hour(
+            WageFacts(work_state="CA", annual_salary=90000, claimed_exempt=True), date(2026, 2, 1))
+        ex = topic(r, "exemption")
+        assert finding(ex, "duties_test")["met"] is None  # always human judgment
+        assert ex["data"]["status"] == "possibly_exempt_pending_duties"
+        assert any("duties" in h for h in ex["human_judgment"])
+
+    def test_higher_of_federal_and_state_governs(self):
+        # WA's $80,168 threshold beats the federal $35,568.
+        r = assess_wage_hour(
+            WageFacts(work_state="WA", annual_salary=90000, claimed_exempt=True), date(2026, 2, 1))
+        assert topic(r, "exemption")["data"]["threshold_governing_level"] == "WA"
+
+    def test_no_exemption_topic_for_a_plain_hourly_worker(self):
+        r = assess_wage_hour(
+            WageFacts(work_state="CA", hourly_rate=20.0, weekly_hours=50), date(2026, 2, 1))
+        assert topic(r, "exemption") is None
+
+
 class TestStructure:
     def test_no_separation_means_no_final_pay_topic(self):
         r = assess_wage_hour(WageFacts(work_state="CA", hourly_rate=20.0), date(2026, 2, 1))

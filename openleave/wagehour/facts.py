@@ -48,7 +48,23 @@ class WageFacts(BaseModel):
         default=None, ge=0, description="Effective hourly cash wage, for the minimum-wage check"
     )
     is_tipped: bool = Field(default=False, description="Employee regularly receives tips")
-    weekly_hours: float | None = Field(default=None, ge=0)
+    weekly_hours: float | None = Field(default=None, ge=0, le=168)
+    daily_hours: list[float] | None = Field(
+        default=None,
+        description="Hours worked each day of the workweek, in order (e.g. [10,10,10,10,8,0,0]). "
+        "Needed for California daily and 7th-day overtime; sums to the weekly hours.",
+    )
+    nondiscretionary_bonus: float | None = Field(
+        default=None, ge=0,
+        description="Nondiscretionary bonus/commission earned in the workweek; folds into the "
+        "regular rate for overtime (a blended rate).",
+    )
+    claimed_exempt: bool = Field(
+        default=False, description="Whether the employer classifies the worker as overtime-exempt"
+    )
+    annual_salary: float | None = Field(
+        default=None, ge=0, description="Annual salary, for the white-collar exemption salary test"
+    )
     separation: Separation | None = Field(
         default=None, description="Present when assessing final-pay-on-separation rules"
     )

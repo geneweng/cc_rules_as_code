@@ -122,5 +122,11 @@
   "minwage.CA.los_angeles": [["2025-07-01", 17.87]],
   "minwage.CA.los_angeles_county": [["2025-07-01", 17.81]],
   "minwage.CA.oakland": [["2026-01-01", 17.34]],
-  "minwage.CA.san_jose": [["2026-01-01", 18.45]]
+  "minwage.CA.san_jose": [["2026-01-01", 18.45]],
+  "exempt.federal.salary_weekly": [["2020-01-01", 684.0]],
+  "exempt.CA.multiplier": [["2000-01-01", 2.0]],
+  "exempt.WA.multiplier": [["2026-01-01", 2.25]],
+  "overtime.federal.weekly_threshold_hours": [["1940-10-24", 40]],
+  "overtime.CA.daily_threshold_hours": [["2000-01-01", 8]],
+  "overtime.CA.double_time_daily_hours": [["2000-01-01", 12]]
 }

@@ -14,7 +14,7 @@ The arc so far: internet survey → validated product brainstorm → working eng
 amendment pipeline → go-to-market collateral (decks, video, landing page) → MCP server →
 expanded jurisdiction coverage.
 
-## Current state (all committed, tree clean, 204 tests passing)
+## Current state (all committed, tree clean, 219 tests passing)
 
 **The engine** (`openleave/`) — sixteen regimes across fourteen jurisdictions. **Every
 comprehensive U.S. paid-family-leave program is now encoded.**
@@ -49,8 +49,8 @@ comprehensive U.S. paid-family-leave program is now encoded.**
 - Regime modules in `openleave/regimes/`; coverage in `openleave/coverage.py`; interactions in
   `openleave/interactions.py`.
 
-**The verification manifest** (`openleave/references.json` + `references.py`) — maps all 124
-parameters (leave + wage-and-hour, incl. 12 local minimum wages) to statute + agency URL + a plain-English meaning, grouped by jurisdiction with
+**The verification manifest** (`openleave/references.json` + `references.py`) — maps all 130
+parameters (leave + wage-and-hour, incl. 12 local minimum wages + overtime/exemption) to statute + agency URL + a plain-English meaning, grouped by jurisdiction with
 `verified`/`verified_by`/`verified_on` sign-off fields and structural "claims" (logic/formulas
 that aren't single numbers). This is the worksheet for the counsel-verification pass — the #1
 gate before real use. Guarded by `tests/test_references.py`: it must document *exactly* the
@@ -70,10 +70,9 @@ New fact model (`WageFacts`/`Separation`, event → ongoing-state) and entry poi
 compliance (a wage that clears CA's 2025 floor fails its 2026 floor), the CA/WA tip-credit
 prohibition vs the federal $2.13 credit, loud Seattle-locality under-coverage warnings, and CA's
 immediate-final-pay + waiting-time-penalty + mandatory vacation payout vs WA's next-pay-period
-rule. **Deferred to Phase 2 (deliberately): overtime math and exempt classification** (the duties
-test is open-textured / high-liability). **Full surface parity with leave:** MCP tool
-`openleave_check_wage_hour`, API `POST /wage-hour/determinations`, and a browser checker at
-`GET /wage-hour` (`wage_checker.html`, linked from the leave checker; verified via screenshot).
+rule. **Full surface parity with leave:** MCP tool `openleave_check_wage_hour`, API
+`POST /wage-hour/determinations`, and a browser checker at `GET /wage-hour` (`wage_checker.html`,
+linked from the leave checker; verified via screenshot).
 **Phase 1.5 DONE — locality minimum wages** (`wagehour/localities.py`): 12 marquee WA + CA local
 rates encoded (Seattle $21.30, Tukwila, Burien, Renton, Everett, Bellingham, King County; SF, LA
 city/county, Oakland, San Jose). Min wage is now `max(federal, state, local)` with the governing
@@ -81,6 +80,15 @@ level cited; an encoded locality is a complete answer, an unencoded one still wa
 an ordinance), and SeaTac is intentionally unencoded (its $20.74 is hospitality/transportation-only).
 Locality name → slug normalization drops "unincorporated". SF/LA are July-1-dated, so a pre-July
 query correctly falls back to state with a "not yet in effect" note.
+**Phase 2 DONE — overtime + exempt classification** (`wagehour/overtime.py`, `exemptions.py`):
+FLSA/WA weekly OT and CA daily(>8→1.5x, >12→2x)/7th-day/weekly-non-pyramiding, with a blended
+regular rate (nondiscretionary bonus). Exemption: salary test decided by rule (federal $684/wk;
+CA 2× min wage = $70,304/yr; WA 2.25× = $80,168/yr — computed from min wage, higher-of governs);
+the **duties test is ALWAYS returned `met: null` + human_judgment — never auto-classified**. A
+sub-threshold salary is definitively non-exempt; otherwise "possibly exempt pending duties" and
+overtime is stated as conditional. This is the deliberate honesty boundary (misclassification
+liability). New WageFacts fields: daily_hours, weekly_hours, nondiscretionary_bonus, claimed_exempt,
+annual_salary. MCP tool + browser checker extended with these inputs; both verified.
 
 **The AI amendment pipeline** (`openleave/watcher/`) — LLM drafts a parameter/logic diff from
 an amendment doc → regression suite gates it (`OPENLEAVE_PARAM_OVERRIDES`) → human approves →
@@ -106,7 +114,7 @@ https://geneweng.github.io/cc_rules_as_code/** (GitHub Pages, `main`/`/docs`).
 
 ```sh
 cd ~/cc_projects/cc_rules_as_code
-.venv/bin/pytest -q                                   # 204 tests
+.venv/bin/pytest -q                                   # 219 tests
 .venv/bin/uvicorn openleave.api:app                   # checker at http://127.0.0.1:8000
 .venv/bin/python -m openleave.mcp_server              # MCP over stdio
 .venv/bin/python -m openleave.watcher --help          # amendment pipeline CLI
@@ -130,7 +138,7 @@ Video/render scratch work lived under the session scratchpad (not in the repo).
 - **The demo video narration is synthetic TTS** — fine for a prototype, re-record with a human
   voice for anything customer-facing. Scene 5's LLM `analyze` step was narrated without
   claiming that specific run was live (no API key).
-- **Traction is internal only** — 204 tests and a working pipeline are engineering traction, not
+- **Traction is internal only** — 219 tests and a working pipeline are engineering traction, not
   market traction. No real design partner, lawyer, or dollar has touched this yet.
 
 ## Decisions already made (don't relitigate)
@@ -153,10 +161,10 @@ Video/render scratch work lived under the session scratchpad (not in the repo).
    expansion, not a gap-fill. The bigger frontier now is #2.
 2. **Wage-and-hour / termination-rules expansion** — scoped (`wage-hour-expansion-scope.md`) and
    **Phase 1 built** (minimum wage + final pay, federal/CA/WA, in `openleave/wagehour/`).
-   Surface parity DONE (MCP + API + browser). Phase 1.5 DONE (12 WA/CA locality minimum wages).
-   Immediate next steps: widen wage-hour state coverage (NY/IL/CO/... so NYC/Chicago/Denver
-   localities have a state base) OR go to Phase 2 (overtime + exempt classification — encode the
-   salary threshold, flag the duties test — the highest-value, highest-liability piece).
+   Surface parity DONE. Phase 1.5 DONE (localities). Phase 2 DONE (overtime + exempt
+   classification). Wage-hour now covers minimum wage, overtime, exemptions, and final pay for
+   federal/CA/WA + 12 localities. Natural next steps: widen wage-hour state coverage (NY/IL/CO/...);
+   add meal/rest-break rules (CA premium pay); or WARN-Act mass-layoff notice on the separation side.
 3. **Accuracy verification pass** — the per-jurisdiction reference manifest now EXISTS
    (`references.json` + `references-worksheet.md`, 0/15 verified). What remains is the human
    step: get an employment lawyer to work the worksheet and record sign-off. Still the prereq

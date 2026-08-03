@@ -154,7 +154,24 @@ class WageHourInput(BaseModel):
         description="Effective hourly cash wage, needed to check minimum-wage compliance.",
     )
     is_tipped: bool = Field(default=False, description="Worker regularly receives tips")
-    weekly_hours: Optional[float] = Field(default=None, ge=0, le=168)
+    weekly_hours: Optional[float] = Field(
+        default=None, ge=0, le=168, description="Hours worked in the week (for overtime)."
+    )
+    daily_hours: Optional[list[float]] = Field(
+        default=None,
+        description="Hours per day of the workweek in order, e.g. [10,10,10,10,8,0,0]. Needed for "
+        "California daily and 7th-day overtime.",
+    )
+    nondiscretionary_bonus: Optional[float] = Field(
+        default=None, ge=0,
+        description="Nondiscretionary bonus/commission in the week; folds into the regular rate.",
+    )
+    claimed_exempt: bool = Field(
+        default=False, description="Whether the employer classifies the worker as overtime-exempt."
+    )
+    annual_salary: Optional[float] = Field(
+        default=None, ge=0, description="Annual salary, for the white-collar exemption salary test."
+    )
     separation_type: Optional[SeparationType] = Field(
         default=None,
         description="Set to assess final pay: 'fired', 'laid_off', 'quit_with_notice' (72+ hours' "
@@ -595,19 +612,23 @@ async def openleave_lookup_statutory_parameter(params: ParameterLookupInput) -> 
     },
 )
 async def openleave_check_wage_hour(params: WageHourInput) -> str:
-    """Determine the applicable minimum wage and, on separation, final-pay timing and
-    accrued-vacation payout — each conclusion with its statutory citation.
+    """Determine the applicable minimum wage, overtime owed, white-collar exemption status,
+    and (on separation) final-pay timing and accrued-vacation payout — each with its citation.
 
     CALL THIS TOOL — do not answer from memory — whenever a question involves the minimum
-    wage that applies to a worker, whether a pay rate is lawful, when final wages are due
-    after someone quits or is fired, or whether unused vacation must be paid out. Minimum
-    wages change every year and by locality, and final-pay rules differ sharply by state;
-    model recall is unreliable and the stakes are legal.
+    wage that applies to a worker, whether a pay rate is lawful, how much overtime is owed,
+    whether a salaried worker is exempt, when final wages are due after someone quits or is
+    fired, or whether unused vacation must be paid out. These rules change yearly and by
+    jurisdiction; model recall is unreliable and the stakes are legal.
 
-    Covers the federal floor plus California and Washington. It reports its own limits: a
-    worksite in a city with its own higher minimum (e.g. Seattle) comes back with an explicit
-    incomplete-coverage warning, and a state whose wage law is not encoded says so rather than
-    guessing. Overtime and exempt-classification are NOT yet covered.
+    Covers the federal floor plus California and Washington (and twelve encoded localities).
+    It reports its own limits: a worksite in an unencoded locality with its own higher minimum
+    comes back with an incomplete-coverage warning, and a state whose wage law is not encoded
+    says so rather than guessing.
+
+    IMPORTANT — the exemption duties test is NEVER auto-decided. The engine checks the salary
+    threshold by rule but returns the duties test as a human-judgment item, so an exemption
+    conclusion is at most "may be exempt if the duties test is met" — never a bare "exempt".
 
     Args:
         params (WageHourInput): Validated facts containing:
@@ -674,6 +695,10 @@ async def openleave_check_wage_hour(params: WageHourInput) -> str:
             hourly_rate=params.hourly_rate,
             is_tipped=params.is_tipped,
             weekly_hours=params.weekly_hours,
+            daily_hours=params.daily_hours,
+            nondiscretionary_bonus=params.nondiscretionary_bonus,
+            claimed_exempt=params.claimed_exempt,
+            annual_salary=params.annual_salary,
             separation=separation,
         )
         result = assess_wage_hour(facts, as_of=params.as_of)

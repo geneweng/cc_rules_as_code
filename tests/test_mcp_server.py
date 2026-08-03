@@ -212,6 +212,23 @@ class TestCheckWageHour:
         assert fp["data"]["paid_on_time"] is False
         assert fp["data"]["vacation_payout_owed"] == 1200.0
 
+    def test_overtime_and_exemption_topics(self):
+        out = call(openleave_check_wage_hour(WageHourInput(
+            work_state="CA", hourly_rate=40.0, daily_hours=[13, 0, 0, 0, 0, 0, 0],
+            claimed_exempt=True, annual_salary=60000, as_of="2026-02-01", response_format="json")))
+        topics = {t["topic"]: t for t in json.loads(out)["topics"]}
+        assert topics["overtime"]["data"]["overtime_hours_2x"] == 1.0
+        # $60k CA salary is below the $70,304 threshold -> non-exempt on salary alone.
+        assert topics["exemption"]["data"]["status"] == "non_exempt_salary_below_threshold"
+        duties = next(f for f in topics["exemption"]["findings"] if f["key"] == "duties_test")
+        assert duties["met"] is None  # never auto-decided
+
+    def test_duties_test_shows_as_human_judgment_in_markdown(self):
+        out = call(openleave_check_wage_hour(WageHourInput(
+            work_state="CA", annual_salary=90000, claimed_exempt=True, weekly_hours=50, as_of="2026-02-01")))
+        assert "Requires human judgment" in out
+        assert "duties test" in out
+
     def test_separation_type_without_last_day_is_an_error(self):
         out = call(openleave_check_wage_hour(WageHourInput(work_state="CA", separation_type="fired")))
         assert out.startswith("Error:")

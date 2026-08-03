@@ -10,7 +10,7 @@ A survey of **Rules as Code (RaC)** — the practice of publishing an official, 
 | [`rules-as-code-survey.pdf`](rules-as-code-survey.pdf) | The same survey rendered as a PDF |
 | [`product-brainstorm-openleave.md`](product-brainstorm-openleave.md) | Product brainstorm + market validation for **OpenLeave**, a leave-law rules engine |
 | [`openleave/`](openleave/) | Working prototype of the OpenLeave MVP (see below) |
-| [`tests/`](tests/) | Scenario-based regression suite for the encodings (204 tests) |
+| [`tests/`](tests/) | Scenario-based regression suite for the encodings (219 tests) |
 | [`wage-hour-expansion-scope.md`](wage-hour-expansion-scope.md) | Scoping doc for the wage-and-hour expansion (the "market is employment law" thesis) |
 
 ## OpenLeave prototype
@@ -27,7 +27,7 @@ An executable, citation-backed encoding of U.S. employee leave law: federal **FM
 
 ```sh
 python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
-.venv/bin/pytest                                # 204-scenario regression suite
+.venv/bin/pytest                                # 219-scenario regression suite
 .venv/bin/uvicorn openleave.api:app            # then open http://127.0.0.1:8000
 ```
 
@@ -76,7 +76,7 @@ Four read-only tools:
 | Tool | What it answers |
 |---|---|
 | `openleave_check_leave_eligibility` | Eligibility, entitlement, and benefit amount under every applicable leave law, each conclusion citing its statute |
-| `openleave_check_wage_hour` | The applicable minimum wage (with tip-credit handling) and, on separation, final-pay timing and accrued-vacation payout — each with its citation |
+| `openleave_check_wage_hour` | Minimum wage (with tip credit & local ordinances), overtime owed, white-collar exemption status (duties test flagged for human judgment), and final-pay timing — each with its citation |
 | `openleave_list_jurisdictions` | What's encoded — and which states have programs that are **not**, so the assistant knows when an answer is partial |
 | `openleave_lookup_statutory_parameter` | A single rate, cap, or threshold as it stood on any date, with its source and verification status |
 
@@ -86,7 +86,7 @@ The tool descriptions instruct the model to call rather than recall ("leave law 
 
 ### Verification manifest — the gate before real use
 
-Every statutory value here is web-researched and **unverified by counsel** — the single most important thing to fix before anyone relies on a determination. `openleave/references.json` is the worksheet for that review: it maps **all 124 encoded parameters** (leave and wage-and-hour) to a plain-English meaning, the governing statute, and the agency page a reviewer checks them against, grouped by jurisdiction with sign-off fields (`verified` / `verified_by` / `verified_on`) and a list of structural claims (eligibility logic, formulas, job-protection rules) that aren't single numbers.
+Every statutory value here is web-researched and **unverified by counsel** — the single most important thing to fix before anyone relies on a determination. `openleave/references.json` is the worksheet for that review: it maps **all 130 encoded parameters** (leave and wage-and-hour) to a plain-English meaning, the governing statute, and the agency page a reviewer checks them against, grouped by jurisdiction with sign-off fields (`verified` / `verified_by` / `verified_on`) and a list of structural claims (eligibility logic, formulas, job-protection rules) that aren't single numbers.
 
 ```sh
 .venv/bin/python -m openleave.references check     # every parameter is documented (CI-gated)
@@ -96,9 +96,9 @@ Every statutory value here is web-researched and **unverified by counsel** — t
 
 The manifest can't drift: a test asserts it documents **exactly** the set of encoded parameters, so adding a rate without a citation breaks the build, and a jurisdiction can't be marked `verified` without a named reviewer and date. The MCP parameter-lookup tool returns each value's citation, source, and verification status alongside the number, so an assistant can cite it and flag that it's still pending review. The generated [`references-worksheet.md`](references-worksheet.md) is the artifact an employment lawyer works through, one jurisdiction at a time.
 
-### Wage & hour (`openleave/wagehour/`) — the next domain, Phase 1
+### Wage & hour (`openleave/wagehour/`) — the second domain
 
-The [scoping doc](wage-hour-expansion-scope.md) lays out the "wedge is leave, market is employment law" expansion. This is its **Phase 1 vertical slice**: **minimum wage** (with tip-credit handling) and **final-pay-on-separation** timing (with accrued-vacation payout), for the federal floor plus **California** and **Washington**. It's a sibling capability that reuses the leave engine's substrate — the effective-dated `parameters`, the `Finding`/`Citation` justification tree, and the coverage-reporting reflex.
+The [scoping doc](wage-hour-expansion-scope.md) lays out the "wedge is leave, market is employment law" expansion. It is now built out through **minimum wage** (with tip-credit handling and local ordinances), **overtime**, **white-collar exempt classification**, and **final-pay-on-separation** timing (with accrued-vacation payout), for the federal floor plus **California** and **Washington** and twelve encoded localities. It's a sibling capability that reuses the leave engine's substrate — the effective-dated `parameters`, the `Finding`/`Citation` justification tree, and the coverage-reporting reflex.
 
 ```python
 from datetime import date
@@ -113,11 +113,11 @@ What the slice demonstrates:
 - **Effective-dated compliance** — a $16.60 wage clears California's 2025 floor ($16.50) and **fails** its 2026 floor ($16.90). Compliance is a function of the date, not a static lookup.
 - **The tip credit, done honestly** — California and Washington prohibit it (full minimum in cash, tips on top; `Cal. Lab. Code § 351`, `RCW 49.46.020(3)`); the federal rule permits a $2.13 cash wage if tips reach $7.25. The engine flags "only CA/WA tip rules are encoded" for other states rather than guessing.
 - **Locality-aware, and honest about its edges** — the minimum wage is the highest of the federal, state, and (where encoded) local floor. A Seattle worksite gets its **$21.30** local rate (`Seattle Municipal Code 14.19`), not the $17.13 state figure — twelve marquee WA and CA localities (Seattle, Tukwila, Renton, San Francisco, Los Angeles city/county, Oakland, San Jose, …) are encoded. A worksite in an *unencoded* locality still returns `coverage.complete: false`, because the engine can't rule out a local ordinance it doesn't know — silent locality under-coverage is the wage-and-hour analogue of returning "FMLA only." SeaTac is deliberately left unencoded and warned, because its $20.74 applies only to hospitality/transportation workers, not city-wide.
+- **Overtime, including California's intricate rules** — FLSA/Washington time-and-a-half over 40 hours a week, plus California's daily overtime (1.5× over 8, 2× over 12), the seventh-consecutive-day premium, and the weekly rule applied *without pyramiding* (`Cal. Lab. Code § 510`). The regular rate blends in a nondiscretionary bonus (`29 C.F.R. § 778.109`) — a $20/hr worker with a $100 weekly bonus over 50 hours has a $22 regular rate and $110 of overtime premium.
+- **Exempt classification — the honest one** — this is where a rules engine is most tempting to overreach, so it deliberately doesn't. The **salary test** is decided by rule (federal $684/week, California 2× and Washington 2.25× the state minimum wage, the higher governing) — a sub-threshold salary is non-exempt no matter the job. But the **duties test is *never* auto-decided**: it always returns `met: null` with a human-judgment note. The strongest conclusion the engine will draw is "may be exempt *if* the duties test is met," and overtime for a possibly-exempt worker is reported as conditional. Auto-answering the duties test would be the survey's "laundered interpretation" failure and, here, direct misclassification liability.
 - **Final pay with real teeth** — California's immediate-on-firing deadline, the 72-hour rule for a no-notice quit, waiting-time-penalty exposure for late payment, and mandatory accrued-vacation payout (valued: 40 hrs × $30 = $1,200) — contrasted with Washington's next-pay-period rule and policy-dependent vacation (returned as `met: null`, a human-judgment point).
 
-The slice has full surface parity with leave: the `openleave_check_wage_hour` MCP tool, a `POST /wage-hour/determinations` API endpoint, and a browser checker at `GET /wage-hour` (linked from the leave checker).
-
-Deliberately deferred to Phase 2 (see the scope doc): **overtime** math and **exempt classification** — the latter because its duties test is open-textured and the liability of getting it wrong is misclassification. Encoding the salary threshold and flagging the duties test for human judgment is the honest design; auto-answering it is not.
+Full surface parity with leave: the `openleave_check_wage_hour` MCP tool, a `POST /wage-hour/determinations` API endpoint, and a browser checker at `GET /wage-hour` (linked from the leave checker).
 
 ## What's covered
 
