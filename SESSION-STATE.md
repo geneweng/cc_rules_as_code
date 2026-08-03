@@ -14,7 +14,7 @@ The arc so far: internet survey → validated product brainstorm → working eng
 amendment pipeline → go-to-market collateral (decks, video, landing page) → MCP server →
 expanded jurisdiction coverage.
 
-## Current state (all committed, tree clean, 219 tests passing)
+## Current state (all committed, tree clean, 224 tests passing)
 
 **The engine** (`openleave/`) — sixteen regimes across fourteen jurisdictions. **Every
 comprehensive U.S. paid-family-leave program is now encoded.**
@@ -96,6 +96,15 @@ apply. Nothing ships without passing tests + explicit sign-off. Uses `claude-opu
 structured outputs. The `analyze` step needs `ANTHROPIC_API_KEY` (not set in the dev sessions
 so far — the demo used an offline-drafted proposal of the same shape).
 
+**The sample agent** (`openleave/agent.py`) — a runnable Claude agent that answers natural-language
+employment-law questions by CALLING the MCP tools (not recalling). Connects to `openleave.mcp_server`
+over stdio, lists tools, runs an Anthropic tool-use loop, prints each tool call to stderr for
+transparency. System prompt forbids answering substantive questions from memory and passes tool
+citations / human-judgment flags / incomplete-coverage warnings through unchanged. Needs
+ANTHROPIC_API_KEY (default model claude-opus-4-8, override with OPENLEAVE_AGENT_MODEL or --model).
+`--list-tools` works without a key (verifies MCP wiring). LLM path NOT run in dev (no key); the MCP
+bridge, tool conversion, and key-guard are tested (`tests/test_agent.py`). `.[agent]` extra.
+
 **The MCP server** (`openleave/mcp_server.py`) — four read-only tools
 (`openleave_check_leave_eligibility`, `openleave_check_wage_hour`, `openleave_list_jurisdictions`,
 `openleave_lookup_statutory_parameter`) so an AI assistant calls the verified oracle instead of
@@ -114,7 +123,7 @@ https://geneweng.github.io/cc_rules_as_code/** (GitHub Pages, `main`/`/docs`).
 
 ```sh
 cd ~/cc_projects/cc_rules_as_code
-.venv/bin/pytest -q                                   # 219 tests
+.venv/bin/pytest -q                                   # 224 tests
 .venv/bin/uvicorn openleave.api:app                   # checker at http://127.0.0.1:8000
 .venv/bin/python -m openleave.mcp_server              # MCP over stdio
 .venv/bin/python -m openleave.watcher --help          # amendment pipeline CLI
@@ -138,7 +147,7 @@ Video/render scratch work lived under the session scratchpad (not in the repo).
 - **The demo video narration is synthetic TTS** — fine for a prototype, re-record with a human
   voice for anything customer-facing. Scene 5's LLM `analyze` step was narrated without
   claiming that specific run was live (no API key).
-- **Traction is internal only** — 219 tests and a working pipeline are engineering traction, not
+- **Traction is internal only** — 224 tests and a working pipeline are engineering traction, not
   market traction. No real design partner, lawyer, or dollar has touched this yet.
 
 ## Decisions already made (don't relitigate)

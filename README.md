@@ -10,7 +10,7 @@ A survey of **Rules as Code (RaC)** — the practice of publishing an official, 
 | [`rules-as-code-survey.pdf`](rules-as-code-survey.pdf) | The same survey rendered as a PDF |
 | [`product-brainstorm-openleave.md`](product-brainstorm-openleave.md) | Product brainstorm + market validation for **OpenLeave**, a leave-law rules engine |
 | [`openleave/`](openleave/) | Working prototype of the OpenLeave MVP (see below) |
-| [`tests/`](tests/) | Scenario-based regression suite for the encodings (219 tests) |
+| [`tests/`](tests/) | Scenario-based regression suite for the encodings (224 tests) |
 | [`wage-hour-expansion-scope.md`](wage-hour-expansion-scope.md) | Scoping doc for the wage-and-hour expansion (the "market is employment law" thesis) |
 
 ## OpenLeave prototype
@@ -27,7 +27,7 @@ An executable, citation-backed encoding of U.S. employee leave law: federal **FM
 
 ```sh
 python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
-.venv/bin/pytest                                # 219-scenario regression suite
+.venv/bin/pytest                                # 224-scenario regression suite
 .venv/bin/uvicorn openleave.api:app            # then open http://127.0.0.1:8000
 ```
 
@@ -83,6 +83,21 @@ Four read-only tools:
 The tool descriptions instruct the model to call rather than recall ("leave law differs by state and its rates change every year; model recall is unreliable for it"), and the three outcomes an assistant must distinguish — a determined answer, `eligible: null` requiring human judgment, and `coverage.complete: false` meaning the answer is partial — are documented in the tool schema itself.
 
 > **Prototype disclaimer:** statutory parameter values are approximations for demonstration; verify against agency publications. Decision support, not legal advice.
+
+### Sample agent — the loop, closed
+
+[`openleave/agent.py`](openleave/agent.py) is a runnable demonstration of the whole thesis: a Claude agent that answers natural-language employment-law questions by **calling** the MCP tools instead of recalling the law. It connects to the same `openleave.mcp_server` this repo ships, lists its tools, and runs a standard Anthropic tool-use loop — dispatching each tool call back to the verified engine. Its system prompt forbids answering substantive questions from memory and tells it to pass through the tools' citations, human-judgment flags, and incomplete-coverage warnings unchanged.
+
+```sh
+.venv/bin/pip install -e '.[agent]'
+export ANTHROPIC_API_KEY=...
+python -m openleave.agent "Is a $15/hour wage legal in California in 2026?"
+python -m openleave.agent                 # a few demo questions (leave, wage, overtime, exemption, coverage)
+python -m openleave.agent --interactive
+python -m openleave.agent --list-tools     # verify the MCP wiring without an API key
+```
+
+As it runs it prints each tool call to stderr (`→ calling openleave_check_wage_hour(work_state='CA', …)`), so you can watch every legal conclusion originate in the engine rather than the model. That transparency is the point: the LLM handles the conversation, the rules engine handles the law.
 
 ### Verification manifest — the gate before real use
 
