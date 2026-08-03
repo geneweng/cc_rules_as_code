@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OpenLeave — Design-Partner One-Pager</title>
+<style>
+  :root {
+    --ink: #1B1C24; --page: #FAFAF6; --oxblood: #6D2130; --gold: #A78B4B;
+    --muted: #5C5F6C; --green: #2E7D3B; --hairline: #D8D4C8; --panel: #F1EFE7;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #888; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { size: 816px 1056px; margin: 0; }
+
+  .sheet {
+    width: 816px; height: 1056px; background: var(--page); color: var(--ink);
+    font: 12.5px/1.5 "Charter", "Georgia", serif; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+
+  /* header */
+  .hdr { background: var(--ink); color: var(--page); padding: 26px 46px 22px; }
+  .hdr .eyebrow { font: 10.5px/1 "Charter", serif; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 14px; }
+  .hdr h1 { font: 33px/1.16 "Baskerville", serif; font-weight: normal; color: var(--page); max-width: 20em; }
+  .hdr h1 em { font-style: italic; color: #D9BE7E; }
+  .hdr .rule { width: 64px; border: 0; border-top: 2px solid var(--gold); margin: 16px 0; }
+  .hdr .sub { font: italic 14px/1.5 "Baskerville", serif; color: #C9C5B8; max-width: 40em; }
+
+  .body { flex: 1; padding: 18px 46px 0; display: flex; flex-direction: column; gap: 12px; }
+
+  .lbl { font: 10px/1.3 "Charter", serif; letter-spacing: 0.17em; text-transform: uppercase;
+    color: var(--oxblood); margin-bottom: 6px; }
+  h2 { font: 17px/1.2 "Baskerville", serif; font-weight: normal; margin-bottom: 5px; }
+  h2 em { font-style: italic; color: var(--oxblood); }
+  p { max-width: 62em; }
+  p b { color: var(--oxblood); font-weight: normal; }
+
+  .cols { display: flex; gap: 26px; }
+  .cols > div { flex: 1; min-width: 0; }
+
+  ul.ticks { list-style: none; }
+  ul.ticks li { position: relative; padding: 3px 0 3px 20px; line-height: 1.42; }
+  ul.ticks li::before { content: "§"; position: absolute; left: 0; color: var(--gold);
+    font: 12px/1.5 "Baskerville", serif; }
+  ul.ticks b { color: var(--oxblood); font-weight: normal; }
+
+  /* proof strip */
+  .proof { display: flex; border: 1px solid var(--hairline); border-radius: 5px; overflow: hidden; background: var(--panel); }
+  .proof .cell { flex: 1; padding: 11px 14px; border-right: 1px solid var(--hairline); }
+  .proof .cell:last-child { border-right: 0; }
+  .proof .n { font: 20px/1 "Baskerville", serif; color: var(--oxblood); }
+  .proof .k { font: 10px/1.35 "Menlo", monospace; color: var(--muted); margin-top: 5px; }
+
+  /* partner box */
+  .partner { border: 1px solid var(--gold); border-radius: 5px; background: #FBF9F2;
+    padding: 16px 20px; display: flex; gap: 28px; }
+  .partner > div { flex: 1; }
+  .partner .st { font: 10.5px/1.3 "Charter", serif; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 8px; }
+  .partner ul { list-style: none; }
+  .partner li { position: relative; padding: 3px 0 3px 16px; line-height: 1.4; font-size: 12px; }
+  .partner li::before { content: "—"; position: absolute; left: 0; color: var(--gold); }
+
+  .note { border-left: 3px solid var(--oxblood); padding: 3px 0 3px 16px;
+    font: italic 12px/1.5 "Baskerville", serif; color: var(--muted); }
+  .note b { font-style: normal; color: var(--oxblood); }
+
+  .foot { margin-top: auto; border-top: 1px solid var(--gold);
+    padding: 12px 46px 16px; display: flex; justify-content: space-between; align-items: baseline; }
+  .foot .cta { font: 17px/1.2 "Baskerville", serif; color: var(--ink); }
+  .foot .cta em { font-style: italic; color: var(--oxblood); }
+  .foot .meta { font: 10px/1.7 "Menlo", monospace; color: var(--muted); text-align: right; letter-spacing: 0.04em; }
+  .foot .meta b { color: var(--gold); font-weight: normal; }
+  .gold { color: var(--gold); }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="hdr">
+    <div class="eyebrow">OpenLeave &nbsp;·&nbsp; Design-Partner Program</div>
+    <h1>The employment-law engine you <em>embed</em> — not another HR app.</h1>
+    <hr class="rule">
+    <div class="sub">A citation-backed, effective-dated rules engine for U.S. leave and wage &amp; hour.
+    Call it as a REST API or an MCP tool; every answer carries its statute.</div>
+  </div>
+
+  <div class="body">
+
+    <div>
+      <div class="lbl">The question your product can't answer</div>
+      <p>Your customers ask your software one deceptively simple thing: <em>is this compliant?</em>
+      Leave and wage law is fifty-plus jurisdictions of moving targets — minimum wages that reindex
+      every year, brand-new paid-leave programs, overtime and exemption rules that change by city.
+      Today you either staff a rules team, hard-code answers that quietly go stale, or let an LLM
+      guess. All three are liabilities.</p>
+    </div>
+
+    <div>
+      <div class="lbl">What you embed</div>
+      <div class="cols">
+        <ul class="ticks">
+          <li><b>Every conclusion cites its statute</b> — a justification tree, not a black box your customers can't defend.</li>
+          <li><b>Effective-dated</b> — "the law as of any date," so back-pay and audits reconstruct exactly what applied, and when.</li>
+        </ul>
+        <ul class="ticks">
+          <li><b>Discretion is flagged, never faked</b> — open-textured questions come back for a human; coverage gaps are reported, never hidden.</li>
+          <li><b>Two call styles</b> — REST for your backend, MCP for your AI features.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div>
+      <div class="lbl">Already real &mdash; a working prototype, open to audit</div>
+      <div class="proof">
+        <div class="cell"><div class="n">16</div><div class="k">leave regimes<br>every U.S. paid-family<br>-leave program</div></div>
+        <div class="cell"><div class="n">Wage &amp; hour</div><div class="k">min wage + 12 localities,<br>overtime, exemptions,<br>final pay</div></div>
+        <div class="cell"><div class="n">MCP</div><div class="k">4 read-only tools —<br>the verified oracle<br>behind your copilot</div></div>
+        <div class="cell"><div class="n">Open</div><div class="k">source encodings —<br>audit every line<br>against the statute</div></div>
+        <div class="cell"><div class="n">224</div><div class="k">automated tests<br>gate every<br>change</div></div>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div>
+        <h2>Why embed, <em>not build</em>.</h2>
+        <p>You don't want to be in the employment-law-maintenance business. Encoding the law once is
+        easy; keeping it current across every jurisdiction, forever, is a team you'd rather not run.
+        That maintenance — an LLM-drafted, regression-gated, <b>counsel-reviewed</b> amendment
+        pipeline — is what you're actually buying.</p>
+      </div>
+      <div>
+        <h2>For <em>AI copilots</em>.</h2>
+        <p>Point your assistant at the MCP server and it calls a verified oracle instead of
+        hallucinating leave law — returning citations your users, and their lawyers, can check.
+        <b>LLM at the edges, verified engine at the core.</b></p>
+      </div>
+    </div>
+
+    <div>
+      <div class="lbl">The design-partner offer</div>
+      <div class="partner">
+        <div>
+          <div class="st">What you get</div>
+          <ul>
+            <li>Early, partner-priced access to the API and MCP tools</li>
+            <li>A direct line into the roadmap — you pick which jurisdictions and rules we verify and ship first</li>
+            <li>The open-source encodings to audit against primary sources yourself</li>
+            <li>White-glove integration support</li>
+          </ul>
+        </div>
+        <div>
+          <div class="st">What we ask</div>
+          <ul>
+            <li>Real use cases, and candid feedback on where the edges are</li>
+            <li>A design-partner reference — once we've earned it</li>
+          </ul>
+          <div class="note" style="margin-top:12px"><b>Straight talk:</b> statutory figures are
+          web-researched and being verified by counsel now — design partners shape that queue. We'd
+          rather show you the edges than oversell past them.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <div class="cta">Let's scope an <em>integration</em>.</div>
+    <div class="meta">
+      OPENLEAVE &nbsp;·&nbsp; employment law, as code<br>
+      <b>github.com/geneweng/cc_rules_as_code</b><br>
+      Decision support, not legal advice.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

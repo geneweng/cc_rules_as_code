@@ -135,7 +135,9 @@ The design move that turns the biggest liability into a feature:
 1. **Engage employment-law counsel** and verify one or two jurisdictions end to end — turns the
    prototype into something sellable and de-risks liability.
 2. **Land 1–2 design partners** (a small payroll / EOR / leave platform, or an AI HR copilot via
-   MCP) — validate the embed model before building billing infrastructure.
+   MCP) — validate the embed model before building billing infrastructure. The pitch is in
+   [`design-partner-onepager.pdf`](design-partner-onepager.pdf) (source:
+   [`design-partner-onepager.html`](design-partner-onepager.html)).
 3. **Ship a thin hosted API** on Render / Fly with API keys + Stripe metered billing.
 4. **Start SOC 2** (Vanta) and stand up E&O insurance in parallel.
 5. Everything else (Cloud Run migration, WorkOS SSO, Orb) is a "when a real customer asks" upgrade.
