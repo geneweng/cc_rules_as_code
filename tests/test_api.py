@@ -83,10 +83,21 @@ def test_wage_hour_endpoint_final_pay():
     assert fp["data"]["vacation_payout_owed"] == 1200.0
 
 
-def test_wage_hour_locality_coverage_warning():
+def test_wage_hour_local_rate_governs():
     r = client.post(
         "/wage-hour/determinations",
-        json={"facts": {"work_state": "WA", "hourly_rate": 17.13, "work_locality": "Seattle"},
+        json={"facts": {"work_state": "WA", "hourly_rate": 20.0, "work_locality": "Seattle"},
+              "as_of": "2026-02-01"},
+    )
+    mw = r.json()["topics"][0]
+    assert mw["data"]["applicable_minimum"] == 21.30  # Seattle local rate applied
+    assert mw["data"]["rate_compliant"] is False
+
+
+def test_wage_hour_unencoded_locality_warns():
+    r = client.post(
+        "/wage-hour/determinations",
+        json={"facts": {"work_state": "WA", "hourly_rate": 17.13, "work_locality": "Tacoma"},
               "as_of": "2026-02-01"},
     )
     assert r.json()["coverage"]["complete"] is False

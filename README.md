@@ -10,7 +10,7 @@ A survey of **Rules as Code (RaC)** — the practice of publishing an official, 
 | [`rules-as-code-survey.pdf`](rules-as-code-survey.pdf) | The same survey rendered as a PDF |
 | [`product-brainstorm-openleave.md`](product-brainstorm-openleave.md) | Product brainstorm + market validation for **OpenLeave**, a leave-law rules engine |
 | [`openleave/`](openleave/) | Working prototype of the OpenLeave MVP (see below) |
-| [`tests/`](tests/) | Scenario-based regression suite for the encodings (197 tests) |
+| [`tests/`](tests/) | Scenario-based regression suite for the encodings (204 tests) |
 | [`wage-hour-expansion-scope.md`](wage-hour-expansion-scope.md) | Scoping doc for the wage-and-hour expansion (the "market is employment law" thesis) |
 
 ## OpenLeave prototype
@@ -27,7 +27,7 @@ An executable, citation-backed encoding of U.S. employee leave law: federal **FM
 
 ```sh
 python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
-.venv/bin/pytest                                # 197-scenario regression suite
+.venv/bin/pytest                                # 204-scenario regression suite
 .venv/bin/uvicorn openleave.api:app            # then open http://127.0.0.1:8000
 ```
 
@@ -86,7 +86,7 @@ The tool descriptions instruct the model to call rather than recall ("leave law 
 
 ### Verification manifest — the gate before real use
 
-Every statutory value here is web-researched and **unverified by counsel** — the single most important thing to fix before anyone relies on a determination. `openleave/references.json` is the worksheet for that review: it maps **all 112 encoded parameters** (leave and wage-and-hour) to a plain-English meaning, the governing statute, and the agency page a reviewer checks them against, grouped by jurisdiction with sign-off fields (`verified` / `verified_by` / `verified_on`) and a list of structural claims (eligibility logic, formulas, job-protection rules) that aren't single numbers.
+Every statutory value here is web-researched and **unverified by counsel** — the single most important thing to fix before anyone relies on a determination. `openleave/references.json` is the worksheet for that review: it maps **all 124 encoded parameters** (leave and wage-and-hour) to a plain-English meaning, the governing statute, and the agency page a reviewer checks them against, grouped by jurisdiction with sign-off fields (`verified` / `verified_by` / `verified_on`) and a list of structural claims (eligibility logic, formulas, job-protection rules) that aren't single numbers.
 
 ```sh
 .venv/bin/python -m openleave.references check     # every parameter is documented (CI-gated)
@@ -112,7 +112,7 @@ What the slice demonstrates:
 
 - **Effective-dated compliance** — a $16.60 wage clears California's 2025 floor ($16.50) and **fails** its 2026 floor ($16.90). Compliance is a function of the date, not a static lookup.
 - **The tip credit, done honestly** — California and Washington prohibit it (full minimum in cash, tips on top; `Cal. Lab. Code § 351`, `RCW 49.46.020(3)`); the federal rule permits a $2.13 cash wage if tips reach $7.25. The engine flags "only CA/WA tip rules are encoded" for other states rather than guessing.
-- **Locality coverage, loudly** — a Seattle worksite returns `coverage.complete: false` because Seattle's $21.30 minimum isn't encoded and the $17.13 state figure would **understate** the floor. Silent locality under-coverage is the wage-and-hour analogue of returning "FMLA only," and the same guard prevents it.
+- **Locality-aware, and honest about its edges** — the minimum wage is the highest of the federal, state, and (where encoded) local floor. A Seattle worksite gets its **$21.30** local rate (`Seattle Municipal Code 14.19`), not the $17.13 state figure — twelve marquee WA and CA localities (Seattle, Tukwila, Renton, San Francisco, Los Angeles city/county, Oakland, San Jose, …) are encoded. A worksite in an *unencoded* locality still returns `coverage.complete: false`, because the engine can't rule out a local ordinance it doesn't know — silent locality under-coverage is the wage-and-hour analogue of returning "FMLA only." SeaTac is deliberately left unencoded and warned, because its $20.74 applies only to hospitality/transportation workers, not city-wide.
 - **Final pay with real teeth** — California's immediate-on-firing deadline, the 72-hour rule for a no-notice quit, waiting-time-penalty exposure for late payment, and mandatory accrued-vacation payout (valued: 40 hrs × $30 = $1,200) — contrasted with Washington's next-pay-period rule and policy-dependent vacation (returned as `met: null`, a human-judgment point).
 
 The slice has full surface parity with leave: the `openleave_check_wage_hour` MCP tool, a `POST /wage-hour/determinations` API endpoint, and a browser checker at `GET /wage-hour` (linked from the leave checker).

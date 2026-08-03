@@ -187,12 +187,20 @@ class TestCheckWageHour:
         assert json.loads(clears)["topics"][0]["data"]["rate_compliant"] is True
         assert json.loads(fails)["topics"][0]["data"]["rate_compliant"] is False
 
-    def test_locality_leads_with_incomplete_coverage(self):
+    def test_encoded_locality_governs(self):
         out = call(openleave_check_wage_hour(
-            WageHourInput(work_state="WA", hourly_rate=17.13, work_locality="Seattle", as_of="2026-02-01")))
+            WageHourInput(work_state="WA", hourly_rate=20.0, work_locality="Seattle",
+                          as_of="2026-02-01", response_format="json")))
+        mw = json.loads(out)["topics"][0]
+        assert mw["data"]["applicable_minimum"] == 21.30  # Seattle's local rate
+        assert mw["data"]["rate_compliant"] is False
+
+    def test_unencoded_locality_leads_with_incomplete_coverage(self):
+        out = call(openleave_check_wage_hour(
+            WageHourInput(work_state="WA", hourly_rate=17.13, work_locality="Tacoma", as_of="2026-02-01")))
         banner = out.split("## ")[0]
         assert "INCOMPLETE COVERAGE" in banner
-        assert "Seattle" in banner
+        assert "Tacoma" in banner
 
     def test_final_pay_and_vacation_payout(self):
         out = call(openleave_check_wage_hour(WageHourInput(

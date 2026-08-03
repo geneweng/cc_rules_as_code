@@ -14,6 +14,11 @@ This mirrors `openleave.coverage`, one domain over.
 
 from __future__ import annotations
 
+from datetime import date
+
+from .. import parameters
+from . import localities
+
 # States this slice encodes a state minimum wage for.
 ENCODED_WAGE_STATES = {"CA", "WA"}
 
@@ -37,9 +42,9 @@ INDUSTRY_CARVEOUTS = {
 }
 
 
-def assess(work_state: str, work_locality: str | None) -> dict:
+def assess(work_state: str, work_locality: str | None, as_of: date) -> dict:
     """Report whether the encoded state/federal minimum could understate the
-    wage that actually applies at this worksite."""
+    wage that actually applies at this worksite, as of the given date."""
     state = (work_state or "").upper()
     locality = (work_locality or "").strip()
     warnings: list[str] = []
@@ -55,18 +60,39 @@ def assess(work_state: str, work_locality: str | None) -> dict:
 
     if state in STATES_WITH_LOCAL_MINIMUMS:
         examples = STATES_WITH_LOCAL_MINIMUMS[state][0]
-        if locality:
+        encoded_here = localities.lookup(state, locality)
+        # Only "applied" if the local rate is actually in force on this date.
+        if encoded_here is not None and parameters.in_force(encoded_here["param_key"], as_of):
+            notes.append(
+                f"The {encoded_here['display']} local minimum wage is encoded and applied above; "
+                f"it governs where higher than the {state} state rate."
+            )
+        elif encoded_here is not None:
+            # Encoded, but its rate had not taken effect on this date.
             complete = False
             warnings.append(
-                f"'{locality}' may set its own higher local minimum wage, which is NOT encoded here. "
-                f"The figure shown is the {state} state floor and may understate the applicable "
+                f"The {encoded_here['display']} local minimum wage is encoded but had not taken "
+                f"effect on {as_of.isoformat()}; the {state} state floor is shown for that date."
+            )
+        elif locality:
+            complete = False
+            warn = (
+                f"'{locality}' is not an encoded locality. If it sets its own higher local minimum "
+                f"wage, the figure shown is the {state} state floor and may understate the applicable "
                 f"minimum. Confirm the local ordinance before relying on this."
             )
+            if localities.slug(locality) == "seatac":
+                warn += (
+                    " (SeaTac has a ~$20.74 minimum for hospitality and transportation workers only, "
+                    "not a general city-wide rate — deliberately not encoded here.)"
+                )
+            warnings.append(warn)
         else:
+            covered = ", ".join(localities.encoded_display_names(state))
             notes.append(
-                f"{state} contains localities with higher minimum wages ({examples}). No worksite "
-                f"locality was given; if the worksite is in one of them, the state figure is a floor, "
-                f"not the applicable rate."
+                f"{state} contains localities with higher minimum wages ({examples}). Encoded here: "
+                f"{covered}. No worksite locality was given; if the worksite is in an unencoded one, "
+                f"the state figure is a floor, not the applicable rate."
             )
 
     for note in INDUSTRY_CARVEOUTS.get(state, []):

@@ -4,7 +4,7 @@
 
 **How to use:** A reviewer works one jurisdiction at a time: open the source pages, check each parameter's value(s) and effective date(s) against the agency's published figures and the cited statute, check each structural claim, then set verified/verified_by/verified_on. Run `python -m openleave.references check` to confirm the manifest still covers every encoded parameter.
 
-**Progress:** 0/18 jurisdictions verified; 112/112 parameters documented.
+**Progress:** 0/18 jurisdictions verified; 124/124 parameters documented.
 
 ## CA — California Paid Family Leave (PFL) and CFRA
 
@@ -37,6 +37,11 @@
 | ☐ | `minwage.CA` | California state minimum wage, all employers ($/hr) | 16.5 [2025-01-01]; 16.9 [2026-01-01] |
 | ☐ | `finalpay.CA.quit_no_notice_hours` | Deadline to pay a no-notice quit (hours) | 72 [2000-01-01] |
 | ☐ | `finalpay.CA.waiting_time_penalty_max_days` | Maximum § 203 waiting-time penalty (days of wages) | 30 [2000-01-01] |
+| ☐ | `minwage.CA.san_francisco` | San Francisco local minimum wage ($/hr; adjusts July 1) | 19.18 [2025-07-01] |
+| ☐ | `minwage.CA.los_angeles` | Los Angeles city local minimum wage ($/hr; adjusts July 1) | 17.87 [2025-07-01] |
+| ☐ | `minwage.CA.los_angeles_county` | Unincorporated LA County local minimum wage ($/hr; adjusts July 1) | 17.81 [2025-07-01] |
+| ☐ | `minwage.CA.oakland` | Oakland local minimum wage ($/hr; adjusts Jan 1) | 17.34 [2026-01-01] |
+| ☐ | `minwage.CA.san_jose` | San Jose local minimum wage ($/hr; adjusts Jan 1) | 18.45 [2026-01-01] |
 
 **Structural claims to verify (not single numbers):**
 
@@ -45,6 +50,8 @@
 - ☐ Fired/laid off -> pay immediately; quit with 72h notice -> last day; quit without -> within 72h.
 - ☐ Accrued vacation is earned wages and must be paid out (§ 227.3).
 - ☐ The finalpay.* effective dates are 'in force since at least 2000' floors, not researched precisely.
+- ☐ Local minimum wages (SF $19.18, LA city $17.87, LA county $17.81 from 2025-07-01; Oakland $17.34, San Jose $18.45 from 2026-01-01) govern where higher than the state rate; the local ordinance citations are prototype approximations.
+- ☐ Several localities have employer-size tiers; the encoded rate is the standard/large-employer rate.
 
 ## CO — Colorado Family and Medical Leave Insurance (FAMLI)
 
@@ -384,10 +391,19 @@
 | ✓ | Parameter | Meaning | Encoded value(s) [effective date] |
 |---|---|---|---|
 | ☐ | `minwage.WA` | Washington state minimum wage ($/hr) | 16.66 [2025-01-01]; 17.13 [2026-01-01] |
+| ☐ | `minwage.WA.seattle` | Seattle local minimum wage, all employers ($/hr) | 21.3 [2026-01-01] |
+| ☐ | `minwage.WA.tukwila` | Tukwila local minimum wage ($/hr) | 21.65 [2026-01-01] |
+| ☐ | `minwage.WA.burien` | Burien local minimum wage ($/hr) | 21.63 [2026-01-01] |
+| ☐ | `minwage.WA.renton` | Renton local minimum wage ($/hr) | 21.57 [2026-01-01] |
+| ☐ | `minwage.WA.everett` | Everett local minimum wage ($/hr) | 20.77 [2026-01-01] |
+| ☐ | `minwage.WA.bellingham` | Bellingham local minimum wage ($/hr) | 19.13 [2026-01-01] |
+| ☐ | `minwage.WA.king_county` | Unincorporated King County local minimum wage ($/hr) | 20.82 [2026-01-01] |
 
 **Structural claims to verify (not single numbers):**
 
 - ☐ Minimum wage is CPI-indexed annually: $16.66 (2025) -> $17.13 (2026), highest state rate in the nation.
 - ☐ Washington prohibits the tip credit: tipped workers get full minimum in cash.
 - ☐ Final wages are due by the end of the next established pay period; no statutory vacation payout.
-- ☐ Many WA localities (Seattle $21.30 in 2026, SeaTac, Tukwila, etc.) set higher minimums — not encoded.
+- ☐ Encoded 2026 local minimums: Seattle $21.30, Tukwila $21.65, Burien $21.63, Renton $21.57, King County $20.82, Everett $20.77, Bellingham $19.13; local ordinance citations are prototype approximations.
+- ☐ SeaTac's ~$20.74 applies only to hospitality/transportation workers, not city-wide — deliberately NOT encoded, still warned.
+- ☐ Several localities have employer-size tiers; the encoded rate is the standard/large-employer rate.

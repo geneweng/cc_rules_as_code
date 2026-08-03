@@ -65,11 +65,12 @@ class TestTipCredit:
 
 
 class TestLocalityCoverage:
-    def test_seattle_worksite_is_flagged_incomplete(self):
+    def test_unencoded_locality_is_flagged_incomplete(self):
+        # A WA city with no encoded ordinance: we can't rule out a local minimum.
         r = assess_wage_hour(
-            WageFacts(work_state="WA", hourly_rate=17.13, work_locality="Seattle"), date(2026, 2, 1))
+            WageFacts(work_state="WA", hourly_rate=17.13, work_locality="Tacoma"), date(2026, 2, 1))
         assert r["coverage"]["complete"] is False
-        assert any("Seattle" in w for w in r["coverage"]["warnings"])
+        assert any("Tacoma" in w for w in r["coverage"]["warnings"])
 
     def test_state_without_locality_notes_the_risk_but_stays_complete(self):
         r = assess_wage_hour(WageFacts(work_state="WA", hourly_rate=17.13), date(2026, 2, 1))
@@ -84,6 +85,48 @@ class TestLocalityCoverage:
     def test_california_industry_carveout_noted(self):
         r = assess_wage_hour(WageFacts(work_state="CA", hourly_rate=20.0), date(2026, 2, 1))
         assert any("fast-food" in n for n in r["coverage"]["notes"])
+
+
+class TestLocalMinimumWage:
+    def test_seattle_local_rate_governs_and_is_complete(self):
+        r = assess_wage_hour(
+            WageFacts(work_state="WA", hourly_rate=20.0, work_locality="Seattle"), date(2026, 2, 1))
+        mw = topic(r, "minimum_wage")
+        assert mw["data"]["applicable_minimum"] == pytest.approx(21.30)
+        assert mw["data"]["governing_level"] == "local"
+        assert mw["data"]["rate_compliant"] is False  # $20 < Seattle's $21.30
+        assert r["coverage"]["complete"] is True  # Seattle is encoded — a real answer now
+
+    def test_san_francisco_uses_july_dated_rate(self):
+        r = assess_wage_hour(
+            WageFacts(work_state="CA", hourly_rate=19.18, work_locality="San Francisco"), date(2026, 2, 1))
+        mw = topic(r, "minimum_wage")
+        assert mw["data"]["applicable_minimum"] == pytest.approx(19.18)
+        assert mw["data"]["local_name"] == "San Francisco"
+
+    def test_king_county_alias_normalizes(self):
+        # "unincorporated King County" must resolve to the king_county slug.
+        r = assess_wage_hour(
+            WageFacts(work_state="WA", hourly_rate=18.0, work_locality="unincorporated King County"),
+            date(2026, 2, 1))
+        assert topic(r, "minimum_wage")["data"]["applicable_minimum"] == pytest.approx(20.82)
+
+    def test_local_rate_before_its_effective_date_falls_back_to_state(self):
+        # SF's rate is encoded from 2025-07-01; earlier, the state floor applies and
+        # coverage says the local rate had not taken effect.
+        r = assess_wage_hour(
+            WageFacts(work_state="CA", hourly_rate=16.50, work_locality="San Francisco"), date(2025, 3, 1))
+        mw = topic(r, "minimum_wage")
+        assert mw["data"]["governing_level"] == "state"
+        assert mw["data"]["applicable_minimum"] == pytest.approx(16.50)
+        assert r["coverage"]["complete"] is False
+        assert any("had not taken effect" in w for w in r["coverage"]["warnings"])
+
+    def test_seatac_is_deliberately_not_encoded_and_warns(self):
+        r = assess_wage_hour(
+            WageFacts(work_state="WA", hourly_rate=17.13, work_locality="SeaTac"), date(2026, 2, 1))
+        assert r["coverage"]["complete"] is False
+        assert any("hospitality and transportation" in w for w in r["coverage"]["warnings"])
 
 
 class TestFinalPayCalifornia:

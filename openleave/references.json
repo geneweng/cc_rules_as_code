@@ -380,14 +380,21 @@
       "parameters": {
         "minwage.CA": "California state minimum wage, all employers ($/hr)",
         "finalpay.CA.quit_no_notice_hours": "Deadline to pay a no-notice quit (hours)",
-        "finalpay.CA.waiting_time_penalty_max_days": "Maximum § 203 waiting-time penalty (days of wages)"
+        "finalpay.CA.waiting_time_penalty_max_days": "Maximum § 203 waiting-time penalty (days of wages)",
+        "minwage.CA.san_francisco": "San Francisco local minimum wage ($/hr; adjusts July 1)",
+        "minwage.CA.los_angeles": "Los Angeles city local minimum wage ($/hr; adjusts July 1)",
+        "minwage.CA.los_angeles_county": "Unincorporated LA County local minimum wage ($/hr; adjusts July 1)",
+        "minwage.CA.oakland": "Oakland local minimum wage ($/hr; adjusts Jan 1)",
+        "minwage.CA.san_jose": "San Jose local minimum wage ($/hr; adjusts Jan 1)"
       },
       "claims": [
         "Minimum wage is CPI-indexed annually: $16.50 (2025) -> $16.90 (2026), all employer sizes.",
         "California prohibits the tip credit (Lab. Code § 351): tipped workers get full minimum in cash.",
         "Fired/laid off -> pay immediately; quit with 72h notice -> last day; quit without -> within 72h.",
         "Accrued vacation is earned wages and must be paid out (§ 227.3).",
-        "The finalpay.* effective dates are 'in force since at least 2000' floors, not researched precisely."
+        "The finalpay.* effective dates are 'in force since at least 2000' floors, not researched precisely.",
+        "Local minimum wages (SF $19.18, LA city $17.87, LA county $17.81 from 2025-07-01; Oakland $17.34, San Jose $18.45 from 2026-01-01) govern where higher than the state rate; the local ordinance citations are prototype approximations.",
+        "Several localities have employer-size tiers; the encoded rate is the standard/large-employer rate."
       ]
     },
     "WA-WAGE": {
@@ -398,13 +405,22 @@
       "verified_by": null,
       "verified_on": null,
       "parameters": {
-        "minwage.WA": "Washington state minimum wage ($/hr)"
+        "minwage.WA": "Washington state minimum wage ($/hr)",
+        "minwage.WA.seattle": "Seattle local minimum wage, all employers ($/hr)",
+        "minwage.WA.tukwila": "Tukwila local minimum wage ($/hr)",
+        "minwage.WA.burien": "Burien local minimum wage ($/hr)",
+        "minwage.WA.renton": "Renton local minimum wage ($/hr)",
+        "minwage.WA.everett": "Everett local minimum wage ($/hr)",
+        "minwage.WA.bellingham": "Bellingham local minimum wage ($/hr)",
+        "minwage.WA.king_county": "Unincorporated King County local minimum wage ($/hr)"
       },
       "claims": [
         "Minimum wage is CPI-indexed annually: $16.66 (2025) -> $17.13 (2026), highest state rate in the nation.",
         "Washington prohibits the tip credit: tipped workers get full minimum in cash.",
         "Final wages are due by the end of the next established pay period; no statutory vacation payout.",
-        "Many WA localities (Seattle $21.30 in 2026, SeaTac, Tukwila, etc.) set higher minimums — not encoded."
+        "Encoded 2026 local minimums: Seattle $21.30, Tukwila $21.65, Burien $21.63, Renton $21.57, King County $20.82, Everett $20.77, Bellingham $19.13; local ordinance citations are prototype approximations.",
+        "SeaTac's ~$20.74 applies only to hospitality/transportation workers, not city-wide — deliberately NOT encoded, still warned.",
+        "Several localities have employer-size tiers; the encoded rate is the standard/large-employer rate."
       ]
     }
   }

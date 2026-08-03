@@ -14,6 +14,7 @@ from datetime import date
 
 from .. import parameters
 from ..engine import Citation, Finding
+from . import localities
 from .facts import PayBasis, WageFacts
 from .result import WageTopic
 
@@ -36,11 +37,34 @@ def assess(facts: WageFacts, as_of: date) -> WageTopic:
     state = facts.work_state.upper()
     topic = WageTopic(topic="minimum_wage", name="Minimum wage")
 
+    # Build the stack of minimum-wage floors that apply — federal, state, and
+    # (if the worksite is in an encoded locality) local. The highest governs; on a
+    # tie the most local level wins.
     federal = parameters.get("minwage.federal", as_of)
+    levels: list[tuple[str, float, Citation, str]] = [
+        ("federal", federal, FLSA, f"federal ${federal:.2f}")
+    ]
+
     state_key = f"minwage.{state}"
     state_min = parameters.get(state_key, as_of) if parameters.in_force(state_key, as_of) else None
-    applicable = max(federal, state_min) if state_min is not None else federal
-    source = STATE_MINWAGE_CITATION.get(state, FLSA) if state_min is not None else FLSA
+    if state_min is not None:
+        levels.append(
+            ("state", state_min, STATE_MINWAGE_CITATION.get(state, FLSA), f"{state} state ${state_min:.2f}")
+        )
+
+    loc = localities.lookup(state, facts.work_locality)
+    local_min = None
+    if loc is not None and parameters.in_force(loc["param_key"], as_of):
+        local_min = parameters.get(loc["param_key"], as_of)
+        levels.append(
+            ("local", local_min, Citation(loc["citation"]), f"{loc['display']} local ${local_min:.2f}")
+        )
+
+    governing = levels[0]
+    for level in levels[1:]:
+        if level[1] >= governing[1]:
+            governing = level
+    gov_level, applicable, source, _ = governing
 
     topic.findings.append(
         Finding(
@@ -48,16 +72,15 @@ def assess(facts: WageFacts, as_of: date) -> WageTopic:
             description=f"The applicable minimum wage is ${applicable:.2f}/hour",
             met=True,
             citation=source,
-            detail=(
-                f"Federal floor ${federal:.2f}; "
-                + (f"{state} state minimum ${state_min:.2f}; the higher governs."
-                   if state_min is not None
-                   else f"no state minimum encoded for {state} — federal floor applies.")
-            ),
+            detail="; ".join(label for _, _, _, label in levels)
+            + f"; the highest governs ({gov_level}).",
         )
     )
     topic.data["federal_minimum"] = federal
     topic.data["state_minimum"] = state_min
+    topic.data["local_minimum"] = local_min
+    topic.data["local_name"] = loc["display"] if local_min is not None else None
+    topic.data["governing_level"] = gov_level
     topic.data["applicable_minimum"] = applicable
 
     # Tipped-wage handling.

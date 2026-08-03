@@ -41,7 +41,7 @@ def assess_wage_hour(facts: WageFacts, as_of: date | None = None) -> dict:
         "as_of": as_of.isoformat(),
         "jurisdiction": {"state": facts.work_state.upper(), "locality": facts.work_locality},
         "topics": [t.as_dict() for t in topics],
-        "coverage": coverage.assess(facts.work_state, facts.work_locality),
+        "coverage": coverage.assess(facts.work_state, facts.work_locality, as_of),
         "disclaimer": DISCLAIMER,
         "engine_version": __version__,
     }

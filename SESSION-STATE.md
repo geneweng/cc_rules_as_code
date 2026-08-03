@@ -14,7 +14,7 @@ The arc so far: internet survey → validated product brainstorm → working eng
 amendment pipeline → go-to-market collateral (decks, video, landing page) → MCP server →
 expanded jurisdiction coverage.
 
-## Current state (all committed, tree clean, 197 tests passing)
+## Current state (all committed, tree clean, 204 tests passing)
 
 **The engine** (`openleave/`) — sixteen regimes across fourteen jurisdictions. **Every
 comprehensive U.S. paid-family-leave program is now encoded.**
@@ -49,8 +49,8 @@ comprehensive U.S. paid-family-leave program is now encoded.**
 - Regime modules in `openleave/regimes/`; coverage in `openleave/coverage.py`; interactions in
   `openleave/interactions.py`.
 
-**The verification manifest** (`openleave/references.json` + `references.py`) — maps all 112
-parameters (leave + wage-and-hour) to statute + agency URL + a plain-English meaning, grouped by jurisdiction with
+**The verification manifest** (`openleave/references.json` + `references.py`) — maps all 124
+parameters (leave + wage-and-hour, incl. 12 local minimum wages) to statute + agency URL + a plain-English meaning, grouped by jurisdiction with
 `verified`/`verified_by`/`verified_on` sign-off fields and structural "claims" (logic/formulas
 that aren't single numbers). This is the worksheet for the counsel-verification pass — the #1
 gate before real use. Guarded by `tests/test_references.py`: it must document *exactly* the
@@ -74,6 +74,13 @@ rule. **Deferred to Phase 2 (deliberately): overtime math and exempt classificat
 test is open-textured / high-liability). **Full surface parity with leave:** MCP tool
 `openleave_check_wage_hour`, API `POST /wage-hour/determinations`, and a browser checker at
 `GET /wage-hour` (`wage_checker.html`, linked from the leave checker; verified via screenshot).
+**Phase 1.5 DONE — locality minimum wages** (`wagehour/localities.py`): 12 marquee WA + CA local
+rates encoded (Seattle $21.30, Tukwila, Burien, Renton, Everett, Bellingham, King County; SF, LA
+city/county, Oakland, San Jose). Min wage is now `max(federal, state, local)` with the governing
+level cited; an encoded locality is a complete answer, an unencoded one still warns (can't rule out
+an ordinance), and SeaTac is intentionally unencoded (its $20.74 is hospitality/transportation-only).
+Locality name → slug normalization drops "unincorporated". SF/LA are July-1-dated, so a pre-July
+query correctly falls back to state with a "not yet in effect" note.
 
 **The AI amendment pipeline** (`openleave/watcher/`) — LLM drafts a parameter/logic diff from
 an amendment doc → regression suite gates it (`OPENLEAVE_PARAM_OVERRIDES`) → human approves →
@@ -99,7 +106,7 @@ https://geneweng.github.io/cc_rules_as_code/** (GitHub Pages, `main`/`/docs`).
 
 ```sh
 cd ~/cc_projects/cc_rules_as_code
-.venv/bin/pytest -q                                   # 197 tests
+.venv/bin/pytest -q                                   # 204 tests
 .venv/bin/uvicorn openleave.api:app                   # checker at http://127.0.0.1:8000
 .venv/bin/python -m openleave.mcp_server              # MCP over stdio
 .venv/bin/python -m openleave.watcher --help          # amendment pipeline CLI
@@ -123,7 +130,7 @@ Video/render scratch work lived under the session scratchpad (not in the repo).
 - **The demo video narration is synthetic TTS** — fine for a prototype, re-record with a human
   voice for anything customer-facing. Scene 5's LLM `analyze` step was narrated without
   claiming that specific run was live (no API key).
-- **Traction is internal only** — 197 tests and a working pipeline are engineering traction, not
+- **Traction is internal only** — 204 tests and a working pipeline are engineering traction, not
   market traction. No real design partner, lawyer, or dollar has touched this yet.
 
 ## Decisions already made (don't relitigate)
@@ -146,9 +153,10 @@ Video/render scratch work lived under the session scratchpad (not in the repo).
    expansion, not a gap-fill. The bigger frontier now is #2.
 2. **Wage-and-hour / termination-rules expansion** — scoped (`wage-hour-expansion-scope.md`) and
    **Phase 1 built** (minimum wage + final pay, federal/CA/WA, in `openleave/wagehour/`).
-   Surface parity DONE (MCP tool + API + browser checker). Immediate next steps: Phase 1.5
-   (top locality minimum wages: Seattle, NYC, SF, LA, Chicago, ...); then Phase 2 (overtime +
-   exempt classification — encode the salary threshold, flag the duties test).
+   Surface parity DONE (MCP + API + browser). Phase 1.5 DONE (12 WA/CA locality minimum wages).
+   Immediate next steps: widen wage-hour state coverage (NY/IL/CO/... so NYC/Chicago/Denver
+   localities have a state base) OR go to Phase 2 (overtime + exempt classification — encode the
+   salary threshold, flag the duties test — the highest-value, highest-liability piece).
 3. **Accuracy verification pass** — the per-jurisdiction reference manifest now EXISTS
    (`references.json` + `references-worksheet.md`, 0/15 verified). What remains is the human
    step: get an employment lawyer to work the worksheet and record sign-off. Still the prereq

@@ -110,5 +110,17 @@
   "minwage.CA": [["2025-01-01", 16.5], ["2026-01-01", 16.9]],
   "minwage.WA": [["2025-01-01", 16.66], ["2026-01-01", 17.13]],
   "finalpay.CA.quit_no_notice_hours": [["2000-01-01", 72]],
-  "finalpay.CA.waiting_time_penalty_max_days": [["2000-01-01", 30]]
+  "finalpay.CA.waiting_time_penalty_max_days": [["2000-01-01", 30]],
+  "minwage.WA.seattle": [["2026-01-01", 21.3]],
+  "minwage.WA.tukwila": [["2026-01-01", 21.65]],
+  "minwage.WA.burien": [["2026-01-01", 21.63]],
+  "minwage.WA.renton": [["2026-01-01", 21.57]],
+  "minwage.WA.everett": [["2026-01-01", 20.77]],
+  "minwage.WA.bellingham": [["2026-01-01", 19.13]],
+  "minwage.WA.king_county": [["2026-01-01", 20.82]],
+  "minwage.CA.san_francisco": [["2025-07-01", 19.18]],
+  "minwage.CA.los_angeles": [["2025-07-01", 17.87]],
+  "minwage.CA.los_angeles_county": [["2025-07-01", 17.81]],
+  "minwage.CA.oakland": [["2026-01-01", 17.34]],
+  "minwage.CA.san_jose": [["2026-01-01", 18.45]]
 }
