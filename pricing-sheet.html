@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OpenLeave — Pricing Sheet</title>
+<style>
+  :root {
+    --ink: #1B1C24; --page: #FAFAF6; --oxblood: #6D2130; --gold: #A78B4B;
+    --muted: #5C5F6C; --green: #2E7D3B; --hairline: #D8D4C8; --panel: #F1EFE7;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #888; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { size: 1280px 648px; margin: 0; }
+
+  .canvas { width: 1280px; height: 648px; background: var(--page); color: var(--ink);
+    font: 13px/1.45 "Charter", "Georgia", serif; overflow: hidden;
+    display: flex; flex-direction: column; padding: 30px 46px 22px; }
+
+  .head { display: flex; justify-content: space-between; align-items: flex-end;
+    border-bottom: 1px solid var(--gold); padding-bottom: 13px; }
+  .head h1 { font: 30px/1.05 "Baskerville", serif; font-weight: normal; }
+  .head h1 em { font-style: italic; color: var(--oxblood); }
+  .head .tagline { font: italic 13.5px/1.4 "Baskerville", serif; color: var(--muted); margin-top: 5px; }
+  .head .caveat { text-align: right; font: 10px/1.5 "Menlo", monospace; color: var(--oxblood);
+    letter-spacing: 0.04em; max-width: 20rem; }
+  .head .caveat b { color: var(--gold); }
+
+  .tiers { display: flex; gap: 14px; margin-top: 18px; }
+  .tier { flex: 1; border: 1px solid var(--hairline); background: #fff; border-radius: 6px;
+    padding: 15px 16px 16px; display: flex; flex-direction: column; position: relative; }
+  .tier.hot { border: 2px solid var(--gold); background: #FBF9F2; }
+  .tier .tag { position: absolute; top: -10px; left: 16px; background: var(--gold); color: #fff;
+    font: 9px/1 "Charter", serif; letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 3px; }
+  .tier .name { font: 21px/1.1 "Baskerville", serif; color: var(--oxblood); }
+  .tier .for { font: 10.5px/1.4 "Menlo", monospace; color: var(--muted); margin-top: 4px; min-height: 28px; }
+  .tier .price { font: 25px/1.1 "Baskerville", serif; margin: 10px 0 2px; }
+  .tier .price small { font: 11px/1 "Charter", serif; color: var(--muted); }
+  .tier .meter { font: 10px/1.4 "Menlo", monospace; color: var(--gold); min-height: 26px; }
+  .tier hr { border: 0; border-top: 1px solid var(--hairline); margin: 9px 0; }
+  .tier ul { list-style: none; flex: 1; }
+  .tier li { position: relative; padding: 3px 0 3px 15px; font-size: 11.5px; line-height: 1.36; }
+  .tier li::before { content: "§"; position: absolute; left: 0; color: var(--gold); font: 11px/1.4 "Baskerville", serif; }
+  .tier li.no { color: var(--muted); }
+  .tier li.no::before { content: "—"; color: var(--hairline); }
+
+  .strip { display: flex; gap: 14px; margin-top: 16px; }
+  .box { flex: 1; border: 1px solid var(--hairline); background: var(--panel); border-radius: 6px; padding: 12px 15px; }
+  .box .bt { font: 10px/1.3 "Charter", serif; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--oxblood); margin-bottom: 7px; }
+  .box p { font-size: 11.5px; line-height: 1.5; color: var(--muted); }
+  .box p b { color: var(--ink); font-weight: normal; }
+  .box .oc { font: 11px/1.7 "Menlo", monospace; color: var(--muted); }
+  .box .oc b { color: var(--oxblood); font-weight: normal; }
+  .gold { color: var(--gold); }
+
+  .foot { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--gold);
+    display: flex; justify-content: space-between; align-items: baseline; gap: 20px; }
+  .foot .dp { font: italic 12px/1.5 "Baskerville", serif; color: var(--muted); max-width: 62rem; }
+  .foot .dp b { font-style: normal; color: var(--oxblood); }
+  .foot .brand { font: 10px/1.6 "Menlo", monospace; color: var(--muted); text-align: right; flex: none; letter-spacing: 0.04em; }
+  .foot .brand b { color: var(--gold); font-weight: normal; }
+</style>
+</head>
+<body>
+<div class="canvas">
+
+  <div class="head">
+    <div>
+      <h1>Pricing &mdash; <em>the code is free; being current is the product</em>.</h1>
+      <div class="tagline">Open-core: audit the encodings free · pay for the hosted, counsel-verified,
+        always-current guarantee.</div>
+    </div>
+    <div class="caveat"><b>ILLUSTRATIVE</b> — anchors for a<br>conversation, not published prices.<br>Validate with design partners.</div>
+  </div>
+
+  <div class="tiers">
+
+    <div class="tier">
+      <div class="name">Community</div>
+      <div class="for">self-hosters · evaluation</div>
+      <div class="price">$0</div>
+      <div class="meter">self-run · open source</div>
+      <hr>
+      <ul>
+        <li>The engine + encodings, open source</li>
+        <li>Run it in your own stack</li>
+        <li>Community / GitHub support</li>
+        <li class="no">Counsel-verified content</li>
+        <li class="no">Amendment feed · SLA</li>
+      </ul>
+    </div>
+
+    <div class="tier">
+      <div class="name">Developer</div>
+      <div class="for">prototyping · SMB · indie apps</div>
+      <div class="price">~$99&ndash;499<small>/mo</small></div>
+      <div class="meter">per determination · incl. volume, then overage</div>
+      <hr>
+      <ul>
+        <li>Hosted REST API + MCP tools</li>
+        <li>Counsel-verified shipped jurisdictions</li>
+        <li>99.5% SLA</li>
+        <li>Email support</li>
+        <li>Self-serve, start in minutes</li>
+      </ul>
+    </div>
+
+    <div class="tier hot">
+      <div class="tag">most common</div>
+      <div class="name">Platform</div>
+      <div class="for">payroll / HRIS / EOR / leave-mgmt / AI copilots</div>
+      <div class="price">PEPM<small> · or committed bundles</small></div>
+      <div class="meter">~$0.25&ndash;1.00 per covered employee / mo</div>
+      <hr>
+      <ul>
+        <li>Everything in Developer, plus &mdash;</li>
+        <li><b style="color:var(--oxblood)">Amendment webhooks</b> · always current</li>
+        <li>99.9% SLA · priority support + Slack</li>
+        <li>Audit-log retention · MCP at scale</li>
+        <li><b style="color:var(--oxblood)">Partner-priced</b> during the design phase</li>
+      </ul>
+    </div>
+
+    <div class="tier">
+      <div class="name">Enterprise</div>
+      <div class="for">large platforms · insurers · regulated</div>
+      <div class="price">Custom<small> · annual, $50k+</small></div>
+      <div class="meter">committed volume + custom terms</div>
+      <hr>
+      <ul>
+        <li>Everything in Platform, plus &mdash;</li>
+        <li>VPC / data-residency · SSO / SCIM</li>
+        <li>Indemnification (with a cap)</li>
+        <li>Custom jurisdictions · priority verification queue</li>
+        <li>99.95% SLA + credits · dedicated CSM</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="strip">
+    <div class="box">
+      <div class="bt">The open-core line</div>
+      <div class="oc"><b>Free</b> &nbsp;self-host · "as is" · web-researched · no SLA<br>
+        <b>Paid</b> &nbsp;hosted · counsel-verified · always current · SLA · indemnified</div>
+    </div>
+    <div class="box">
+      <div class="bt">What you pay for</div>
+      <p>Counsel-verified content · always current (amendment feed) · SLA + support · indemnification ·
+        audit trail. <b>Never gated: currency and amendment alerts are the reason to pay.</b></p>
+    </div>
+    <div class="box">
+      <div class="bt">Add-ons</div>
+      <p>Extra jurisdictions / domains · priority verification · self-host commercial license +
+        support · higher indemnification cap · white-label checker.</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="dp"><b>Design partners:</b> partner-priced (free-to-deep-discount) Platform access and a
+      say in which jurisdictions get counsel-verified first, in exchange for real use cases, candid
+      feedback, and a reference once earned. Meter on determinations; package on the buyer's unit
+      (PEPM for platforms, per-call for copilots, per-claim for insurers).</div>
+    <div class="brand">OPENLEAVE · <b>github.com/geneweng/cc_rules_as_code</b><br>
+      Illustrative figures for discussion. Decision support, not legal advice.</div>
+  </div>
+
+</div>
+</body>
+</html>

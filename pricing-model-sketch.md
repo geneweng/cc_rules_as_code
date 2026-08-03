@@ -2,7 +2,8 @@
 
 *A first-draft pricing model for OpenLeave. Companion to
 [`business-model-and-deployment.md`](business-model-and-deployment.md), which argues the model is
-API-first, usage-based, B2B, open-core.*
+API-first, usage-based, B2B, open-core. The tier table below is also rendered as a one-page visual
+sheet: [`pricing-sheet.pdf`](pricing-sheet.pdf) (source: [`pricing-sheet.html`](pricing-sheet.html)).*
 
 > **All dollar figures below are illustrative placeholders** — anchors for a conversation, not
 > validated prices. Real pricing comes from design-partner willingness-to-pay and unit economics
