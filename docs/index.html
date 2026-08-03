@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OpenLeave — Leave law, as code</title>
-<meta name="description" content="An executable, citation-backed encoding of U.S. employee leave law, sold as an API. Open-source encodings, AI-maintained, attorney-approved.">
+<title>OpenLeave — Employment law, as code</title>
+<meta name="description" content="A citation-backed, effective-dated rules engine for U.S. leave and wage & hour that platforms and AI copilots embed as an API or MCP tool. Open-source encodings, AI-maintained, attorney-approved.">
 <style>
   :root {
     --ink: #1B1C24; --page: #FAFAF6; --oxblood: #6D2130; --gold: #A78B4B;
@@ -95,6 +95,11 @@
   .split li { padding: 12px 0; border-top: 1px solid var(--hairline); font-size: 16px; }
   .split li b { font-family: "Baskerville", serif; font-weight: normal; font-size: 17.5px; }
   .split li:first-child { border-top: 0; }
+  .offer-lbl { font: 13px/1.4 "Charter", serif; letter-spacing: 0.14em; text-transform: uppercase;
+               color: var(--gold); margin-bottom: 8px; }
+  .straight { border-left: 3px solid var(--oxblood); padding: 4px 0 4px 16px; margin-top: 18px;
+              font: italic 16px/1.55 "Baskerville", serif; color: var(--muted); }
+  .straight b { font-style: normal; color: var(--oxblood); }
 
   /* closing */
   .close { background: var(--ink); color: var(--page); text-align: left; }
@@ -125,6 +130,7 @@
       <a href="#how">How it works</a>
       <a href="#pipeline">The pipeline</a>
       <a href="#opencore">Open core</a>
+      <a href="#partners">For partners</a>
       <a href="https://github.com/geneweng/cc_rules_as_code">GitHub</a>
     </nav>
   </div>
@@ -133,12 +139,12 @@
 <section class="hero">
   <div class="wrap">
     <div>
-      <div class="eyebrow">Leave law, as code</div>
-      <h1>Every leave decision, backed by <em>the letter of the law</em>.</h1>
-      <p class="sub">OpenLeave is an executable encoding of U.S. employee leave law —
-      FMLA and the state paid-leave programs — served as an API that returns
-      determinations with the statute attached.</p>
-      <a class="btn primary" href="https://github.com/geneweng/cc_rules_as_code">View on GitHub</a>
+      <div class="eyebrow">Employment law, as code</div>
+      <h1>The employment-law engine you <em>embed</em>.</h1>
+      <p class="sub">A citation-backed, effective-dated rules engine for U.S. leave and wage &amp; hour.
+      Call it as a REST API or an MCP tool — every answer arrives with its statute attached. The
+      layer beneath your product, not another HR app.</p>
+      <a class="btn primary" href="#partners">Become a design partner</a>
       <a class="btn ghost" href="#how">See how it works</a>
     </div>
     <div class="exchange mono" aria-label="Example API request and response">
@@ -173,8 +179,9 @@
   <div class="wrap">
     <div class="sec-eyebrow">§ 1 · What you get</div>
     <h2>Determinations with <em>reasoning attached</em>.</h2>
-    <p class="lede">Send facts about a person's situation. Get back, for every applicable
-    law: eligibility, entitlement, the computed benefit — and the authority behind each conclusion.</p>
+    <p class="lede">Send facts about a person's situation. Get back, for every applicable leave and
+    wage-and-hour law: eligibility, entitlement, the computed benefit or the minimum wage and
+    overtime owed — and the authority behind each conclusion.</p>
     <div class="three">
       <div class="card">
         <h3>Justification trees</h3>
@@ -243,8 +250,10 @@
         <b style="color:var(--ink)">every comprehensive U.S. paid-leave program</b> — FMLA plus
         California, Colorado, Connecticut, DC, Delaware, Maine, Maryland, Massachusetts, Minnesota,
         New Jersey, New York, Oregon, Rhode Island, and Washington — sixteen regimes across
-        fourteen jurisdictions (Maryland's is encoded ahead of its 2028 launch), with a
-        159-scenario regression suite and the amendment pipeline running end to end.</p>
+        fourteen jurisdictions, <b style="color:var(--ink)">plus wage &amp; hour</b> (minimum wage
+        with local ordinances, overtime, exempt classification, and final pay) for the federal floor,
+        California, and Washington. A 224-scenario regression suite and the amendment pipeline run end
+        to end.</p>
       </div>
       <ul>
         <li><b>Payroll / HRIS / EOR platforms</b> — replace an internal rules team with an API line-item</li>
@@ -256,12 +265,45 @@
   </div>
 </section>
 
+<section class="block" id="partners">
+  <div class="wrap">
+    <div class="sec-eyebrow">§ 4 · Design partners</div>
+    <h2>Why embed, <em>not build</em>.</h2>
+    <p class="lede">You don't want to run an employment-law-maintenance team. Encoding the law once
+    is easy; keeping it current across every jurisdiction, forever, is the part you'd rather buy — and
+    for an AI copilot, it's a verified oracle to <em>call</em> instead of a rules layer to
+    hallucinate.</p>
+    <div class="split">
+      <div>
+        <div class="offer-lbl">What you get</div>
+        <ul>
+          <li>Early, partner-priced access to the API and MCP tools</li>
+          <li>A direct line into the roadmap — you pick which jurisdictions and rules we verify with counsel first</li>
+          <li>The open-source encodings, to audit against primary sources yourself</li>
+          <li>White-glove integration support</li>
+        </ul>
+      </div>
+      <div>
+        <div class="offer-lbl">What we ask</div>
+        <ul>
+          <li>Real use cases, and candid feedback on where the edges are</li>
+          <li>A design-partner reference — once we've earned it</li>
+        </ul>
+        <p class="straight"><b>Straight talk:</b> statutory figures are web-researched and being
+        verified by counsel now — design partners shape that queue. We'd rather show you the edges
+        than oversell past them.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="close">
   <div class="wrap">
-    <div class="eyebrow">Design partnerships open — Fall 2026</div>
+    <div class="eyebrow">Design partners — a few seats</div>
     <h2>Stop re-coding the law.<br>Start calling it.</h2>
-    <p>We're onboarding three design partners for the 15-jurisdiction rollout.
-    If your team maintains leave rules by hand, we'd like to talk.</p>
+    <p>The leave sweep is done and wage &amp; hour is live. We're taking on a handful of design
+    partners to shape the counsel-verification queue and the first integrations. If your product
+    answers "is this compliant?", let's talk.</p>
     <a class="btn primary" style="background:var(--gold); color:var(--ink)" href="mailto:gene.weng@gmail.com">Talk to us</a>
     <a class="btn ghost" style="border-color:#3A3B45; color:var(--page)" href="https://github.com/geneweng/cc_rules_as_code">Read the code</a>
   </div>
