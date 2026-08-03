@@ -27,6 +27,7 @@ guarantee.* So the model that fits is:
   users. A per-seat model misprices infrastructure.
 - **Pricing shapes.** Metered per determination, or per-covered-employee-per-month, with tiers and
   volume commits. Usage-based aligns price with value and is how modern API infrastructure sells.
+  A first-draft tier structure is sketched in [`pricing-model-sketch.md`](pricing-model-sketch.md).
 - **Open-core is a genuine advantage here.** The encodings + engine are already open source. Lean
   into it: open source is *distribution and trust* (buyers audit every line against the statute);
   the commercial product is the **hosted, SLA-backed, counsel-verified, always-current** service +
