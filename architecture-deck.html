@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OpenLeave — Architecture</title>
+<style>
+  :root {
+    --ink: #1B1C24;
+    --page: #FAFAF6;
+    --oxblood: #6D2130;
+    --gold: #A78B4B;
+    --muted: #5C5F6C;
+    --green: #2E7D3B;
+    --hairline: #D8D4C8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #888; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { size: 1280px 720px; margin: 0; }
+
+  .slide {
+    width: 1280px; height: 720px;
+    background: var(--page); color: var(--ink);
+    font: 18px/1.5 "Charter", "Georgia", serif;
+    position: relative; overflow: hidden;
+    page-break-after: always;
+    display: flex; flex-direction: column;
+  }
+
+  .runhead {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 34px 64px 12px;
+    font: 12px/1 "Charter", serif; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--gold);
+  }
+  .runhead b { color: var(--oxblood); font-weight: normal; }
+  .folio {
+    position: absolute; bottom: 26px; left: 64px; right: 64px;
+    display: flex; justify-content: space-between;
+    font: 11px/1 "Menlo", monospace; color: var(--muted); letter-spacing: 0.06em;
+  }
+
+  .body { flex: 1; display: flex; padding: 36px 64px 58px; gap: 44px; min-height: 0; }
+  .margin-col { width: 168px; flex: none; padding-top: 8px; }
+  .marker { font: 54px/1 "Baskerville", "Times New Roman", serif; color: var(--oxblood); }
+  .marker small { display: block; font: 12px/1.5 "Charter", serif; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--muted); margin-top: 10px; }
+  .marginalia {
+    margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--hairline);
+    font: italic 13.5px/1.55 "Baskerville", serif; color: var(--muted);
+  }
+  .marginalia .cite { display: block; font: 10.5px/1.6 "Menlo", monospace;
+    font-style: normal; color: var(--gold); margin-top: 8px; }
+  .main { flex: 1; min-width: 0; }
+
+  h2 { font: 38px/1.15 "Baskerville", "Times New Roman", serif; font-weight: normal; margin: 0 0 18px; }
+  h2 em { font-style: italic; color: var(--oxblood); }
+  .lede { font-size: 20px; line-height: 1.5; margin-bottom: 16px; max-width: 48rem; }
+  .main p { max-width: 48rem; }
+
+  .dark { background: var(--ink); color: var(--page); }
+  .cover { justify-content: center; padding: 0 110px; }
+  .cover .rule { width: 76px; border: 0; border-top: 2px solid var(--gold); margin: 30px 0; }
+  .cover h1 { font: 76px/1.1 "Baskerville", serif; font-weight: normal; }
+  .cover .longtitle { font: italic 23px/1.55 "Baskerville", serif; color: #C9C5B8; max-width: 54rem; }
+  .cover .longtitle b { font-style: normal; font-weight: normal; color: var(--gold);
+    letter-spacing: 0.18em; font-size: 16px; }
+  .cover .meta { margin-top: 42px; font: 13px/1.9 "Menlo", monospace; color: #8B8E9C; letter-spacing: 0.05em; }
+  .cover .meta b { color: var(--gold); font-weight: normal; }
+
+  .mono {
+    font: 12.5px/1.65 "Menlo", monospace; background: #F1EFE7;
+    border-left: 3px solid var(--gold); padding: 16px 20px; border-radius: 0 4px 4px 0;
+    white-space: pre; overflow: hidden;
+  }
+  .mono .c { color: var(--muted); }
+  .mono .k { color: var(--oxblood); }
+  .mono .g { color: var(--green); }
+  .mono .x { color: var(--oxblood); }
+  .mono .cite { color: var(--gold); }
+  .mono .em { color: var(--ink); font-weight: bold; }
+
+  blockquote {
+    font: italic 21px/1.55 "Baskerville", serif; color: #3A3B45;
+    border-left: 2px solid var(--oxblood); padding: 4px 0 4px 22px; margin: 0 0 20px; max-width: 46rem;
+  }
+  blockquote .src { display: block; font: 11px/1.8 "Menlo", monospace; font-style: normal;
+    color: var(--gold); margin-top: 8px; }
+
+  .cols { display: flex; gap: 32px; }
+  .cols > div { flex: 1; min-width: 0; }
+  .small { font-size: 14px; color: var(--muted); }
+  .gold { color: var(--gold); }
+  .lbl { font: 12px/1.4 "Charter", serif; letter-spacing: 0.16em; text-transform: uppercase;
+         color: var(--muted); margin: 0 0 10px; }
+  ul.pts { list-style: none; margin: 8px 0 0; }
+  ul.pts li { padding: 7px 0 7px 22px; position: relative; font-size: 16.5px; line-height: 1.5;
+              border-bottom: 1px solid var(--hairline); max-width: 48rem; }
+  ul.pts li:last-child { border-bottom: 0; }
+  ul.pts li::before { content: "§"; position: absolute; left: 0; color: var(--gold);
+                      font: 15px/1.5 "Baskerville", serif; }
+  ul.pts b { color: var(--oxblood); font-weight: normal; }
+
+  /* three tiers */
+  .tiers { display: flex; flex-direction: column; gap: 6px; margin-top: 22px; }
+  .tier { border: 1px solid var(--hairline); background: #F5F3EC; border-radius: 4px;
+          padding: 15px 20px; display: flex; align-items: center; gap: 24px; }
+  .tier .tlabel { font: 12px/1.35 "Charter", serif; letter-spacing: 0.16em; text-transform: uppercase;
+                  color: var(--oxblood); width: 132px; flex: none; }
+  .tier .titems { font: 13.5px/1.55 "Menlo", monospace; color: var(--muted); }
+  .tier.core { background: var(--ink); border-color: var(--ink); }
+  .tier.core .tlabel { color: var(--gold); }
+  .tier.core .titems { color: #C9C5B8; }
+  .tierarrow { text-align: center; color: var(--gold); font: 16px/1 "Baskerville", serif; margin: -2px 0; }
+
+  /* invariant table */
+  .invtable { width: 100%; border-collapse: collapse; margin-top: 14px; }
+  .invtable th { text-align: left; font: 11px/1.4 "Charter", serif; letter-spacing: 0.14em;
+                 text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--gold);
+                 padding: 4px 14px 8px; }
+  .invtable td { padding: 8px 14px; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+  .invtable tr:last-child td { border-bottom: 0; }
+  .invtable td.inv { font: 15px/1.32 "Baskerville", serif; color: var(--ink); width: 46%; }
+  .invtable td.inv b { color: var(--oxblood); font-weight: normal; }
+  .invtable td.fail { font: 12.5px/1.38 "Charter", serif; color: var(--muted); }
+
+  /* chain diagram */
+  .chain { display: flex; align-items: stretch; gap: 0; margin-top: 24px; }
+  .stage { flex: 1; border: 1px solid var(--hairline); background: #F5F3EC;
+           padding: 15px 15px; border-radius: 4px; }
+  .stage .no { font: 20px/1 "Baskerville", serif; color: var(--oxblood); margin-bottom: 6px; }
+  .stage .t { font: 17px/1.2 "Baskerville", serif; margin-bottom: 8px; }
+  .stage .d { font: 11px/1.55 "Menlo", monospace; color: var(--muted); }
+  .arrow { align-self: center; font: 24px/1 "Baskerville", serif; color: var(--gold); padding: 0 9px; flex: none; }
+  .loop { margin: 22px 0 0; padding: 14px 20px; border: 1px dashed var(--gold); border-radius: 4px;
+          font: italic 15px/1.55 "Baskerville", serif; color: var(--muted); }
+  .loop b { font-style: normal; font-family: "Charter", serif; font-size: 12.5px;
+            letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- ══════════ COVER ══════════ -->
+<section class="slide dark cover">
+  <div class="longtitle"><b>OPENLEAVE&nbsp;·&nbsp;ARCHITECTURE</b></div>
+  <h1>The edges,<br>and the core.</h1>
+  <hr class="rule">
+  <div class="longtitle">How OpenLeave is built and why — a deterministic, citation-backed rules
+  engine at the center, with language models kept to the edges, where they draft and converse but
+  never decide the law.</div>
+  <div class="meta">AUGUST 2026 &nbsp;·&nbsp; <b>the design, in twelve panels</b></div>
+</section>
+
+<!-- ══════════ § 1 THE THESIS ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Architecture</span><span>The Thesis</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 1<small>The Thesis</small></div>
+      <div class="marginalia">Every decision that follows falls out of one commitment.</div>
+    </div>
+    <div class="main">
+      <h2>LLM at the edges, <em>engine at the core</em>.</h2>
+      <blockquote>The LLM belongs at the edges; a verified rules engine belongs at the core.
+      <span class="src">the survey's organizing thesis, made concrete</span></blockquote>
+      <p class="lede">Language models draft amendments and hold the conversation. They never decide
+      the law. Taking that seriously forces four properties:</p>
+      <ul class="pts">
+        <li>The core is <b>deterministic</b> — the same facts and date always yield the same answer.</li>
+        <li>Every conclusion <b>carries its citation</b> — nothing is asserted without a source.</li>
+        <li>Genuine discretion is <b>surfaced, not guessed</b> — open questions come back flagged.</li>
+        <li>The engine <b>reports the limits of its own coverage</b> instead of bluffing.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — ARCHITECTURE</span><span>2</span></div>
+</section>
+
+<!-- ══════════ § 2 THREE TIERS ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Architecture</span><span>Structure</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 2<small>Structure</small></div>
+      <div class="marginalia">The core knows nothing of the two tiers above it — everything above is
+        a thin adapter.</div>
+    </div>
+    <div class="main">
+      <h2>Three tiers.</h2>
+      <div class="tiers">
+        <div class="tier"><div class="tlabel">Edges<br><span class="small">(LLM-facing)</span></div>
+          <div class="titems">sample agent&nbsp;&nbsp;·&nbsp;&nbsp;amendment watcher<br>
+            <span class="gold">Claude drafts &amp; converses — never decides</span></div></div>
+        <div class="tierarrow">▼&nbsp;&nbsp;tool calls&nbsp;&nbsp;·&nbsp;&nbsp;proposed diffs</div>
+        <div class="tier"><div class="tlabel">Surfaces<br><span class="small">(transport)</span></div>
+          <div class="titems">MCP server (4 tools)&nbsp;&nbsp;·&nbsp;&nbsp;FastAPI + browser checkers</div></div>
+        <div class="tierarrow">▼&nbsp;&nbsp;validated facts + as_of date</div>
+        <div class="tier core"><div class="tlabel">Core<br><span class="small">(deterministic)</span></div>
+          <div class="titems">determine(facts, as_of)&nbsp;&nbsp;·&nbsp;&nbsp;assess_wage_hour(facts, as_of)<br>
+            regimes &amp; wage topics · engine · parameters · manifest</div></div>
+      </div>
+      <p class="small" style="margin-top:20px">The core is a pure Python library you can call
+      directly; the MCP server, the API, and the agent are thin adapters that transport questions in
+      and cited answers out.</p>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — ARCHITECTURE</span><span>3</span></div>
+</section>
+
+<!-- ══════════ § 3 EFFECTIVE-DATED PARAMETERS ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Architecture</span><span>Parameters</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 3<small>Parameters</small></div>
+      <div class="marginalia">One mechanism buys "the law as of any date" — and it is what the
+        amendment pipeline maintains.
+        <span class="cite">openleave/parameters.json</span></div>
+    </div>
+    <div class="main">
+      <h2>Numbers stay <em>data</em>, on a timeline.</h2>
+      <div class="mono">
+<span class="c"># parameters.json — each key is an effective-dated [date, value] series</span>
+<span class="k">"minwage.CA"</span>: [[<span class="g">"2025-01-01"</span>, <span class="g">16.50</span>], [<span class="g">"2026-01-01"</span>, <span class="g">16.90</span>]]
+
+parameters.get(<span class="k">"minwage.CA"</span>, as_of=date(2025, 6, 1))  <span class="c">-></span>  <span class="em">16.50</span>
+parameters.get(<span class="k">"minwage.CA"</span>, as_of=date(2026, 6, 1))  <span class="c">-></span>  <span class="em">16.90</span></div>
+      <p style="margin-top:20px">A wage that clears California's 2025 floor <em>fails</em> its 2026
+      floor. Reconstructing a past determination for an audit is just passing an earlier
+      <span class="gold">as_of</span>. SAWW bumps, benefit caps, program launch dates, and the
+      vacated-then-restored federal exempt threshold are all just points on a timeline.</p>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — ARCHITECTURE</span><span>4</span></div>
+</section>
+
+<!-- ══════════ § 4 SHARED VOCABULARY ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Architecture</span><span>Vocabulary</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 4<small>Vocabulary</small></div>
+      <div class="marginalia">A leave finding and a wage finding are the same kind of object.
+        <span class="cite">openleave/engine.py</span></div>
+    </div>
+    <div class="main">
+      <h2>Everything is a <em>cited Finding</em>.</h2>
+      <div class="mono">
+Finding(
+    key=<span class="g">"serious_health_condition"</span>,
+    description=<span class="g">"The condition is a 'serious health condition'"</span>,
+    met=<span class="em">None</span>,                       <span class="c"># -> a human must decide (never guessed)</span>
+    citation=Citation(<span class="cite">"29 C.F.R. § 825.113"</span>),
+)</div>
+      <p style="margin-top:20px"><span class="gold">met=None</span> is load-bearing: it means the
+      question is open-textured and a human must decide it. <span class="gold">resolve_eligibility</span>
+      propagates that <span class="gold">None</span> through — discretion is never silently collapsed
+      to a boolean. The same rule flags an exemption's duties test.</p>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — ARCHITECTURE</span><span>5</span></div>
+</section>
+
+<!-- ══════════ § 5 HONESTY INVARIANTS ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Architecture</span><span>Invariants</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 5<small>Invariants</small></div>
+      <div class="marginalia">The heart of the design: each rule exists to prevent a specific way a
+        rules-oracle lies.</div>
+    </div>
+    <div class="main">
+      <h2>Built to <em>refuse</em> the easy lie.</h2>
+      <table class="invtable">
+        <tr><th>Invariant</th><th>Failure it prevents</th></tr>
+        <tr><td class="inv"><b>Every conclusion cites its source</b></td>
+            <td class="fail">Unverifiable or hallucinated law</td></tr>
+        <tr><td class="inv"><b>Discretion is flagged, never compiled</b> (met = null)</td>
+            <td class="fail">Auto-answering open-textured questions — "laundered interpretation"</td></tr>
+        <tr><td class="inv"><b>Coverage is reported, never assumed</b></td>
+            <td class="fail">Silent under-coverage — a partial answer read as complete</td></tr>
+        <tr><td class="inv"><b>Outside the encoded range ≠ no entitlement</b></td>
+            <td class="fail">Reading "we lack the historical rate" as "no benefit"</td></tr>
+        <tr><td class="inv"><b>Enacted ≠ in force</b> (e.g. MD FAMLI, 2028)</td>
+            <td class="fail">Fabricating a benefit that cannot be claimed yet</td></tr>
+        <tr><td class="inv"><b>Law as of any date</b></td>
+            <td class="fail">Answering a past event with today's numbers</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — ARCHITECTURE</span><span>6</span></div>
+</section>
+
+<!-- ══════════ § 6 DATA FLOW ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Architecture</span><span>Flow</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 6<small>Flow</small></div>
+      <div class="marginalia">One determination — fanned out to every regime, then reassembled.</div>
+    </div>
+    <div class="main">
+      <h2>Facts in, <em>cited answer</em> out.</h2>
+      <div class="chain">
+        <div class="stage"><div class="no">in</div><div class="t">Facts + as_of</div>
+          <div class="d">work_state<br>hire_date<br>event / wage<br>a date</div></div>
+        <div class="arrow">→</div>
+        <div class="stage"><div class="no">fan out</div><div class="t">16 regimes</div>
+          <div class="d">each returns a<br>RegimeResult:<br>findings +<br>eligibility</div></div>
+        <div class="arrow">→</div>
+        <div class="stage"><div class="no">cross-cut</div><div class="t">Interactions<br>+ coverage</div>
+          <div class="d">concurrency<br>notes;<br>complete?<br>+ warnings</div></div>
+        <div class="arrow">→</div>
+        <div class="stage"><div class="no">out</div><div class="t">Determination</div>
+          <div class="d">regimes[]<br>interactions[]<br>coverage<br>disclaimer</div></div>
+      </div>
+      <p style="margin-top:22px" class="small">Each assessor is a pure function of
+      <span class="gold">(facts, as_of)</span> plus the read-only parameter store; nothing mutates
+      shared state. <span class="gold">assess_wage_hour</span> has the identical shape — fan out to
+      topic assessors, attach locality-aware coverage, return a dict.</p>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — ARCHITECTURE</span><span>7</span></div>
+</section>
+
+<!-- ══════════ § 7 TWO DOMAINS, ONE SUBSTRATE ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Architecture</span><span>Reuse</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 7<small>Reuse</small></div>
+      <div class="marginalia">Wage &amp; hour was added over the leave engine's substrate, not
+        beside a copy of it.</div>
+    </div>
+    <div class="main">
+      <h2>Wage &amp; hour is a <em>sibling</em>, not a rewrite.</h2>
+      <div class="cols" style="margin-top:8px">
+        <div>
+          <div class="lbl">Leave</div>
+          <p class="small"><span class="gold">determine(facts, as_of)</span><br>
+          <span class="gold">regimes/</span> — 16 modules<br>
+          Facts are <b>event-shaped</b> (a LeaveEvent)</p>
+        </div>
+        <div>
+          <div class="lbl">Wage &amp; hour</div>
+          <p class="small"><span class="gold">assess_wage_hour(facts, as_of)</span><br>
+          <span class="gold">wagehour/</span> — topic assessors + localities<br>
+          WageFacts are <b>ongoing-state</b> (no single event)</p>
+        </div>
+      </div>
+      <div class="loop" style="margin-top:26px"><b>Shared substrate&nbsp;&nbsp;</b> Both reuse the same
+      Finding / Citation types, the effective-dated parameter store, the coverage-reporting reflex, and
+      the verification manifest. Only the fact shape, the entry point, and the locality dimension are
+      new — the template for a third domain (breaks, WARN-Act) to follow.</div>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — ARCHITECTURE</span><span>8</span></div>
+</section>
+
+<!-- ══════════ § 8 AMENDMENT WATCHER ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Architecture</span><span>Currency</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 8<small>Currency</small></div>
+      <div class="marginalia">Encoding the law once is easy; staying current is the product. The LLM
+        proposes — a human and the tests decide.</div>
+    </div>
+    <div class="main">
+      <h2>Staying current, <em>safely</em>.</h2>
+      <div class="chain">
+        <div class="stage"><div class="no">1</div><div class="t">Amendment</div>
+          <div class="d">a statute or<br>agency notice</div></div>
+        <div class="arrow">→</div>
+        <div class="stage"><div class="no">2</div><div class="t">Analyze</div>
+          <div class="d">Claude drafts a<br>structured diff<br>+ provenance</div></div>
+        <div class="arrow">→</div>
+        <div class="stage"><div class="no">3</div><div class="t">Validate</div>
+          <div class="d">full regression<br>suite gates the<br>diff as an overlay</div></div>
+        <div class="arrow">→</div>
+        <div class="stage"><div class="no">4</div><div class="t">Review</div>
+          <div class="d">human approves,<br>recorded</div></div>
+        <div class="arrow">→</div>
+        <div class="stage"><div class="no">5</div><div class="t">Apply</div>
+          <div class="d">only if valid<br>AND approved</div></div>
+      </div>
+      <div class="loop"><b>The guarantees&nbsp;&nbsp;</b> Parameter updates are machine-appliable;
+      structural changes are flagged <span class="gold">requires_human_encoding</span> and never
+      auto-applied. A diff that rewrites an in-force historical value breaks pinned determinations and
+      is rejected. Nothing ships without passing tests <em>and</em> a recorded sign-off.</div>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — ARCHITECTURE</span><span>9</span></div>
+</section>
+
+<!-- ══════════ § 9 VERIFICATION MANIFEST ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Architecture</span><span>Trust</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 9<small>Trust</small></div>
+      <div class="marginalia">The one thing standing between an impressive prototype and reliance.
+        <span class="cite">openleave/references.json</span></div>
+    </div>
+    <div class="main">
+      <h2>The trust boundary, <em>drift-guarded</em>.</h2>
+      <p class="lede">Every statutory value here is web-researched and <b>unverified by counsel</b> —
+      the load-bearing caveat. The manifest is the worksheet for closing it.</p>
+      <ul class="pts">
+        <li>Maps <b>every parameter</b> to a plain-English meaning, its governing statute, and the
+          agency page to check it against — with per-jurisdiction sign-off fields.</li>
+        <li>A test asserts it documents <b>exactly</b> the encoded parameter set — so a rate cannot be
+          added without a citation, and the build fails if one is.</li>
+        <li>No jurisdiction can be marked verified without a <b>named reviewer and date</b>.</li>
+        <li>The MCP lookup tool returns each value's source and verification status, so a consumer
+          always knows a figure is still <b>pending review</b>.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — ARCHITECTURE</span><span>10</span></div>
+</section>
+
+<!-- ══════════ § 10 EDGES & EXTENSION ══════════ -->
+<section class="slide">
+  <div class="runhead"><span><b>OpenLeave</b> — Architecture</span><span>Edges &amp; Extension</span></div>
+  <div class="body">
+    <div class="margin-col">
+      <div class="marker">§ 10<small>Edges &amp; Extension</small></div>
+      <div class="marginalia">The seams are guarded so you cannot add law without documenting its
+        source.</div>
+    </div>
+    <div class="main">
+      <h2>Thin edges, <em>guarded seams</em>.</h2>
+      <div class="cols" style="margin-top:8px">
+        <div>
+          <div class="lbl">The surfaces</div>
+          <p class="small">All three — <span class="gold">MCP server</span> (4 tools),
+          <span class="gold">REST API + browser checkers</span>, and the <span class="gold">sample
+          agent</span> — call the same two core functions and add nothing to the reasoning. The agent
+          is the only place a model answers a user, and even there it is forbidden to answer
+          substantive questions except through the tools.</p>
+        </div>
+        <div>
+          <div class="lbl">Where to extend</div>
+          <p class="small">Add a leave <b>regime</b>, a wage <b>topic</b>, or a
+          <b>jurisdiction</b> — the recurring pattern is that the manifest drift-guard and the tests
+          <b>force you to document its source</b>. That is the architecture enforcing its own central
+          promise: no law without a citation.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="folio"><span>OPENLEAVE — ARCHITECTURE</span><span>11</span></div>
+</section>
+
+<!-- ══════════ BACK COVER ══════════ -->
+<section class="slide dark cover">
+  <div class="longtitle"><b>DESIGN&nbsp;IN&nbsp;ONE&nbsp;BREATH,</b></div>
+  <hr class="rule">
+  <h1 style="font-size:52px;line-height:1.2">A deterministic, cited core;<br>the language, at the edges.</h1>
+  <div class="meta" style="margin-top:52px">
+    OPENLEAVE &nbsp;·&nbsp; employment law, as code<br>
+    <b>github.com/geneweng/cc_rules_as_code</b> &nbsp;·&nbsp; see ARCHITECTURE.md for the full document
+  </div>
+</section>
+
+</body>
+</html>

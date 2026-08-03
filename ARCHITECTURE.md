@@ -2,6 +2,9 @@
 
 How the system is built, why it's built that way, and where to extend it.
 
+*Also available as a slide deck: [`architecture-deck.pdf`](architecture-deck.pdf) (source:
+[`architecture-deck.html`](architecture-deck.html)).*
+
 OpenLeave is an executable, citation-backed encoding of U.S. employment law (employee leave plus
 wage & hour). Its one organizing idea is the survey's thesis:
 
